@@ -1,0 +1,2 @@
+DELETE FROM public.devices a USING public.devices b WHERE a.ctid < b.ctid AND a.user_id = b.user_id AND a.external_id = b.external_id AND a.external_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS devices_user_external_id_key ON public.devices (user_id, external_id) WHERE external_id IS NOT NULL;
