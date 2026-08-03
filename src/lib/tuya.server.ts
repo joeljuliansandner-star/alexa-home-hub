@@ -114,7 +114,7 @@ export interface TuyaDevice {
   id: string;
   name: string;
   category: string;
-  product_name?: string;
+  product_name: string | undefined;
   online: boolean;
   status: Array<{ code: string; value: unknown }>;
 }
