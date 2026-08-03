@@ -7,9 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getDreameVacuums = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    const { dreameLogin, dreameDeviceList, dreameGetState, DREAME_STATE_LABEL } = await import(
-      "./dreame.server"
-    );
+    const { dreameLogin, dreameDeviceList, dreameGetState } = await import("./dreame.server");
 
     let session;
     try {
@@ -45,8 +43,7 @@ export const getDreameVacuums = createServerFn({ method: "POST" })
         model: device.model,
         online: device.online,
         battery: state?.battery ?? null,
-        statusLabel:
-          state?.state != null ? (DREAME_STATE_LABEL[state.state] ?? `Status ${state.state}`) : null,
+        statusLabel: state?.label ?? null,
         cleanArea: state?.cleanArea ?? null,
         cleanTime: state?.cleanTime ?? null,
         isRunning: state?.isRunning ?? false,
