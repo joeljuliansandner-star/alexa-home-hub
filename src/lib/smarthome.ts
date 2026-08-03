@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { controlTapoDevice } from "@/lib/tapo.functions";
-import { controlTuyaDevice } from "@/lib/tuya.functions";
+import { controlTuyaDevice, refreshTuyaStates } from "@/lib/tuya.functions";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   useMutation,
@@ -75,7 +75,29 @@ export const devicesQuery = {
 };
 
 export function useDevices() {
-  return useQuery(devicesQuery);
+  return useQuery({ ...devicesQuery, refetchInterval: 10_000 });
+}
+
+/**
+ * Holt regelmäßig die Zustände aus Smart Life ins Panel,
+ * damit Änderungen in der App auch hier sichtbar werden.
+ */
+export function useTuyaLiveSync(enabled = true) {
+  const qc = useQueryClient();
+  useQuery({
+    queryKey: ["tuya-live"],
+    queryFn: async () => {
+      const result = await refreshTuyaStates();
+      if (result.changed > 0) {
+        await qc.invalidateQueries({ queryKey: ["devices"] });
+      }
+      return result;
+    },
+    enabled,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
 }
 
 export const scenesQuery = {

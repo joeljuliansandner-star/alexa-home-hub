@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTuyaLiveSync } from "@/lib/smarthome";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -34,6 +35,9 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
+
+  // Änderungen aus der Smart-Life-App laufend ins Panel übernehmen
+  useTuyaLiveSync();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? "Gastzugang"));
