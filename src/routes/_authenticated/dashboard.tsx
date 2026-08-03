@@ -69,6 +69,14 @@ function Dashboard() {
   const runScene = useRunScene();
   const seed = useSeedDemo();
   const deleteDevice = useDeleteRow("devices");
+  const queryClient = useQueryClient();
+  const syncTuya = useMutation({
+    mutationFn: () => syncTuyaDevices(),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
 
   const list = devices.data ?? [];
   const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
