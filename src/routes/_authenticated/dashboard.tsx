@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Plus, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { Plus, Loader2, Sparkles, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+
+import { syncTuyaDevices } from "@/lib/tuya.functions";
+
 
 import {
   useActivity,
