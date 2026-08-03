@@ -112,8 +112,8 @@ export function WeatherClock() {
       </div>
 
       <div className="flex items-center gap-4">
-        <Icon className="size-10 text-accent" />
-        <div>
+        <Icon className="size-10 shrink-0 text-accent" />
+        <div className="min-w-0">
           <p className="font-display text-3xl font-semibold tabular-nums">
             {weather.data ? `${weather.data.temperature}°C` : weather.isError ? "–" : "…"}
           </p>
