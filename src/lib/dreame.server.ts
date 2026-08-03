@@ -219,6 +219,8 @@ function emptyState(): DreameState {
   };
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function dreameGetState(
   session: DreameSession,
   did: string,
@@ -227,24 +229,41 @@ export async function dreameGetState(
   const values = new Map<DreamePropKey, unknown>();
   let reachable = false;
 
-  // Der Roboter beantwortet nur kleine Abfragen zuverlässig -> in Blöcken lesen.
+  // Der Roboter schläft in der Ladestation und antwortet dann erst nach ein paar
+  // Versuchen (Cloud-Code 80001 = "Befehl abgelaufen") -> mit Wiederholungen wecken.
   for (let i = 0; i < entries.length; i += 6) {
     const chunk = entries.slice(i, i + 6);
-    let response: any = null;
-    try {
-      response = await sendCommand(session, did, {
-        did,
-        id: Math.floor(Math.random() * 9000) + 1000,
-        method: "get_properties",
-        params: chunk.map(([, [siid, piid]]) => ({ did, siid, piid })),
-        from: "XXXXXX",
-      });
-    } catch {
-      response = null;
+    let results: any[] = [];
+
+    const attempts = i === 0 ? 4 : 2;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      let response: any = null;
+      try {
+        response = await sendCommand(session, did, {
+          did,
+          id: Math.floor(Math.random() * 9000) + 1000,
+          method: "get_properties",
+          params: chunk.map(([, [siid, piid]]) => ({ did, siid, piid })),
+          from: "XXXXXX",
+        });
+      } catch {
+        response = null;
+      }
+
+      const list: any[] = response?.data?.result ?? response?.result ?? [];
+      if (Array.isArray(list) && list.length > 0) {
+        results = list;
+        break;
+      }
+      // Nur wiederholen, wenn der Roboter geschlafen hat (Timeout der Cloud).
+      if (attempt < attempts - 1) await sleep(1200);
     }
 
-    const results: any[] = response?.data?.result ?? response?.result ?? [];
-    if (!Array.isArray(results) || results.length === 0) continue;
+    if (results.length === 0) {
+      // Erster Block ohne Antwort => Roboter schläft wirklich, weitere Blöcke sparen wir uns.
+      if (i === 0) break;
+      continue;
+    }
     reachable = true;
 
     for (const [key, [siid, piid]] of chunk) {
@@ -256,6 +275,7 @@ export async function dreameGetState(
   }
 
   if (!reachable) return emptyState();
+
 
   const num = (key: DreamePropKey) => {
     const value = values.get(key);
