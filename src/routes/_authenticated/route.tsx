@@ -19,7 +19,10 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
-      throw redirect({ to: "/auth" });
+      // Kein Login nötig: still ein Gastkonto anlegen, damit die Daten
+      // gespeichert bleiben. Später kann daraus ein echtes Konto werden.
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw redirect({ to: "/auth" });
     }
   },
   component: AuthenticatedLayout,
@@ -38,7 +41,7 @@ function AuthenticatedLayout() {
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? "Gastzugang"));
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") navigate({ to: "/auth", replace: true });
     });
