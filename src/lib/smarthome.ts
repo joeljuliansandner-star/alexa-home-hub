@@ -174,7 +174,10 @@ export function useUpdateDevice() {
       if (log) await logActivity(log);
       return { note };
     },
-    onSuccess: () => invalidateAll(qc),
+    onSuccess: (result) => {
+      invalidateAll(qc);
+      if (result?.note) toast.warning(result.note);
+    },
   });
 }
 
