@@ -57,23 +57,23 @@ function Landing() {
   }, [navigate]);
 
   return (
-    <div className="hero-glow min-h-screen">
+    <div className="hero-glow min-h-dvh">
       <div className="mx-auto flex max-w-5xl flex-col px-5 py-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <House className="size-5" />
             </span>
-            <span className="font-display text-lg font-semibold">Smarthome Control</span>
+            <span className="truncate font-display text-lg font-semibold">Smarthome Control</span>
           </div>
-          <Button asChild variant="secondary" size="sm">
+          <Button asChild variant="secondary" size="sm" className="min-h-11 shrink-0">
             <Link to="/auth">Anmelden</Link>
           </Button>
         </header>
 
-        <main className="py-16 md:py-24">
+        <main className="py-12 md:py-24">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-accent">Adminpanel</p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.05] md:text-6xl">
+          <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-[1.1] sm:text-4xl md:text-6xl">
             <span className="text-gradient">Dein Zuhause</span> – vollständig unter Kontrolle.
           </h1>
           <p className="mt-5 max-w-xl text-base text-muted-foreground">
@@ -81,12 +81,12 @@ function Landing() {
             Vorbereitet für die Kopplung mit Alexa über eine Steuerzentrale.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="w-full sm:w-auto">
               <Link to="/auth">Panel öffnen</Link>
             </Button>
           </div>
 
-          <section className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-12 grid gap-4 sm:mt-16 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
               <div key={feature.title} className="panel p-5">
                 <feature.icon className="size-5 text-primary" />
