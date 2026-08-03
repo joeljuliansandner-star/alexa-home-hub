@@ -124,9 +124,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <div className="pointer-events-none fixed bottom-3 right-3 z-50 rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-[11px] font-medium text-muted-foreground backdrop-blur">
+      <div className="pointer-events-none fixed bottom-3 left-1/2 z-50 -translate-x-1/2 rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-[11px] font-medium text-muted-foreground backdrop-blur">
         powered by Joel-Julian Sandner
       </div>
+
       <Toaster position="top-center" richColors />
 
     </QueryClientProvider>
