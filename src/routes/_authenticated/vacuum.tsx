@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { controlVacuum, getVacuumStates } from "@/lib/tuya.functions";
+import { controlDreameVacuum, getDreameVacuums } from "@/lib/dreame.functions";
 
 export const Route = createFileRoute("/_authenticated/vacuum")({
   ssr: false,
