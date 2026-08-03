@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Plus, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { Plus, Loader2, Sparkles, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+
+import { syncTuyaDevices } from "@/lib/tuya.functions";
+
 
 import {
   useActivity,
@@ -65,6 +69,14 @@ function Dashboard() {
   const runScene = useRunScene();
   const seed = useSeedDemo();
   const deleteDevice = useDeleteRow("devices");
+  const queryClient = useQueryClient();
+  const syncTuya = useMutation({
+    mutationFn: () => syncTuyaDevices(),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
 
   const list = devices.data ?? [];
   const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
@@ -97,11 +109,33 @@ function Dashboard() {
       <div className="panel flex flex-col items-center gap-4 p-10 text-center">
         <h1 className="text-2xl font-semibold">Dein Zuhause ist noch leer</h1>
         <p className="max-w-md text-sm text-muted-foreground">
-          Lege Räume und Geräte an – oder starte mit einem Beispiel-Setup aus Wohnzimmer, Küche,
-          Schlafzimmer und Büro inklusive Szenen.
+          Hol dir zuerst deine Smart-Life-Geräte aus der Tuya-Cloud – oder lege Räume und Geräte
+          manuell an.
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          <Button onClick={() => seed.mutate(undefined, { onSuccess: () => toast.success("Beispiel-Setup angelegt") })} disabled={seed.isPending}>
+          <Button
+            onClick={() =>
+              syncTuya.mutate(undefined, {
+                onSuccess: (res) =>
+                  toast.success(`${res.imported} Smart-Life-Geräte übernommen`),
+                onError: (error) =>
+                  toast.error(error instanceof Error ? error.message : "Abgleich fehlgeschlagen"),
+              })
+            }
+            disabled={syncTuya.isPending}
+          >
+            {syncTuya.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RefreshCw className="size-4" />
+            )}
+            Smart Life abgleichen
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => seed.mutate(undefined, { onSuccess: () => toast.success("Beispiel-Setup angelegt") })}
+            disabled={seed.isPending}
+          >
             {seed.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
             Beispiel-Setup laden
           </Button>
@@ -111,6 +145,7 @@ function Dashboard() {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-8">
