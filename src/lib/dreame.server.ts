@@ -130,6 +130,7 @@ async function sendCommand(session: DreameSession, did: string, data: unknown) {
   }
 }
 
+/** MIoT-Eigenschaften (Standard-Dreame-Spezifikation). */
 const PROPS = {
   state: [2, 1],
   error: [2, 2],
@@ -138,7 +139,25 @@ const PROPS = {
   status: [4, 1],
   cleanTime: [4, 2],
   cleanArea: [4, 3],
+  suction: [4, 4],
+  water: [4, 5],
+  waterTank: [4, 6],
+  taskStatus: [4, 7],
+  resumeCleaning: [4, 11],
+  carpetBoost: [4, 12],
+  childLock: [4, 13],
+  autoEmpty: [4, 26],
+  dndEnabled: [5, 1],
+  dndStart: [5, 2],
+  dndEnd: [5, 3],
+  volume: [7, 2],
+  mainBrushLife: [9, 2],
+  sideBrushLife: [10, 2],
+  filterLife: [11, 2],
+  mapObject: [6, 6],
 } as const;
+
+export type DreamePropKey = keyof typeof PROPS;
 
 export type DreameState = {
   battery: number | null;
@@ -147,37 +166,113 @@ export type DreameState = {
   chargingState: number | null;
   cleanArea: number | null;
   cleanTime: number | null;
+  error: number | null;
+  suction: number | null;
+  water: number | null;
+  waterTank: number | null;
+  taskStatus: number | null;
+  resumeCleaning: number | null;
+  carpetBoost: number | null;
+  childLock: number | null;
+  autoEmpty: number | null;
+  dndEnabled: number | null;
+  dndStart: string | null;
+  dndEnd: string | null;
+  volume: number | null;
+  mainBrushLife: number | null;
+  sideBrushLife: number | null;
+  filterLife: number | null;
+  rooms: { id: number; name: string }[];
   isRunning: boolean;
   label: string;
+  reachable: boolean;
 };
 
+function emptyState(): DreameState {
+  return {
+    battery: null,
+    state: null,
+    status: null,
+    chargingState: null,
+    cleanArea: null,
+    cleanTime: null,
+    error: null,
+    suction: null,
+    water: null,
+    waterTank: null,
+    taskStatus: null,
+    resumeCleaning: null,
+    carpetBoost: null,
+    childLock: null,
+    autoEmpty: null,
+    dndEnabled: null,
+    dndStart: null,
+    dndEnd: null,
+    volume: null,
+    mainBrushLife: null,
+    sideBrushLife: null,
+    filterLife: null,
+    rooms: [],
+    isRunning: false,
+    label: "Nicht erreichbar",
+    reachable: false,
+  };
+}
 
 export async function dreameGetState(
   session: DreameSession,
   did: string,
 ): Promise<DreameState> {
-  const id = Math.floor(Math.random() * 9000) + 1000;
-  const params = Object.values(PROPS).map(([siid, piid]) => ({ did, siid, piid }));
-  const response = await sendCommand(session, did, {
-    did,
-    id,
-    method: "get_properties",
-    params,
-    from: "XXXXXX",
-  });
+  const entries = Object.entries(PROPS) as [DreamePropKey, readonly [number, number]][];
+  const values = new Map<DreamePropKey, unknown>();
+  let reachable = false;
 
-  const results: any[] = response?.data?.result ?? response?.result ?? [];
-  const pick = (siid: number, piid: number) => {
-    const hit = Array.isArray(results)
-      ? results.find((r) => r?.siid === siid && r?.piid === piid)
-      : null;
-    const value = hit?.value;
-    return typeof value === "number" ? value : null;
+  // Der Roboter beantwortet nur kleine Abfragen zuverlässig -> in Blöcken lesen.
+  for (let i = 0; i < entries.length; i += 6) {
+    const chunk = entries.slice(i, i + 6);
+    let response: any = null;
+    try {
+      response = await sendCommand(session, did, {
+        did,
+        id: Math.floor(Math.random() * 9000) + 1000,
+        method: "get_properties",
+        params: chunk.map(([, [siid, piid]]) => ({ did, siid, piid })),
+        from: "XXXXXX",
+      });
+    } catch {
+      response = null;
+    }
+
+    const results: any[] = response?.data?.result ?? response?.result ?? [];
+    if (!Array.isArray(results) || results.length === 0) continue;
+    reachable = true;
+
+    for (const [key, [siid, piid]] of chunk) {
+      const hit = results.find((r) => r?.siid === siid && r?.piid === piid);
+      if (hit && hit.code === 0 && hit.value !== undefined && hit.value !== null) {
+        values.set(key, hit.value);
+      }
+    }
+  }
+
+  if (!reachable) return emptyState();
+
+  const num = (key: DreamePropKey) => {
+    const value = values.get(key);
+    if (typeof value === "number") return value;
+    if (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value))) {
+      return Number(value);
+    }
+    return null;
+  };
+  const str = (key: DreamePropKey) => {
+    const value = values.get(key);
+    return typeof value === "string" ? value : null;
   };
 
-  const state = pick(PROPS.state[0], PROPS.state[1]);
-  const battery = pick(PROPS.battery[0], PROPS.battery[1]);
-  const chargingState = pick(PROPS.chargingState[0], PROPS.chargingState[1]);
+  const state = num("state");
+  const battery = num("battery");
+  const chargingState = num("chargingState");
   const isRunning = state === 1 || state === 7;
 
   let label: string;
@@ -192,42 +287,108 @@ export async function dreameGetState(
   return {
     battery,
     state,
-    status: pick(PROPS.status[0], PROPS.status[1]),
+    status: num("status"),
     chargingState,
-    cleanArea: pick(PROPS.cleanArea[0], PROPS.cleanArea[1]),
-    cleanTime: pick(PROPS.cleanTime[0], PROPS.cleanTime[1]),
+    cleanArea: num("cleanArea"),
+    cleanTime: num("cleanTime"),
+    error: num("error"),
+    suction: num("suction"),
+    water: num("water"),
+    waterTank: num("waterTank"),
+    taskStatus: num("taskStatus"),
+    resumeCleaning: num("resumeCleaning"),
+    carpetBoost: num("carpetBoost"),
+    childLock: num("childLock"),
+    autoEmpty: num("autoEmpty"),
+    dndEnabled: num("dndEnabled"),
+    dndStart: str("dndStart"),
+    dndEnd: str("dndEnd"),
+    volume: num("volume"),
+    mainBrushLife: num("mainBrushLife"),
+    sideBrushLife: num("sideBrushLife"),
+    filterLife: num("filterLife"),
+    rooms: [],
     isRunning,
     label,
+    reachable: true,
   };
 }
 
+/** Setzt eine Einstellung (Saugkraft, Wasser, Lautstärke, …). */
+export async function dreameSetProp(
+  session: DreameSession,
+  did: string,
+  key: DreamePropKey,
+  value: number | string,
+): Promise<{ ok: boolean; message: string }> {
+  const [siid, piid] = PROPS[key];
+  const response = await sendCommand(session, did, {
+    did,
+    id: Math.floor(Math.random() * 9000) + 1000,
+    method: "set_properties",
+    params: [{ did, siid, piid, value }],
+    from: "XXXXXX",
+  });
+  return interpret(response);
+}
 
 const ACTIONS = {
   start: [4, 1],
   pause: [4, 2],
   dock: [3, 1],
   locate: [7, 1],
+  emptyDustbin: [15, 1],
 } as const;
+
+export type DreameActionKey = keyof typeof ACTIONS;
 
 export async function dreameAction(
   session: DreameSession,
   did: string,
-  action: keyof typeof ACTIONS,
+  action: DreameActionKey,
 ): Promise<{ ok: boolean; message: string }> {
   const [siid, aiid] = ACTIONS[action];
-  const id = Math.floor(Math.random() * 9000) + 1000;
   const response = await sendCommand(session, did, {
     did,
-    id,
+    id: Math.floor(Math.random() * 9000) + 1000,
     method: "action",
     params: { did, siid, aiid, in: [] },
     from: "XXXXXX",
   });
+  return interpret(response);
+}
 
+/** Startet die Reinigung ausgewählter Räume (Raum-IDs aus der Dreame-Karte). */
+export async function dreameCleanRooms(
+  session: DreameSession,
+  did: string,
+  roomIds: number[],
+): Promise<{ ok: boolean; message: string }> {
+  const segments = roomIds.map((id) => [id, 1]);
+  const payload = JSON.stringify({ selects: segments });
+  const response = await sendCommand(session, did, {
+    did,
+    id: Math.floor(Math.random() * 9000) + 1000,
+    method: "action",
+    params: {
+      did,
+      siid: 4,
+      aiid: 1,
+      in: [
+        { piid: 1, value: 18 },
+        { piid: 10, value: payload },
+      ],
+    },
+    from: "XXXXXX",
+  });
+  return interpret(response);
+}
+
+function interpret(response: any): { ok: boolean; message: string } {
   const code = response?.code ?? response?.data?.code ?? 0;
   if (code === 0) return { ok: true, message: "Befehl gesendet" };
   if (code === 80001) {
-    return { ok: false, message: "Der Saugroboter hat nicht geantwortet (offline?)" };
+    return { ok: false, message: "Der Saugroboter hat nicht geantwortet (offline/Standby?)" };
   }
   return { ok: false, message: `Dreame hat den Befehl abgelehnt (${code})` };
 }
