@@ -176,15 +176,31 @@ export async function dreameGetState(
   };
 
   const state = pick(PROPS.state[0], PROPS.state[1]);
+  const battery = pick(PROPS.battery[0], PROPS.battery[1]);
+  const chargingState = pick(PROPS.chargingState[0], PROPS.chargingState[1]);
+  const isRunning = state === 1 || state === 7;
+
+  let label: string;
+  if (isRunning) {
+    label = state === 7 ? "Wischt" : "Reinigt";
+  } else if (chargingState === 1) {
+    label = battery !== null && battery >= 99 ? "Vollständig geladen" : "Lädt";
+  } else {
+    label = (state !== null ? DREAME_STATE_LABEL[state] : undefined) ?? "Bereit";
+  }
+
   return {
-    battery: pick(PROPS.battery[0], PROPS.battery[1]),
+    battery,
     state,
     status: pick(PROPS.status[0], PROPS.status[1]),
+    chargingState,
     cleanArea: pick(PROPS.cleanArea[0], PROPS.cleanArea[1]),
     cleanTime: pick(PROPS.cleanTime[0], PROPS.cleanTime[1]),
-    isRunning: state === 1 || state === 7,
+    isRunning,
+    label,
   };
 }
+
 
 const ACTIONS = {
   start: [4, 1],
