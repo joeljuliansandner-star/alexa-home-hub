@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 
@@ -42,6 +43,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedScenesRoute = AuthenticatedScenesRouteImport.update({
   id: '/scenes',
   path: '/scenes',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
 }
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
 }
@@ -76,15 +84,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/automations' | '/dashboard' | '/scenes' | '/settings'
+    | '/'
+    | '/auth'
+    | '/automations'
+    | '/dashboard'
+    | '/home'
+    | '/scenes'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/automations' | '/dashboard' | '/scenes' | '/settings'
+  to:
+    | '/'
+    | '/auth'
+    | '/automations'
+    | '/dashboard'
+    | '/home'
+    | '/scenes'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -92,6 +114,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/automations'
     | '/_authenticated/dashboard'
+    | '/_authenticated/home'
     | '/_authenticated/scenes'
     | '/_authenticated/settings'
   fileRoutesById: FileRoutesById
@@ -139,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/scenes': {
       id: '/_authenticated/scenes'
       path: '/scenes'
@@ -159,6 +189,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
@@ -166,6 +197,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
