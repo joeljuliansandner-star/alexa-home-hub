@@ -6,6 +6,7 @@ import {
   Sparkles,
   Timer,
   Settings2,
+  Home,
   LogOut,
   House,
 } from "lucide-react";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const nav = [
+  { to: "/home", label: "Startseite", icon: Home },
   { to: "/dashboard", label: "Übersicht", icon: LayoutDashboard },
   { to: "/scenes", label: "Szenen", icon: Sparkles },
   { to: "/automations", label: "Automationen", icon: Timer },
