@@ -27,12 +27,12 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const nav = [
-  { to: "/home", label: "Startseite", icon: Home },
-  { to: "/dashboard", label: "Übersicht", icon: LayoutDashboard },
-  { to: "/vacuum", label: "Staubsauger", icon: Bot },
-  { to: "/scenes", label: "Szenen", icon: Sparkles },
-  { to: "/automations", label: "Automationen", icon: Timer },
-  { to: "/settings", label: "Einstellungen", icon: Settings2 },
+  { to: "/home", label: "Startseite", shortLabel: "Start", icon: Home },
+  { to: "/dashboard", label: "Übersicht", shortLabel: "Geräte", icon: LayoutDashboard },
+  { to: "/vacuum", label: "Staubsauger", shortLabel: "Staubi", icon: Bot },
+  { to: "/scenes", label: "Szenen", shortLabel: "Szenen", icon: Sparkles },
+  { to: "/automations", label: "Automationen", shortLabel: "Regeln", icon: Timer },
+  { to: "/settings", label: "Einstellungen", shortLabel: "Setup", icon: Settings2 },
 ] as const;
 
 function AuthenticatedLayout() {
@@ -59,15 +59,15 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div className="min-h-screen hero-glow">
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-5 md:flex-row md:gap-8 md:px-8 md:py-8">
+    <div className="hero-glow min-h-dvh">
+      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-5 px-4 py-4 md:flex-row md:gap-8 md:px-8 md:py-8">
         <aside className="md:w-60 md:shrink-0">
-          <div className="flex items-center justify-between gap-3 md:flex-col md:items-stretch md:gap-8">
-            <Link to="/dashboard" className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:flex md:flex-col md:items-stretch md:gap-8">
+            <Link to="/dashboard" className="flex min-w-0 items-center gap-2.5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <House className="size-5" />
               </span>
-              <span className="font-display text-lg font-semibold tracking-tight">
+              <span className="truncate font-display text-lg font-semibold tracking-tight">
                 Smarthome
               </span>
             </Link>
@@ -101,7 +101,7 @@ function AuthenticatedLayout() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="size-11 shrink-0 md:hidden"
               onClick={handleSignOut}
               aria-label="Abmelden"
             >
@@ -109,24 +109,27 @@ function AuthenticatedLayout() {
             </Button>
           </div>
 
-          <nav className="mt-4 grid grid-cols-6 gap-1 rounded-2xl border border-border bg-surface p-1 md:hidden">
+          <nav
+            className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 gap-0.5 border-t border-border bg-surface/95 px-1 pt-1 backdrop-blur md:hidden"
+            style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom))" }}
+          >
             {nav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium text-muted-foreground",
+                  "flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl px-0.5 py-1.5 text-[10px] font-medium leading-tight text-muted-foreground",
                 )}
                 activeProps={{ className: "bg-secondary text-foreground" }}
               >
-                <item.icon className="size-4" />
-                {item.label}
+                <item.icon className="size-4 shrink-0" />
+                <span className="w-full truncate text-center">{item.shortLabel}</span>
               </Link>
             ))}
           </nav>
         </aside>
 
-        <main className="min-w-0 flex-1 pb-10">
+        <main className="min-w-0 flex-1 pb-28 md:pb-10">
           <Outlet />
         </main>
       </div>

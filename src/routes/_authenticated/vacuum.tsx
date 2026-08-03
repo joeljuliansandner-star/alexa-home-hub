@@ -419,7 +419,7 @@ function DreameCard({
         <p className="flex items-center gap-2 text-sm font-medium">
           <Wind className="size-4" /> Saugkraft
         </p>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {SUCTION.map((s) => (
             <Button
               key={s.value}
