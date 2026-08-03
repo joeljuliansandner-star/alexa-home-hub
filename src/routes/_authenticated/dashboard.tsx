@@ -149,15 +149,15 @@ function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold">Übersicht</h1>
+      <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold sm:text-3xl">Übersicht</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {activeCount} von {list.filter((d) => d.kind !== "sensor").length} Geräten aktiv ·{" "}
             {(rooms.data ?? []).length} Räume
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 [&>*]:flex-1 sm:[&>*]:flex-none">
           <AddRoomDialog />
           <AddDeviceDialog rooms={rooms.data ?? []} />
         </div>
