@@ -170,6 +170,27 @@ export function useUpdateDevice() {
         }
       }
 
+      // Smart Life / Tuya: schalten und dimmen läuft über die Tuya-Cloud.
+      if (
+        device.external_source === "tuya" &&
+        device.external_id &&
+        (patch.is_on !== undefined || patch.brightness !== undefined)
+      ) {
+        try {
+          const result = await controlTuyaDevice({
+            data: {
+              externalId: device.external_id,
+              ...(patch.is_on !== undefined ? { on: patch.is_on } : {}),
+              ...(patch.brightness !== undefined ? { brightness: patch.brightness } : {}),
+            },
+          });
+          if (!result.ok) note = result.message;
+        } catch (error) {
+          note = error instanceof Error ? error.message : "Smart Life nicht erreichbar";
+        }
+      }
+
+
       const { error } = await supabase.from("devices").update(patch).eq("id", device.id);
       if (error) throw error;
       if (log) await logActivity(log);
