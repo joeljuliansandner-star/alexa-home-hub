@@ -25,9 +25,11 @@ export const deviceKindLabel: Record<string, string> = {
   sensor: "Sensor",
   blind: "Rollladen",
   speaker: "Lautsprecher",
+  vacuum: "Staubsauger",
 };
 
 export const controllableKinds: DeviceKind[] = ["light", "plug", "blind", "speaker"];
+
 
 async function currentUserId() {
   const { data } = await supabase.auth.getUser();
