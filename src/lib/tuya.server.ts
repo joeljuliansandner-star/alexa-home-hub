@@ -94,7 +94,7 @@ function tuyaErrorMessage(code?: number, msg?: string): string {
     case 1004:
       return "Tuya: Signatur ungültig – Access Secret stimmt nicht.";
     case 1106:
-      return "Tuya: Keine Berechtigung. Prüfe, ob im Cloud-Projekt die API „IoT Core" aktiviert ist.";
+      return "Tuya: Keine Berechtigung. Prüfe, ob im Cloud-Projekt die API IoT Core aktiviert ist.";
     case 1114:
     case 2406:
       return "Tuya: Falsches Rechenzentrum. Das Cloud-Projekt muss in derselben Region liegen wie deine Smart-Life-App (Europa).";
