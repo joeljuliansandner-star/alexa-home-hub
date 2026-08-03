@@ -14,7 +14,244 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_log: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      automations: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          scene_id: string | null
+          trigger_type: string
+          trigger_value: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          scene_id?: string | null
+          trigger_type?: string
+          trigger_value?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          scene_id?: string | null
+          trigger_type?: string
+          trigger_value?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automations_scene_id_fkey"
+            columns: ["scene_id"]
+            isOneToOne: false
+            referencedRelation: "scenes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devices: {
+        Row: {
+          alexa_name: string | null
+          brightness: number
+          color: string | null
+          created_at: string
+          id: string
+          is_on: boolean
+          is_online: boolean
+          kind: Database["public"]["Enums"]["device_kind"]
+          manufacturer: string | null
+          name: string
+          room_id: string | null
+          sensor_unit: string | null
+          sensor_value: number | null
+          sort_order: number
+          target_value: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alexa_name?: string | null
+          brightness?: number
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_on?: boolean
+          is_online?: boolean
+          kind?: Database["public"]["Enums"]["device_kind"]
+          manufacturer?: string | null
+          name: string
+          room_id?: string | null
+          sensor_unit?: string | null
+          sensor_value?: number | null
+          sort_order?: number
+          target_value?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alexa_name?: string | null
+          brightness?: number
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_on?: boolean
+          is_online?: boolean
+          kind?: Database["public"]["Enums"]["device_kind"]
+          manufacturer?: string | null
+          name?: string
+          room_id?: string | null
+          sensor_unit?: string | null
+          sensor_value?: number | null
+          sort_order?: number
+          target_value?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devices_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scene_actions: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          scene_id: string
+          set_brightness: number | null
+          set_on: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          scene_id: string
+          set_brightness?: number | null
+          set_on?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          scene_id?: string
+          set_brightness?: number | null
+          set_on?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scene_actions_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scene_actions_scene_id_fkey"
+            columns: ["scene_id"]
+            isOneToOne: false
+            referencedRelation: "scenes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenes: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +260,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      device_kind:
+        | "light"
+        | "plug"
+        | "thermostat"
+        | "sensor"
+        | "blind"
+        | "speaker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +393,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      device_kind: [
+        "light",
+        "plug",
+        "thermostat",
+        "sensor",
+        "blind",
+        "speaker",
+      ],
+    },
   },
 } as const
