@@ -258,3 +258,109 @@ export const refreshTuyaStates = createServerFn({ method: "POST" })
 
     return { changed };
   });
+
+/* ------------------------------ Saugroboter ------------------------------- */
+
+/** Liest Akku, Status und Reinigungsdaten aller Saugroboter aus Smart Life. */
+export const getVacuumStates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { tuyaToken, tuyaDeviceStatus, parseVacuumState } = await import("./tuya.server");
+
+    const { data: rows } = await context.supabase
+      .from("devices")
+      .select("id, name, external_id, is_online, model")
+      .eq("user_id", context.userId)
+      .eq("kind", "vacuum");
+
+    if (!rows?.length) return { vacuums: [] };
+
+    let token: string;
+    try {
+      token = await tuyaToken();
+    } catch {
+      return { vacuums: [] };
+    }
+
+    const vacuums = [];
+    for (const row of rows) {
+      if (!row.external_id) continue;
+      try {
+        const status = await tuyaDeviceStatus(token, row.external_id);
+        vacuums.push({
+          id: row.id,
+          externalId: row.external_id,
+          name: row.name,
+          model: row.model,
+          online: row.is_online,
+          ...parseVacuumState(status),
+        });
+      } catch {
+        vacuums.push({
+          id: row.id,
+          externalId: row.external_id,
+          name: row.name,
+          model: row.model,
+          online: false,
+          battery: null,
+          status: null,
+          mode: null,
+          cleanArea: null,
+          cleanTime: null,
+          fanSpeed: null,
+          isRunning: false,
+        });
+      }
+    }
+
+    return { vacuums };
+  });
+
+/** Startet, pausiert, schickt zur Ladestation oder lässt den Sauger piepen. */
+export const controlVacuum = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        externalId: z.string().min(1).max(128),
+        action: z.enum(["start", "pause", "dock", "locate"]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { tuyaToken, tuyaDeviceStatus, tuyaSendCommands, vacuumCommands } = await import(
+      "./tuya.server"
+    );
+
+    const { data: device } = await context.supabase
+      .from("devices")
+      .select("id, name")
+      .eq("user_id", context.userId)
+      .eq("external_id", data.externalId)
+      .maybeSingle();
+    if (!device) throw new Error("Staubsauger nicht gefunden");
+
+    try {
+      const token = await tuyaToken();
+      const status = await tuyaDeviceStatus(token, data.externalId);
+      const commands = vacuumCommands(status, data.action);
+      if (!commands.length) {
+        return { ok: false, message: "Dieser Befehl wird vom Gerät nicht unterstützt." };
+      }
+      const ok = await tuyaSendCommands(token, data.externalId, commands);
+      if (ok) {
+        await context.supabase.from("activity_log").insert({
+          user_id: context.userId,
+          message: `${device.name}: ${data.action}`,
+        });
+      }
+      return ok
+        ? { ok: true, message: "Befehl gesendet" }
+        : { ok: false, message: "Smart Life hat den Befehl abgelehnt." };
+    } catch (error) {
+      return {
+        ok: false,
+        message: error instanceof Error ? error.message : "Smart Life nicht erreichbar",
+      };
+    }
+  });
