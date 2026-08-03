@@ -144,10 +144,13 @@ export type DreameState = {
   battery: number | null;
   state: number | null;
   status: number | null;
+  chargingState: number | null;
   cleanArea: number | null;
   cleanTime: number | null;
   isRunning: boolean;
+  label: string;
 };
+
 
 export async function dreameGetState(
   session: DreameSession,
