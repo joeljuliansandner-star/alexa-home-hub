@@ -5,6 +5,7 @@ import { Plus, Loader2, Sparkles, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { syncTuyaDevices } from "@/lib/tuya.functions";
+import { WeatherClock } from "@/components/WeatherClock";
 
 
 import {
@@ -162,6 +163,8 @@ function Dashboard() {
           <AddDeviceDialog rooms={rooms.data ?? []} />
         </div>
       </header>
+
+      <WeatherClock />
 
       {scenes.data?.length ? (
         <section className="space-y-3">
