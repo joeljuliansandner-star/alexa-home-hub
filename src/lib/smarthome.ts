@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { controlTapoDevice } from "@/lib/tapo.functions";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   useMutation,
