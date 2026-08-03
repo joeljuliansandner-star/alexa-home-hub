@@ -154,9 +154,24 @@ export function useUpdateDevice() {
       patch: Partial<Device>;
       log?: string;
     }) => {
+      let note: string | null = null;
+
+      // Real hardware: try to switch the physical Tapo device first.
+      if (device.external_source === "tapo" && device.external_id && patch.is_on !== undefined) {
+        try {
+          const result = await controlTapoDevice({
+            data: { externalId: device.external_id, on: patch.is_on },
+          });
+          if (!result.ok) note = result.message;
+        } catch (error) {
+          note = error instanceof Error ? error.message : "Tapo nicht erreichbar";
+        }
+      }
+
       const { error } = await supabase.from("devices").update(patch).eq("id", device.id);
       if (error) throw error;
       if (log) await logActivity(log);
+      return { note };
     },
     onSuccess: () => invalidateAll(qc),
   });
