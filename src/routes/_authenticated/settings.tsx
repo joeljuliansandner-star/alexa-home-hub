@@ -64,7 +64,7 @@ function SettingsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold">Einstellungen</h1>
+        <h1 className="text-2xl font-semibold sm:text-3xl">Einstellungen</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Smart Life, Tapo, Geräte-Abgleich und Alexa-Zuordnung.
         </p>
