@@ -86,10 +86,10 @@ export function WeatherClock() {
   const Icon = weather.data ? iconFor(weather.data.code, weather.data.isDay) : Cloud;
 
   return (
-    <section className="panel flex flex-wrap items-center justify-between gap-6 p-5">
-      <div>
+    <section className="panel flex flex-col gap-5 p-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-6">
+      <div className="min-w-0">
         <p className="text-xs uppercase tracking-wider text-muted-foreground">Wurzen</p>
-        <p className="font-display text-4xl font-semibold tabular-nums">
+        <p className="font-display text-3xl font-semibold tabular-nums sm:text-4xl">
           {now
             ? now.toLocaleTimeString("de-DE", {
                 hour: "2-digit",
