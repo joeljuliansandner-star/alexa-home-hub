@@ -56,7 +56,7 @@ function SettingsPage() {
     mutationFn: () => syncTuyaDevices(),
     onSuccess: (result) => {
       qc.invalidateQueries();
-      toast.success(`${result.imported} Smart-Life-Geräte übernommen (${result.online} online)`);
+      toast.success(`${result.imported} Smart-Life-Geräte und ${result.rooms} Räume übernommen (${result.online} online)`);
     },
     onError: (error: Error) => toast.error(error.message),
   });

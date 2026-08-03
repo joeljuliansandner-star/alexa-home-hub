@@ -117,7 +117,7 @@ function Dashboard() {
             onClick={() =>
               syncTuya.mutate(undefined, {
                 onSuccess: (res) =>
-                  toast.success(`${res.imported} Smart-Life-Geräte übernommen`),
+                  toast.success(`${res.imported} Geräte und ${res.rooms} Räume übernommen`),
                 onError: (error) =>
                   toast.error(error instanceof Error ? error.message : "Abgleich fehlgeschlagen"),
               })
