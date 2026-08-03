@@ -117,7 +117,9 @@ export interface TuyaDevice {
   product_name: string | undefined;
   online: boolean;
   status: Array<{ code: string; value: unknown }>;
+  uid?: string | undefined;
 }
+
 
 /** Alle Geräte, die mit dem verknüpften Smart-Life-Konto verbunden sind. */
 export async function tuyaDeviceList(token: string): Promise<TuyaDevice[]> {
