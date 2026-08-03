@@ -19,22 +19,32 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       const { kind } = kindForModel(device.deviceType, device.deviceModel);
       if (device.status === 1) online += 1;
 
-      const { error } = await context.supabase.from("devices").upsert(
-        {
-          user_id: context.userId,
-          external_id: device.deviceId,
-          external_source: "tapo",
-          name: device.alias,
-          model: device.deviceModel,
-          kind,
-          manufacturer: "TP-Link Tapo",
-          alexa_name: device.alias,
-          is_online: device.status === 1,
-        },
-        { onConflict: "user_id,external_id" },
-      );
+      const payload = {
+        user_id: context.userId,
+        external_id: device.deviceId,
+        external_source: "tapo",
+        name: device.alias,
+        model: device.deviceModel,
+        kind,
+        manufacturer: "TP-Link Tapo",
+        alexa_name: device.alias,
+        is_online: device.status === 1,
+      };
+
+      const { data: existing } = await context.supabase
+        .from("devices")
+        .select("id")
+        .eq("user_id", context.userId)
+        .eq("external_id", device.deviceId)
+        .maybeSingle();
+
+      const { error } = existing
+        ? await context.supabase.from("devices").update(payload).eq("id", existing.id)
+        : await context.supabase.from("devices").insert(payload);
+
       if (error) throw new Error(error.message);
       imported += 1;
+
     }
 
     await context.supabase.from("activity_log").insert({

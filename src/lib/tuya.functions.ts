@@ -34,24 +34,34 @@ export const syncTuyaDevices = createServerFn({ method: "POST" })
           )
         : 100;
 
-      const { error } = await context.supabase.from("devices").upsert(
-        {
-          user_id: context.userId,
-          external_id: device.id,
-          external_source: "tuya",
-          name: device.name,
-          model: device.product_name ?? device.category,
-          kind,
-          manufacturer: "Smart Life / Tuya",
-          alexa_name: device.name,
-          is_online: device.online,
-          is_on: isOn,
-          brightness: Math.min(100, Math.max(1, brightness)),
-        },
-        { onConflict: "user_id,external_id" },
-      );
+      const payload = {
+        user_id: context.userId,
+        external_id: device.id,
+        external_source: "tuya",
+        name: device.name,
+        model: device.product_name ?? device.category,
+        kind,
+        manufacturer: "Smart Life / Tuya",
+        alexa_name: device.name,
+        is_online: device.online,
+        is_on: isOn,
+        brightness: Math.min(100, Math.max(1, brightness)),
+      };
+
+      const { data: existing } = await context.supabase
+        .from("devices")
+        .select("id")
+        .eq("user_id", context.userId)
+        .eq("external_id", device.id)
+        .maybeSingle();
+
+      const { error } = existing
+        ? await context.supabase.from("devices").update(payload).eq("id", existing.id)
+        : await context.supabase.from("devices").insert(payload);
+
       if (error) throw new Error(error.message);
       imported += 1;
+
     }
 
     await context.supabase.from("activity_log").insert({
