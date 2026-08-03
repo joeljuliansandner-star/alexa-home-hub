@@ -136,8 +136,73 @@ export async function tuyaDeviceList(token: string): Promise<TuyaDevice[]> {
     status: Array.isArray(raw["status"])
       ? (raw["status"] as Array<{ code: string; value: unknown }>)
       : [],
+    uid: raw["uid"] ? String(raw["uid"]) : undefined,
   }));
 }
+
+export interface TuyaRoom {
+  name: string;
+  deviceIds: string[];
+}
+
+/**
+ * Liest die Räume aller Häuser des Smart-Life-Kontos inklusive der
+ * darin liegenden Geräte-IDs.
+ */
+export async function tuyaRooms(token: string, uid: string): Promise<TuyaRoom[]> {
+  const homes = await request<Array<{ home_id: number }>>(
+    "GET",
+    `/v1.0/users/${uid}/homes`,
+    { accessToken: token },
+  );
+
+  const rooms: TuyaRoom[] = [];
+
+  for (const home of homes ?? []) {
+    const detail = await request<{ rooms?: Array<{ room_id: number; name: string }> }>(
+      "GET",
+      `/v1.0/homes/${home.home_id}/rooms`,
+      { accessToken: token },
+    );
+
+    for (const room of detail.rooms ?? []) {
+      let deviceIds: string[] = [];
+      try {
+        const devices = await request<Array<{ id: string }>>(
+          "GET",
+          `/v1.0/homes/${home.home_id}/rooms/${room.room_id}/devices`,
+          { accessToken: token },
+        );
+        deviceIds = (devices ?? []).map((d) => String(d.id));
+      } catch {
+        deviceIds = [];
+      }
+      rooms.push({ name: cleanRoomName(room.name), deviceIds });
+    }
+  }
+
+  return rooms;
+}
+
+/** Entfernt Tuya-Zusätze wie „ - Geräte“ aus dem Raumnamen. */
+function cleanRoomName(name: string): string {
+  return name.replace(/\s*-\s*Ger(ä|ae)te\s*$/i, "").trim() || name;
+}
+
+/** Passendes Icon für einen Raumnamen. */
+export function iconForRoom(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("küche") || n.includes("kueche")) return "utensils";
+  if (n.includes("bad")) return "bath";
+  if (n.includes("schlaf")) return "bed";
+  if (n.includes("kinder")) return "baby";
+  if (n.includes("flur") || n.includes("diele")) return "door-open";
+  if (n.includes("büro") || n.includes("buero") || n.includes("arbeit")) return "laptop";
+  if (n.includes("garten") || n.includes("balkon") || n.includes("terrasse")) return "trees";
+  if (n.includes("keller") || n.includes("abstell")) return "package";
+  return "sofa";
+}
+
 
 export async function tuyaDeviceStatus(
   token: string,
