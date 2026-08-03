@@ -27,7 +27,7 @@ function HomePage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-semibold">Startseite</h1>
+        <h1 className="text-2xl font-semibold sm:text-3xl">Startseite</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Uhrzeit und Wetter für Wurzen
         </p>
