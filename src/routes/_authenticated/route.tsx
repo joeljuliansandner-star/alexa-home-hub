@@ -7,6 +7,7 @@ import {
   Timer,
   Settings2,
   Home,
+  Bot,
   LogOut,
   House,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/_authenticated")({
 const nav = [
   { to: "/home", label: "Startseite", icon: Home },
   { to: "/dashboard", label: "Übersicht", icon: LayoutDashboard },
+  { to: "/vacuum", label: "Staubsauger", icon: Bot },
   { to: "/scenes", label: "Szenen", icon: Sparkles },
   { to: "/automations", label: "Automationen", icon: Timer },
   { to: "/settings", label: "Einstellungen", icon: Settings2 },
@@ -107,7 +109,7 @@ function AuthenticatedLayout() {
             </Button>
           </div>
 
-          <nav className="mt-4 grid grid-cols-4 gap-1 rounded-2xl border border-border bg-surface p-1 md:hidden">
+          <nav className="mt-4 grid grid-cols-6 gap-1 rounded-2xl border border-border bg-surface p-1 md:hidden">
             {nav.map((item) => (
               <Link
                 key={item.to}

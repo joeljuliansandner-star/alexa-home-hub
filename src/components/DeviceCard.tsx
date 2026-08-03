@@ -5,6 +5,7 @@ import {
   Gauge,
   Blinds,
   Speaker,
+  Bot,
   WifiOff,
 } from "lucide-react";
 
@@ -20,7 +21,9 @@ const icons = {
   sensor: Gauge,
   blind: Blinds,
   speaker: Speaker,
+  vacuum: Bot,
 } as const;
+
 
 export function DeviceCard({
   device,

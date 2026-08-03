@@ -245,7 +245,9 @@ export function brightnessCode(
   return null;
 }
 
-const CATEGORY_KIND: Record<string, "light" | "plug" | "thermostat" | "blind" | "sensor"> = {
+type TuyaKind = "light" | "plug" | "thermostat" | "blind" | "sensor" | "vacuum";
+
+const CATEGORY_KIND: Record<string, TuyaKind> = {
   dj: "light",
   dd: "light",
   dc: "light",
@@ -263,8 +265,95 @@ const CATEGORY_KIND: Record<string, "light" | "plug" | "thermostat" | "blind" | 
   qn: "thermostat",
   cl: "blind",
   clkg: "blind",
+  sd: "vacuum",
+  xxj: "vacuum",
 };
 
-export function kindForCategory(category: string): "light" | "plug" | "thermostat" | "blind" | "sensor" {
+export function kindForCategory(category: string): TuyaKind {
   return CATEGORY_KIND[category.toLowerCase()] ?? "sensor";
 }
+
+/* ------------------------------ Saugroboter ------------------------------- */
+
+export interface VacuumState {
+  battery: number | null;
+  status: string | null;
+  mode: string | null;
+  cleanArea: number | null;
+  cleanTime: number | null;
+  fanSpeed: string | null;
+  isRunning: boolean;
+}
+
+function statusValue(
+  status: Array<{ code: string; value: unknown }>,
+  codes: string[],
+): unknown {
+  for (const code of codes) {
+    const hit = status.find((s) => s.code === code);
+    if (hit !== undefined) return hit.value;
+  }
+  return undefined;
+}
+
+/** Liest die typischen Datenpunkte eines Tuya-/Dreame-Saugroboters aus. */
+export function parseVacuumState(
+  status: Array<{ code: string; value: unknown }>,
+): VacuumState {
+  const battery = statusValue(status, ["battery_percentage", "electricity_left", "residual_electricity"]);
+  const state = statusValue(status, ["status", "state", "work_state"]);
+  const mode = statusValue(status, ["mode", "work_mode"]);
+  const area = statusValue(status, ["clean_area", "clean_record"]);
+  const time = statusValue(status, ["clean_time"]);
+  const fan = statusValue(status, ["suction", "fan_speed", "fan_carpet"]);
+  const running = String(state ?? "").toLowerCase();
+
+  return {
+    battery: typeof battery === "number" ? battery : null,
+    status: state === undefined ? null : String(state),
+    mode: mode === undefined ? null : String(mode),
+    cleanArea: typeof area === "number" ? area : null,
+    cleanTime: typeof time === "number" ? time : null,
+    fanSpeed: fan === undefined ? null : String(fan),
+    isRunning:
+      running.includes("clean") ||
+      running.includes("smart") ||
+      running.includes("work") ||
+      running.includes("mop"),
+  };
+}
+
+/** Baut die Befehle für Start/Pause/Ladestation abhängig von den Datenpunkten. */
+export function vacuumCommands(
+  status: Array<{ code: string; value: unknown }>,
+  action: "start" | "pause" | "dock" | "locate",
+): Array<{ code: string; value: unknown }> {
+  const has = (code: string) => status.some((s) => s.code === code);
+
+  if (action === "start") {
+    if (has("power_go")) return [{ code: "power_go", value: true }];
+    if (has("switch_go")) return [{ code: "switch_go", value: true }];
+    if (has("mode")) return [{ code: "mode", value: "smart" }];
+    if (has("power")) return [{ code: "power", value: true }];
+    return [];
+  }
+
+  if (action === "pause") {
+    if (has("pause")) return [{ code: "pause", value: true }];
+    if (has("power_go")) return [{ code: "power_go", value: false }];
+    if (has("switch_go")) return [{ code: "switch_go", value: false }];
+    if (has("mode")) return [{ code: "mode", value: "standby" }];
+    return [];
+  }
+
+  if (action === "dock") {
+    if (has("switch_charge")) return [{ code: "switch_charge", value: true }];
+    if (has("mode")) return [{ code: "mode", value: "chargego" }];
+    return [];
+  }
+
+  if (has("seek")) return [{ code: "seek", value: true }];
+  if (has("find_robot")) return [{ code: "find_robot", value: true }];
+  return [];
+}
+
