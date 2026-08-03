@@ -85,11 +85,14 @@ export type Database = {
           brightness: number
           color: string | null
           created_at: string
+          external_id: string | null
+          external_source: string | null
           id: string
           is_on: boolean
           is_online: boolean
           kind: Database["public"]["Enums"]["device_kind"]
           manufacturer: string | null
+          model: string | null
           name: string
           room_id: string | null
           sensor_unit: string | null
@@ -104,11 +107,14 @@ export type Database = {
           brightness?: number
           color?: string | null
           created_at?: string
+          external_id?: string | null
+          external_source?: string | null
           id?: string
           is_on?: boolean
           is_online?: boolean
           kind?: Database["public"]["Enums"]["device_kind"]
           manufacturer?: string | null
+          model?: string | null
           name: string
           room_id?: string | null
           sensor_unit?: string | null
@@ -123,11 +129,14 @@ export type Database = {
           brightness?: number
           color?: string | null
           created_at?: string
+          external_id?: string | null
+          external_source?: string | null
           id?: string
           is_on?: boolean
           is_online?: boolean
           kind?: Database["public"]["Enums"]["device_kind"]
           manufacturer?: string | null
+          model?: string | null
           name?: string
           room_id?: string | null
           sensor_unit?: string | null
