@@ -35,14 +35,14 @@ function HomePage() {
 
       <WeatherClock />
 
-      <div className="flex flex-wrap gap-2">
-        <Button asChild className="gap-2">
+      <div className="grid gap-2 sm:flex sm:flex-wrap">
+        <Button asChild className="h-12 justify-start gap-2 sm:h-10 sm:justify-center">
           <Link to="/dashboard">
             <LayoutDashboard className="size-4" />
             Zur Geräteübersicht
           </Link>
         </Button>
-        <Button asChild variant="secondary" className="gap-2">
+        <Button asChild variant="secondary" className="h-12 justify-start gap-2 sm:h-10 sm:justify-center">
           <Link to="/scenes">
             <Sparkles className="size-4" />
             Szenen
