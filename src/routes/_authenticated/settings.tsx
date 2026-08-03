@@ -1,11 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Check, ExternalLink, Mic, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  ExternalLink,
+  Mic,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { useDevices } from "@/lib/smarthome";
 import { syncTapoDevices } from "@/lib/tapo.functions";
+import { syncTuyaDevices } from "@/lib/tuya.functions";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/settings")({
