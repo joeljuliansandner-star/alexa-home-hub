@@ -7,11 +7,57 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const syncTuyaDevices = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { tuyaToken, tuyaDeviceList, kindForCategory, switchCode, brightnessCode } =
-      await import("./tuya.server");
+    const {
+      tuyaToken,
+      tuyaDeviceList,
+      tuyaRooms,
+      iconForRoom,
+      kindForCategory,
+      switchCode,
+      brightnessCode,
+    } = await import("./tuya.server");
 
     const token = await tuyaToken();
     const cloudDevices = await tuyaDeviceList(token);
+
+    // Räume aus Smart Life holen und im Panel anlegen
+    const deviceRoom = new Map<string, string>();
+    let roomsImported = 0;
+    const uid = cloudDevices.find((d) => d.uid)?.uid;
+
+    if (uid) {
+      try {
+        const cloudRooms = await tuyaRooms(token, uid);
+        for (const room of cloudRooms) {
+          const { data: existingRoom } = await context.supabase
+            .from("rooms")
+            .select("id")
+            .eq("user_id", context.userId)
+            .eq("name", room.name)
+            .maybeSingle();
+
+          let roomId = existingRoom?.id ?? null;
+          if (!roomId) {
+            const { data: created, error: roomError } = await context.supabase
+              .from("rooms")
+              .insert({
+                user_id: context.userId,
+                name: room.name,
+                icon: iconForRoom(room.name),
+                sort_order: roomsImported,
+              })
+              .select("id")
+              .single();
+            if (roomError) throw new Error(roomError.message);
+            roomId = created.id;
+          }
+          roomsImported += 1;
+          for (const deviceId of room.deviceIds) deviceRoom.set(deviceId, roomId);
+        }
+      } catch {
+        // Räume sind optional – Geräteabgleich läuft trotzdem weiter
+      }
+    }
 
     let imported = 0;
     let online = 0;
@@ -46,6 +92,7 @@ export const syncTuyaDevices = createServerFn({ method: "POST" })
         is_online: device.online,
         is_on: isOn,
         brightness: Math.min(100, Math.max(1, brightness)),
+        ...(deviceRoom.has(device.id) ? { room_id: deviceRoom.get(device.id)! } : {}),
       };
 
       const { data: existing } = await context.supabase
@@ -61,23 +108,24 @@ export const syncTuyaDevices = createServerFn({ method: "POST" })
 
       if (error) throw new Error(error.message);
       imported += 1;
-
     }
 
     await context.supabase.from("activity_log").insert({
       user_id: context.userId,
-      message: `Smart-Life-Abgleich: ${imported} Geräte übernommen`,
+      message: `Smart-Life-Abgleich: ${imported} Geräte und ${roomsImported} Räume übernommen`,
     });
 
     return {
       imported,
       online,
+      rooms: roomsImported,
       devices: cloudDevices.map((d) => ({
         name: d.name,
         model: d.product_name ?? d.category,
         online: d.online,
       })),
     };
+
   });
 
 /** Schaltet bzw. dimmt ein Smart-Life-/Tuya-Gerät über die Cloud. */
