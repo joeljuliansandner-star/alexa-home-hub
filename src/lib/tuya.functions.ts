@@ -189,3 +189,72 @@ export const controlTuyaDevice = createServerFn({ method: "POST" })
       };
     }
   });
+
+/** Holt nur die aktuellen Zustände (an/aus, Helligkeit, online) aus Smart Life. */
+export const refreshTuyaStates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { tuyaToken, tuyaDeviceList, switchCode, brightnessCode } = await import(
+      "./tuya.server"
+    );
+
+    const { data: known } = await context.supabase
+      .from("devices")
+      .select("id, external_id, is_on, brightness, is_online")
+      .eq("user_id", context.userId)
+      .eq("external_source", "tuya");
+
+    if (!known?.length) return { changed: 0 };
+
+    const byExternal = new Map(known.map((d) => [d.external_id ?? "", d]));
+
+    let token: string;
+    let cloudDevices;
+    try {
+      token = await tuyaToken();
+      cloudDevices = await tuyaDeviceList(token);
+    } catch {
+      return { changed: 0 };
+    }
+
+    let changed = 0;
+
+    for (const device of cloudDevices) {
+      const row = byExternal.get(device.id);
+      if (!row) continue;
+
+      const sw = switchCode(device.status);
+      const isOn = sw ? Boolean(device.status.find((s) => s.code === sw)?.value) : row.is_on;
+
+      const bright = brightnessCode(device.status);
+      const brightness = bright
+        ? Math.min(
+            100,
+            Math.max(
+              1,
+              Math.round(
+                (Number(device.status.find((s) => s.code === bright.code)?.value ?? bright.max) /
+                  bright.max) *
+                  100,
+              ),
+            ),
+          )
+        : row.brightness;
+
+      if (
+        isOn === row.is_on &&
+        brightness === row.brightness &&
+        device.online === row.is_online
+      ) {
+        continue;
+      }
+
+      await context.supabase
+        .from("devices")
+        .update({ is_on: isOn, brightness, is_online: device.online })
+        .eq("id", row.id);
+      changed += 1;
+    }
+
+    return { changed };
+  });
