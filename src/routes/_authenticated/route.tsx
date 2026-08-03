@@ -27,12 +27,12 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const nav = [
-  { to: "/home", label: "Startseite", icon: Home },
-  { to: "/dashboard", label: "Übersicht", icon: LayoutDashboard },
-  { to: "/vacuum", label: "Staubsauger", icon: Bot },
-  { to: "/scenes", label: "Szenen", icon: Sparkles },
-  { to: "/automations", label: "Automationen", icon: Timer },
-  { to: "/settings", label: "Einstellungen", icon: Settings2 },
+  { to: "/home", label: "Startseite", shortLabel: "Start", icon: Home },
+  { to: "/dashboard", label: "Übersicht", shortLabel: "Geräte", icon: LayoutDashboard },
+  { to: "/vacuum", label: "Staubsauger", shortLabel: "Staubi", icon: Bot },
+  { to: "/scenes", label: "Szenen", shortLabel: "Szenen", icon: Sparkles },
+  { to: "/automations", label: "Automationen", shortLabel: "Regeln", icon: Timer },
+  { to: "/settings", label: "Einstellungen", shortLabel: "Setup", icon: Settings2 },
 ] as const;
 
 function AuthenticatedLayout() {
