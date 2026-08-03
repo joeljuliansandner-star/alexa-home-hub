@@ -214,7 +214,7 @@ function emptyState(): DreameState {
     filterLife: null,
     rooms: [],
     isRunning: false,
-    label: "Nicht erreichbar",
+    label: "Standby (schläft)",
     reachable: false,
   };
 }
