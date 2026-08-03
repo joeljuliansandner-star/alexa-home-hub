@@ -40,6 +40,7 @@ function SettingsPage() {
   const devices = useDevices();
   const qc = useQueryClient();
   const tapoDevices = (devices.data ?? []).filter((d) => d.external_source === "tapo");
+  const tuyaDevices = (devices.data ?? []).filter((d) => d.external_source === "tuya");
   const mapped = (devices.data ?? []).filter((d) => d.alexa_name);
 
   const sync = useMutation({
@@ -51,14 +52,77 @@ function SettingsPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const syncTuya = useMutation({
+    mutationFn: () => syncTuyaDevices(),
+    onSuccess: (result) => {
+      qc.invalidateQueries();
+      toast.success(`${result.imported} Smart-Life-Geräte übernommen (${result.online} online)`);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
     <div className="space-y-6">
       <header>
         <h1 className="text-3xl font-semibold">Einstellungen</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tapo-Konto, Geräte-Abgleich und Alexa-Zuordnung.
+          Smart Life, Tapo, Geräte-Abgleich und Alexa-Zuordnung.
         </p>
       </header>
+
+      <section className="panel space-y-4 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
+              <Zap className="size-5" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold">Smart Life / Tuya</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Über die offizielle Tuya-Cloud. Diese Geräte lassen sich hier wirklich schalten und
+                dimmen – ganz ohne Zusatzhardware.
+              </p>
+            </div>
+          </div>
+          <Button
+            className="gap-2"
+            disabled={syncTuya.isPending}
+            onClick={() => syncTuya.mutate()}
+          >
+            <RefreshCw className={syncTuya.isPending ? "size-4 animate-spin" : "size-4"} />
+            Smart Life abgleichen
+          </Button>
+        </div>
+
+        {tuyaDevices.length ? (
+          <ul className="divide-y divide-border">
+            {tuyaDevices.map((device) => (
+              <li key={device.id} className="flex items-center justify-between gap-4 py-2.5 text-sm">
+                <span className="min-w-0">
+                  <span className="block truncate">{device.name}</span>
+                  <span className="text-xs text-muted-foreground">{device.model}</span>
+                </span>
+                <span
+                  className={
+                    device.is_online
+                      ? "flex items-center gap-1.5 text-xs text-success"
+                      : "flex items-center gap-1.5 text-xs text-muted-foreground"
+                  }
+                >
+                  {device.is_online ? <Wifi className="size-3.5" /> : <WifiOff className="size-3.5" />}
+                  {device.is_online ? "online" : "offline"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Noch kein Abgleich. Sobald Access ID und Secret aus dem Tuya-Portal hinterlegt sind,
+            holt „Smart Life abgleichen" alle Geräte hierher.
+          </p>
+        )}
+      </section>
+
 
       <section className="panel space-y-4 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
