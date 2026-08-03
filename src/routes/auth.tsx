@@ -83,7 +83,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="hero-glow flex min-h-screen items-center justify-center px-4 py-10">
+    <div className="hero-glow flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="panel w-full max-w-md p-7">
         <div className="flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
