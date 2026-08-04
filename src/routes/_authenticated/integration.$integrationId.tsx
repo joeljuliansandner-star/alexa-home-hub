@@ -140,6 +140,8 @@ function IntegrationDetailPage() {
     },
   });
 
+  if (integrationId === "alexa") return <AlexaIntegrationPanel />;
+
   if (!integration) {
     return (
       <div className={stacks.page}>
