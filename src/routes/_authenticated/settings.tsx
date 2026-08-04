@@ -136,7 +136,13 @@ function SettingsPage() {
     mutationFn: () => syncTapoDevices(),
     onSuccess: (result) => {
       qc.invalidateQueries();
-      toast.success(`${result.imported} Tapo-Geräte übernommen (${result.online} online)`);
+      toast.success(
+        `${result.imported} TP-Link-Geräte übernommen (${result.hubs} Steuerzentralen, ${result.children} Untergeräte, ${result.online} online)`,
+      );
+      for (const problem of result.errors) toast.warning(problem);
+      if (result.unsupported.length) {
+        toast.warning(`Nicht unterstützt: ${result.unsupported.join(", ")}`);
+      }
     },
     onError: (error: Error) => toast.error(error.message),
   });
