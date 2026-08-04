@@ -10,8 +10,8 @@ const AUTHORIZE_URL = "https://www.amazon.com/ap/oa";
 const TOKEN_URL = "https://api.amazon.com/auth/o2/token";
 const PROFILE_URL = "https://api.amazon.com/user/profile";
 
-/** Vom Amazon-Konto angeforderte Berechtigungen. */
-export const AMAZON_SCOPES = ["profile", "alexa::skills:account_linking"] as const;
+/** Vom Amazon-Konto angeforderte Berechtigungen (offizielle LWA-Scopes). */
+export const AMAZON_SCOPES = ["profile", "profile:user_id"] as const;
 
 export type AmazonTokens = {
   accessToken: string;
