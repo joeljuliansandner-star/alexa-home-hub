@@ -25,7 +25,7 @@ import {
 } from "@/lib/smarthome";
 import { DeviceCard } from "@/components/DeviceCard";
 import { cn } from "@/lib/utils";
-import { EmptyState, LoadingState, Section, grids } from "@/components/kit";
+import { EmptyState, EntryList, EntryRow, LoadingState, Section, grids } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -399,22 +399,19 @@ function Dashboard() {
 
       {activity.data?.length ? (
         <Section title="Letzte Aktivität">
-          <ul className="panel divide-y divide-border p-1">
+          <EntryList>
             {activity.data.slice(0, 8).map((entry) => (
-              <li
+              <EntryRow
                 key={entry.id}
-                className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm"
+                meta={new Date(entry.created_at).toLocaleTimeString("de-DE", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               >
-                <span className="truncate">{entry.message}</span>
-                <time className="shrink-0 text-xs text-muted-foreground">
-                  {new Date(entry.created_at).toLocaleTimeString("de-DE", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </time>
-              </li>
+                {entry.message}
+              </EntryRow>
             ))}
-          </ul>
+          </EntryList>
         </Section>
       ) : null}
     </div>
