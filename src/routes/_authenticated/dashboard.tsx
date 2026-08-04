@@ -297,7 +297,12 @@ function Dashboard() {
                   onBrightness={(value) =>
                     updateDevice.mutate({ device, patch: { brightness: value } })
                   }
+                  onFavorite={(value) => toggleFavorite.mutate({ device, value })}
+                  onOpen={() =>
+                    navigate({ to: "/device/$deviceId", params: { deviceId: device.id } })
+                  }
                 />
+
                 <button
                   className="absolute right-2 top-14 rounded-lg p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                   aria-label={`${device.name} löschen`}
