@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, PlugZap, RefreshCw, Settings2, Unplug } from "lucide-react";
@@ -50,30 +51,73 @@ export const Route = createFileRoute("/_authenticated/integration/$integrationId
   component: IntegrationDetailPage,
 });
 
+type DebugLog = {
+  lines: string[];
+  errors: string[];
+  unsupported: string[];
+};
+
 function IntegrationDetailPage() {
   const { integrationId } = useParams({ from: "/_authenticated/integration/$integrationId" });
   const devices = useDevices();
   const qc = useQueryClient();
+  const [debug, setDebug] = useState<DebugLog | null>(null);
 
   const integration = getIntegration(integrationId);
 
   const sync = useMutation({
     mutationFn: async () => {
+      const stamp = new Date().toLocaleTimeString("de-DE");
       if (integrationId === "tuya") {
         const result = await syncTuyaDevices();
-        return `${result.imported} Geräte und ${result.rooms} Räume übernommen`;
+        return {
+          message: `${result.imported} Geräte und ${result.rooms} Räume übernommen`,
+          log: {
+            lines: [`${stamp} – ${result.imported} Geräte, ${result.rooms} Räume`],
+            errors: [],
+            unsupported: [],
+          } satisfies DebugLog,
+        };
       }
       if (integrationId === "tapo") {
         const result = await syncTapoDevices();
-        return `${result.imported} Geräte übernommen`;
+        return {
+          message: `${result.imported} Geräte übernommen (${result.children} über Steuerzentralen)`,
+          log: {
+            lines: [
+              `${stamp} – Abgleich abgeschlossen`,
+              `Steuerzentralen gefunden: ${result.hubs}`,
+              `Direkte Geräte: ${result.imported - result.children}`,
+              `Untergeräte an Hubs: ${result.children}`,
+              `Online: ${result.online} von ${result.imported}`,
+              ...result.devices.map(
+                (d) =>
+                  `• ${d.name} – ${d.label} (${d.model})${d.viaHub ? ` über ${d.viaHub}` : ""} – ${
+                    d.online ? "online" : "offline"
+                  }`,
+              ),
+            ],
+            errors: result.errors,
+            unsupported: result.unsupported,
+          } satisfies DebugLog,
+        };
       }
       throw new Error("Für diesen Dienst ist noch keine Verbindung hinterlegt.");
     },
-    onSuccess: (message) => {
+    onSuccess: (result) => {
       qc.invalidateQueries();
-      toast.success(message);
+      setDebug(result.log);
+      toast.success(result.message);
+      for (const problem of result.log.errors) toast.warning(problem);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      setDebug({
+        lines: [`${new Date().toLocaleTimeString("de-DE")} – Abgleich fehlgeschlagen`],
+        errors: [error.message],
+        unsupported: [],
+      });
+      toast.error(error.message);
+    },
   });
 
   if (!integration) {
@@ -180,9 +224,40 @@ function IntegrationDetailPage() {
         )}
       </Section>
 
-      <Section title="Fehlerprotokoll">
-        <EmptyState description="Keine Fehler protokolliert (Platzhalter)." />
+      <Section title="Debug-Protokoll">
+        {debug ? (
+          <Panel className="space-y-3">
+            <div className="max-h-64 space-y-1 overflow-y-auto font-mono text-xs text-muted-foreground">
+              {debug.lines.map((line, index) => (
+                <p key={`${line}-${index}`}>{line}</p>
+              ))}
+            </div>
+            {debug.unsupported.length ? (
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-sm font-medium">Nicht unterstützte Geräte</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {debug.unsupported.join(", ")}
+                </p>
+              </div>
+            ) : null}
+            {debug.errors.length ? (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+                <p className="text-sm font-medium text-destructive">API-Fehler</p>
+                <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                  {debug.errors.map((problem) => (
+                    <li key={problem}>{problem}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Keine API-Fehler beim letzten Abgleich.</p>
+            )}
+          </Panel>
+        ) : (
+          <EmptyState description="Starte einen Abgleich, um Hubs, Geräte und Fehler zu protokollieren." />
+        )}
       </Section>
+
 
       <Section title="Erweiterte Einstellungen">
         <Panel className="divide-y divide-border py-0">
