@@ -27,14 +27,16 @@ export function Section({
   action,
   children,
   className,
+  id,
 }: {
   title?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   return (
-    <section className={cn("space-y-3", className)}>
+    <section id={id} className={cn("space-y-3", className)}>
       {title ? <SectionTitle action={action}>{title}</SectionTitle> : null}
       {children}
     </section>
