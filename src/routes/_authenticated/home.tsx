@@ -170,17 +170,18 @@ function HomePage() {
             onClick={() => navigate({ to: "/dashboard" })}
           />
         </div>
-      </section>
+      </Section>
 
-      <section id="favoriten" className="space-y-3 scroll-mt-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Favoriten
-          </h2>
+      <Section
+        id="favoriten"
+        className="scroll-mt-4"
+        title="Favoriten"
+        action={
           <Link to="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
             Alle Geräte
           </Link>
-        </div>
+        }
+      >
         {favorites.length ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {favorites.map((device) => (
