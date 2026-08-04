@@ -224,9 +224,40 @@ function IntegrationDetailPage() {
         )}
       </Section>
 
-      <Section title="Fehlerprotokoll">
-        <EmptyState description="Keine Fehler protokolliert (Platzhalter)." />
+      <Section title="Debug-Protokoll">
+        {debug ? (
+          <Panel className="space-y-3">
+            <div className="max-h-64 space-y-1 overflow-y-auto font-mono text-xs text-muted-foreground">
+              {debug.lines.map((line, index) => (
+                <p key={`${line}-${index}`}>{line}</p>
+              ))}
+            </div>
+            {debug.unsupported.length ? (
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-sm font-medium">Nicht unterstützte Geräte</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {debug.unsupported.join(", ")}
+                </p>
+              </div>
+            ) : null}
+            {debug.errors.length ? (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+                <p className="text-sm font-medium text-destructive">API-Fehler</p>
+                <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                  {debug.errors.map((problem) => (
+                    <li key={problem}>{problem}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Keine API-Fehler beim letzten Abgleich.</p>
+            )}
+          </Panel>
+        ) : (
+          <EmptyState description="Starte einen Abgleich, um Hubs, Geräte und Fehler zu protokollieren." />
+        )}
       </Section>
+
 
       <Section title="Erweiterte Einstellungen">
         <Panel className="divide-y divide-border py-0">
