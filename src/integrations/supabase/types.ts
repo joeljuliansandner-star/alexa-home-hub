@@ -35,6 +35,186 @@ export type Database = {
         }
         Relationships: []
       }
+      alexa_connections: {
+        Row: {
+          access_token: string
+          account_email: string | null
+          account_name: string | null
+          amazon_user_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          refresh_token: string | null
+          scope: string | null
+          token_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_email?: string | null
+          account_name?: string | null
+          amazon_user_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          scope?: string | null
+          token_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_email?: string | null
+          account_name?: string | null
+          amazon_user_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          scope?: string | null
+          token_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      alexa_devices: {
+        Row: {
+          capabilities: Json
+          created_at: string
+          device_family: string | null
+          device_id: string
+          device_type: string | null
+          firmware_version: string | null
+          id: string
+          is_online: boolean
+          last_synced_at: string
+          name: string
+          raw_source: string | null
+          room: string | null
+          serial_number: string | null
+          software_version: string | null
+          unsupported_properties: Json
+          updated_at: string
+          user_id: string
+          wifi_status: string | null
+        }
+        Insert: {
+          capabilities?: Json
+          created_at?: string
+          device_family?: string | null
+          device_id: string
+          device_type?: string | null
+          firmware_version?: string | null
+          id?: string
+          is_online?: boolean
+          last_synced_at?: string
+          name: string
+          raw_source?: string | null
+          room?: string | null
+          serial_number?: string | null
+          software_version?: string | null
+          unsupported_properties?: Json
+          updated_at?: string
+          user_id: string
+          wifi_status?: string | null
+        }
+        Update: {
+          capabilities?: Json
+          created_at?: string
+          device_family?: string | null
+          device_id?: string
+          device_type?: string | null
+          firmware_version?: string | null
+          id?: string
+          is_online?: boolean
+          last_synced_at?: string
+          name?: string
+          raw_source?: string | null
+          room?: string | null
+          serial_number?: string | null
+          software_version?: string | null
+          unsupported_properties?: Json
+          updated_at?: string
+          user_id?: string
+          wifi_status?: string | null
+        }
+        Relationships: []
+      }
+      alexa_settings: {
+        Row: {
+          auto_sync: boolean
+          created_at: string
+          debug_mode: boolean
+          sync_interval_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_sync?: boolean
+          created_at?: string
+          debug_mode?: boolean
+          sync_interval_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_sync?: boolean
+          created_at?: string
+          debug_mode?: boolean
+          sync_interval_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      alexa_sync_log: {
+        Row: {
+          created_at: string
+          details: Json
+          duration_ms: number | null
+          endpoint: string
+          id: string
+          message: string | null
+          method: string
+          ok: boolean
+          status_code: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          duration_ms?: number | null
+          endpoint: string
+          id?: string
+          message?: string | null
+          method?: string
+          ok?: boolean
+          status_code?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          duration_ms?: number | null
+          endpoint?: string
+          id?: string
+          message?: string | null
+          method?: string
+          ok?: boolean
+          status_code?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       automations: {
         Row: {
           created_at: string
