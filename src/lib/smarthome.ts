@@ -545,3 +545,47 @@ export function useSeedDemo() {
     onSuccess: () => invalidateAll(qc),
   });
 }
+
+/* ------------------------------- Favoriten -------------------------------- */
+
+export function useToggleFavorite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ device, value }: { device: Device; value: boolean }) => {
+      const { error } = await supabase
+        .from("devices")
+        .update({ is_favorite: value })
+        .eq("id", device.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["devices"] }),
+  });
+}
+
+/** Schaltet alle Geräte eines Typs gemeinsam. */
+export function useBulkToggleKind() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ devices, on }: { devices: Device[]; on: boolean }) => {
+      for (const device of devices) {
+        if (device.external_source === "tuya" && device.external_id) {
+          try {
+            await controlTuyaDevice({ data: { externalId: device.external_id, on } });
+          } catch {
+            /* Gerät offline – lokaler Zustand wird trotzdem gesetzt */
+          }
+        }
+        if (device.external_source === "tapo" && device.external_id) {
+          try {
+            await controlTapoDevice({ data: { externalId: device.external_id, on } });
+          } catch {
+            /* siehe oben */
+          }
+        }
+        await supabase.from("devices").update({ is_on: on }).eq("id", device.id);
+      }
+      return devices.length;
+    },
+    onSuccess: () => invalidateAll(qc),
+  });
+}

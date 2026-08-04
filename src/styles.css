@@ -186,3 +186,25 @@
   background-clip: text;
   color: transparent;
 }
+
+@utility panel-glass {
+  background-color: color-mix(in oklab, var(--surface) 72%, transparent);
+  background-image: var(--gradient-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+@utility panel-hover {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+@utility stat-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
