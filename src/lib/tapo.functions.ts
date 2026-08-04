@@ -20,7 +20,7 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       await import("./tapo.server");
 
     const token = await tapoLogin();
-    const cloudDevices = await tapoDeviceList(token);
+    const { devices: cloudDevices, raw: rawDeviceList } = await tapoDeviceList(token);
 
     let imported = 0;
     let online = 0;
@@ -29,6 +29,7 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
     const errors: string[] = [];
     const unsupported: string[] = [];
     const list: SyncedDevice[] = [];
+    const rawChildren: Array<{ hub: string; payload: unknown }> = [];
 
     type DevicePayload = Database["public"]["Tables"]["devices"]["Insert"];
 
@@ -81,7 +82,8 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
 
       if (!hub) continue;
 
-      const { children, error } = await tapoChildDevices(token, device.deviceId);
+      const { children, error, raw } = await tapoChildDevices(token, device.deviceId);
+      for (const payload of raw) rawChildren.push({ hub: device.alias, payload });
       if (error) errors.push(`${device.alias}: ${error}`);
 
       for (const child of children) {
@@ -138,6 +140,18 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       errors,
       unsupported,
       devices: list,
+      api: {
+        library: "Eigene Implementierung (fetch) – TP-Link Cloud API",
+        endpoint: "https://eu-wap.tplinkcloud.com/",
+        methods: ["login", "getDeviceList", "passthrough → get_child_device_list"],
+      },
+      raw: {
+        deviceList: JSON.stringify(rawDeviceList, null, 2),
+        childLists: rawChildren.map((entry) => ({
+          hub: entry.hub,
+          payload: JSON.stringify(entry.payload, null, 2),
+        })),
+      },
     };
   });
 

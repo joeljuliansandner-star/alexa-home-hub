@@ -55,6 +55,10 @@ type DebugLog = {
   lines: string[];
   errors: string[];
   unsupported: string[];
+  api?: { library: string; endpoint: string; methods: string[] };
+  hubs?: number;
+  children?: number;
+  raw?: { deviceList: string; childLists: Array<{ hub: string; payload: string }> };
 };
 
 function IntegrationDetailPage() {
@@ -99,6 +103,10 @@ function IntegrationDetailPage() {
             ],
             errors: result.errors,
             unsupported: result.unsupported,
+            api: result.api,
+            hubs: result.hubs,
+            children: result.children,
+            raw: result.raw,
           } satisfies DebugLog,
         };
       }
@@ -257,6 +265,72 @@ function IntegrationDetailPage() {
           <EmptyState description="Starte einen Abgleich, um Hubs, Geräte und Fehler zu protokollieren." />
         )}
       </Section>
+
+      {integrationId === "tapo" || integrationId === "kasa" ? (
+        <Section title="Entwicklerbereich (Debug)">
+          {debug ? (
+            <Panel className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">Verwendete API</p>
+                {debug.api ? (
+                  <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                    <li>Bibliothek: {debug.api.library}</li>
+                    <li>Endpunkt: {debug.api.endpoint}</li>
+                    <li>Methoden: {debug.api.methods.join(", ")}</li>
+                  </ul>
+                ) : (
+                  <p className="mt-1 text-xs text-muted-foreground">Keine Angaben vorhanden.</p>
+                )}
+              </div>
+
+              <div className={grids.stats}>
+                <StatTile label="Steuerzentralen" value={String(debug.hubs ?? 0)} tone="accent" />
+                <StatTile label="Untergeräte" value={String(debug.children ?? 0)} tone="primary" />
+                <StatTile label="API-Fehler" value={String(debug.errors.length)} tone={debug.errors.length ? "muted" : "primary"} />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium">Rohantwort Geräteabfrage</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Tokens, Konto-Daten und Netzwerkkennungen sind entfernt.
+                </p>
+                <pre className="mt-2 max-h-72 overflow-auto rounded-lg border border-border bg-muted/30 p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                  {debug.raw?.deviceList ?? "—"}
+                </pre>
+              </div>
+
+              {debug.raw?.childLists.length ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Rohantwort Untergeräte</p>
+                  {debug.raw.childLists.map((entry, index) => (
+                    <div key={`${entry.hub}-${index}`}>
+                      <p className="text-xs text-muted-foreground">{entry.hub}</p>
+                      <pre className="mt-1 max-h-72 overflow-auto rounded-lg border border-border bg-muted/30 p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                        {entry.payload}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <div>
+                <p className="text-sm font-medium">API-Fehlermeldungen</p>
+                {debug.errors.length ? (
+                  <ul className="mt-1 space-y-1 text-xs text-destructive">
+                    {debug.errors.map((problem) => (
+                      <li key={problem}>{problem}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1 text-xs text-muted-foreground">Keine Fehler beim letzten Abgleich.</p>
+                )}
+              </div>
+            </Panel>
+          ) : (
+            <EmptyState description="Starte einen Abgleich, um API-Details und Rohantworten zu sehen." />
+          )}
+        </Section>
+      ) : null}
 
 
       <Section title="Erweiterte Einstellungen">

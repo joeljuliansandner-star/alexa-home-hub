@@ -65,7 +65,24 @@ function decodeAlias(raw: string, fallback: string): string {
   }
 }
 
-export async function tapoDeviceList(token: string): Promise<TapoCloudDevice[]> {
+/** Entfernt Tokens, Passwörter und Konto-Daten aus Rohantworten. */
+const SECRET_KEY = /token|password|passwd|secret|key|email|account|terminal|username|ssid|mac|ip/i;
+
+export function redact(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redact);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = SECRET_KEY.test(k) ? "«entfernt»" : redact(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+export async function tapoDeviceList(
+  token: string,
+): Promise<{ devices: TapoCloudDevice[]; raw: unknown }> {
   const data = await cloudCall<{ deviceList: Array<Record<string, unknown>> }>(
     `${CLOUD_URL}?token=${encodeURIComponent(token)}`,
     { method: "getDeviceList" },
@@ -74,7 +91,7 @@ export async function tapoDeviceList(token: string): Promise<TapoCloudDevice[]> 
     throw new Error(`Geräteliste konnte nicht geladen werden (Code ${data.error_code}).`);
   }
 
-  return (data.result?.deviceList ?? []).map((raw) => {
+  const devices = (data.result?.deviceList ?? []).map((raw) => {
     const model = String(raw["deviceModel"] ?? "Gerät");
     // Fehlt das Statusfeld, gilt ein gelistetes Gerät als erreichbar.
     const rawStatus = raw["status"];
@@ -89,6 +106,8 @@ export async function tapoDeviceList(token: string): Promise<TapoCloudDevice[]> 
       isOnline: status !== 0,
     };
   });
+
+  return { devices, raw: redact(data) };
 }
 
 /** Cloud passthrough. Tapo devices usually reject this ("Device is offline"). */
@@ -177,8 +196,9 @@ function decodeNickname(raw: unknown, fallback: string): string {
 export async function tapoChildDevices(
   token: string,
   hubId: string,
-): Promise<{ children: TapoChildDevice[]; error: string | null }> {
+): Promise<{ children: TapoChildDevice[]; error: string | null; raw: unknown[] }> {
   const children: TapoChildDevice[] = [];
+  const raw: unknown[] = [];
   let startIndex = 0;
 
   for (let page = 0; page < 6; page += 1) {
@@ -198,12 +218,14 @@ export async function tapoChildDevices(
         },
       );
     } catch (err) {
-      return { children, error: err instanceof Error ? err.message : "Unbekannter Fehler" };
+      return { children, raw, error: err instanceof Error ? err.message : "Unbekannter Fehler" };
     }
 
     if (payload.error_code !== 0) {
+      raw.push(redact(payload));
       return {
         children,
+        raw,
         error:
           payload.error_code === -20571
             ? "Die Steuerzentrale nimmt über die Cloud keine Abfragen an (nur im Heimnetz erreichbar)."
@@ -215,15 +237,17 @@ export async function tapoChildDevices(
     try {
       inner = JSON.parse(String(payload.result?.responseData ?? "{}"));
     } catch {
-      return { children, error: "Antwort der Steuerzentrale war unlesbar." };
+      return { children, raw, error: "Antwort der Steuerzentrale war unlesbar." };
     }
+    raw.push(redact(inner));
 
     if (inner.error_code && inner.error_code !== 0) {
-      return { children, error: `Steuerzentrale meldet Fehler ${inner.error_code}.` };
+      return { children, raw, error: `Steuerzentrale meldet Fehler ${inner.error_code}.` };
     }
 
     const list = inner.result?.child_device_list ?? [];
     if (!list.length) break;
+
 
     for (const raw of list) {
       const model = String(raw["model"] ?? "Gerät");
@@ -247,5 +271,5 @@ export async function tapoChildDevices(
     if (inner.result?.sum !== undefined && startIndex >= Number(inner.result.sum)) break;
   }
 
-  return { children, error: null };
+  return { children, error: null, raw };
 }
