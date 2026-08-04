@@ -183,7 +183,7 @@ function HomePage() {
         }
       >
         {favorites.length ? (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className={grids.cards}>
             {favorites.map((device) => (
               <DeviceCard
                 key={device.id}
@@ -204,22 +204,24 @@ function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="panel-glass flex flex-col items-start gap-3 p-5">
-            <p className="text-sm text-muted-foreground">
-              Noch keine Favoriten. Markiere Geräte in der Übersicht mit dem Stern, um sie hier
-              schnell zu erreichen.
-            </p>
-            <Button asChild variant="secondary" className="min-h-11">
-              <Link to="/dashboard">Geräte auswählen</Link>
-            </Button>
-          </div>
+          <EmptyState
+            description={
+              <span className="flex flex-col items-start gap-3">
+                <span>
+                  Noch keine Favoriten. Markiere Geräte in der Übersicht mit dem Stern, um sie
+                  hier schnell zu erreichen.
+                </span>
+                <Button asChild variant="secondary" className="min-h-11">
+                  <Link to="/dashboard">Geräte auswählen</Link>
+                </Button>
+              </span>
+            }
+            className="text-left"
+          />
         )}
-      </section>
+      </Section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Benachrichtigungen
-        </h2>
+      <Section title="Benachrichtigungen">
         <div className="panel-glass divide-y divide-border p-1">
           {offline.length ? (
             <div className="flex items-start gap-3 px-3 py-3">
