@@ -140,6 +140,15 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       errors,
       unsupported,
       devices: list,
+      api: {
+        library: "Eigene Implementierung (fetch) – TP-Link Cloud API",
+        endpoint: "https://eu-wap.tplinkcloud.com/",
+        methods: ["login", "getDeviceList", "passthrough → get_child_device_list"],
+      },
+      raw: {
+        deviceList: rawDeviceList,
+        childLists: rawChildren,
+      },
     };
   });
 
