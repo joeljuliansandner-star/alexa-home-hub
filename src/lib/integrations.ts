@@ -107,18 +107,19 @@ export const integrations: IntegrationDef[] = [
   {
     id: "alexa",
     name: "Amazon Alexa",
-    description: "Sprachsteuerung über Alexa – Namen der Geräte werden abgeglichen.",
+    description: "Echo-Geräte über das eigene Amazon-Konto anbinden, abgleichen und steuern.",
     icon: Mic,
-    tone: "muted",
-    externalSource: null,
-    live: false,
+    tone: "primary",
+    externalSource: "alexa",
+    live: true,
     account: [
-      { label: "Konto", value: "Noch nicht verbunden" },
-      { label: "Skill", value: "Platzhalter" },
+      { label: "Anmeldung", value: "Login with Amazon (OAuth 2.0)" },
+      { label: "Geräte", value: "Echo Dot, Show, Pop, Studio, Flex, Auto, Hub, Input" },
+      { label: "Steuerung", value: "Lautstärke und Stummschaltung" },
     ],
     advanced: [
-      { label: "Gerätenamen synchronisieren", hint: "Namen exakt wie in der Alexa-App" },
-      { label: "Routinen auslösen", hint: "Platzhalter für spätere Webhooks" },
+      { label: "Automatischer Abgleich", hint: "Intervall in den Einstellungen" },
+      { label: "Debugmodus", hint: "API-Aufrufe im Entwicklerbereich protokollieren" },
     ],
   },
   {
