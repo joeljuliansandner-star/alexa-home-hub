@@ -18,6 +18,7 @@ import {
   useRunScene,
   useSeedDemo,
   useToggleFavorite,
+  isCameraDevice,
   useUpdateDevice,
   type DeviceKind,
   deviceKindLabel,
@@ -43,6 +44,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+
+type ChipId = "all" | "light" | "plug" | "sensor" | "camera" | "favorite";
+type SortId = "name" | "room" | "status";
+
+const chips: { id: ChipId; label: string }[] = [
+  { id: "all", label: "Alle" },
+  { id: "light", label: "Lichter" },
+  { id: "plug", label: "Steckdosen" },
+  { id: "sensor", label: "Sensoren" },
+  { id: "camera", label: "Kameras" },
+  { id: "favorite", label: "Favoriten" },
+];
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
