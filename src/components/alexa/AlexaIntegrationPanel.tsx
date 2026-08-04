@@ -16,7 +16,7 @@ import {
 } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { formatSync } from "@/lib/integrations";
-import { alexaValue } from "@/lib/alexa/model";
+import { ALEXA_NO_DEVICE_API, alexaValue } from "@/lib/alexa/model";
 import {
   useAlexaDevices,
   useAlexaDisconnect,
@@ -178,8 +178,7 @@ export function AlexaIntegrationPanel() {
         ) : (
           <EmptyState
             description={
-              info?.lastError ??
-              "Noch keine Echo-Geräte übernommen. Melde dich an und starte einen Abgleich."
+              info?.lastError ?? ALEXA_NO_DEVICE_API
             }
           />
         )}
@@ -201,7 +200,7 @@ export function AlexaIntegrationPanel() {
         <Panel className="space-y-3">
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li>Anmeldung: Login with Amazon (OAuth 2.0, api.amazon.com)</li>
-            <li>Geräte: Alexa Device API (api.amazonalexa.com)</li>
+            <li>Geräte: keine öffentliche Amazon-API vorhanden – Aufrufe entfernt</li>
             <li>Tokens werden serverseitig gespeichert und nie im Browser abgelegt.</li>
           </ul>
           {log.data?.length ? (
