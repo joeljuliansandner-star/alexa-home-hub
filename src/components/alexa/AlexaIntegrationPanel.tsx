@@ -124,6 +124,20 @@ export function AlexaIntegrationPanel() {
         </Panel>
       ) : null}
 
+      <Panel className="space-y-2 border-amber-500/40">
+        <p className="text-sm font-medium">Keine Echo-Geräteliste über Amazon verfügbar</p>
+        <p className="text-xs text-muted-foreground">{ALEXA_NO_DEVICE_API}</p>
+        <p className="text-xs text-muted-foreground">
+          Die früher genutzten Adressen unter <code>api.amazonalexa.com</code> gehören zu den
+          Skill-gebundenen Schnittstellen (Alexa Smart Home / Skill Messaging) und antworten für
+          Login-with-Amazon-Tokens mit <strong>HTTP 404</strong>. Sie wurden entfernt. Die
+          Anmeldung bleibt bestehen und liefert ausschließlich die Kontodaten (Name, E-Mail).
+          Für echte Gerätesteuerung wäre ein eigener, bei Amazon zertifizierter Alexa-Skill mit
+          Account-Linking nötig.
+        </p>
+      </Panel>
+
+
       <div className={grids.stats}>
         <StatTile
           label="Status"
