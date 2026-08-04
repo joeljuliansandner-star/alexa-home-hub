@@ -1,17 +1,29 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Star, Wifi, WifiOff } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Loader2, Pencil, Star, Wifi, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   deviceKindLabel,
+  deviceSourceLabel,
+  useDeviceHistory,
   useDevices,
   useRooms,
   useToggleFavorite,
   useUpdateDevice,
 } from "@/lib/smarthome";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/device/$deviceId")({
@@ -41,6 +53,17 @@ function DeviceDetail() {
   const toggleFavorite = useToggleFavorite();
 
   const device = (devices.data ?? []).find((d) => d.id === deviceId);
+  const history = useDeviceHistory(device?.name);
+
+  const [name, setName] = useState("");
+  const [roomId, setRoomId] = useState("none");
+
+  useEffect(() => {
+    if (device) {
+      setName(device.name);
+      setRoomId(device.room_id ?? "none");
+    }
+  }, [device?.id, device?.name, device?.room_id]);
 
   if (devices.isLoading) {
     return (
@@ -69,7 +92,12 @@ function DeviceDetail() {
     { label: "Raum", value: room?.name ?? "Ohne Raum" },
     { label: "Hersteller", value: device.manufacturer ?? "—" },
     { label: "Modell", value: device.model ?? "—" },
-    { label: "Quelle", value: device.external_source ?? "manuell" },
+    {
+      label: "Verbindung",
+      value: device.external_source
+        ? (deviceSourceLabel[device.external_source] ?? device.external_source)
+        : "manuell",
+    },
     { label: "Alexa-Name", value: device.alexa_name ?? "—" },
     {
       label: "Zuletzt aktualisiert",
@@ -180,6 +208,96 @@ function DeviceDetail() {
         </section>
       ) : null}
 
+      <section className="panel space-y-4 p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Gerät bearbeiten
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="device-name">Name</Label>
+            <Input
+              id="device-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-11"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="device-room">Raum</Label>
+            <Select value={roomId} onValueChange={setRoomId}>
+              <SelectTrigger id="device-room" className="h-11">
+                <SelectValue placeholder="Raum" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Ohne Raum</SelectItem>
+                {(rooms.data ?? []).map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Button
+          className="min-h-11 w-full gap-2 sm:w-auto"
+          disabled={
+            updateDevice.isPending ||
+            !name.trim() ||
+            (name.trim() === device.name && roomId === (device.room_id ?? "none"))
+          }
+          onClick={() =>
+            updateDevice.mutate(
+              {
+                device,
+                patch: { name: name.trim(), room_id: roomId === "none" ? null : roomId },
+                log: `${device.name} bearbeitet`,
+              },
+              { onSuccess: () => toast.success("Gerät gespeichert") },
+            )
+          }
+        >
+          <Pencil className="size-4" /> Speichern
+        </Button>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Letzte Schaltvorgänge
+        </h2>
+        {history.isLoading ? (
+          <div className="panel flex h-24 items-center justify-center">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : history.data?.length ? (
+          <ul className="panel divide-y divide-border p-1">
+            {history.data.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm"
+              >
+                <span className="truncate">{entry.message}</span>
+                <time className="shrink-0 text-xs text-muted-foreground">
+                  {new Date(entry.created_at).toLocaleString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </time>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="panel-glass p-5 text-sm text-muted-foreground">
+            Noch keine Schaltvorgänge protokolliert.
+          </p>
+        )}
+      </section>
+
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Geräteinformationen
+      </h2>
       <section className="grid gap-3 sm:grid-cols-2">
         {facts.map((fact) => (
           <div key={fact.label} className="panel h-full p-4">
