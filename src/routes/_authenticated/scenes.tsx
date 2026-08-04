@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
-import { LoadingState, PageHeader, stacks } from "@/components/kit";
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,6 +25,7 @@ import { LoadingState, PageHeader, stacks } from "@/components/kit";
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { LoadingState, PageHeader, stacks } from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/scenes")({
   head: () => ({

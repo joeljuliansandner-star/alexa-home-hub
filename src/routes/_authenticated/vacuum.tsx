@@ -23,12 +23,12 @@ import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { controlVacuum, getVacuumStates } from "@/lib/tuya.functions";
 import {
-import { PageHeader, stacks } from "@/components/kit";
   cleanDreameRooms,
   controlDreameVacuum,
   getDreameVacuums,
   setDreameSetting,
 } from "@/lib/dreame.functions";
+import { PageHeader, stacks } from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/vacuum")({
   ssr: false,

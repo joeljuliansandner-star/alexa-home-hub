@@ -25,13 +25,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-import { LoadingState, PageHeader, stacks } from "@/components/kit";
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LoadingState, PageHeader, stacks } from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/automations")({
   head: () => ({
