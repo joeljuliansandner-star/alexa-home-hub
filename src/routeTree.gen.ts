@@ -18,6 +18,7 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVacuumRouteImport } from './routes/_authenticated/vacuum'
+import { Route as AuthenticatedDeviceDeviceIdRouteImport } from './routes/_authenticated/device.$deviceId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,12 @@ const AuthenticatedVacuumRoute = AuthenticatedVacuumRouteImport.update({
   path: '/vacuum',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDeviceDeviceIdRoute =
+  AuthenticatedDeviceDeviceIdRouteImport.update({
+    id: '/device/$deviceId',
+    path: '/device/$deviceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
+  '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,6 +92,7 @@ export interface FileRoutesByTo {
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
+  '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +105,7 @@ export interface FileRoutesById {
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/vacuum': typeof AuthenticatedVacuumRoute
+  '/_authenticated/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/scenes'
     | '/settings'
     | '/vacuum'
+    | '/device/$deviceId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/scenes'
     | '/settings'
     | '/vacuum'
+    | '/device/$deviceId'
   id:
     | '__root__'
     | '/'
@@ -129,6 +141,7 @@ export interface FileRouteTypes {
     | '/_authenticated/scenes'
     | '/_authenticated/settings'
     | '/_authenticated/vacuum'
+    | '/_authenticated/device/$deviceId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVacuumRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/device/$deviceId': {
+      id: '/_authenticated/device/$deviceId'
+      path: '/device/$deviceId'
+      fullPath: '/device/$deviceId'
+      preLoaderRoute: typeof AuthenticatedDeviceDeviceIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -212,6 +232,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedVacuumRoute: typeof AuthenticatedVacuumRoute
+  AuthenticatedDeviceDeviceIdRoute: typeof AuthenticatedDeviceDeviceIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -221,6 +242,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedVacuumRoute: AuthenticatedVacuumRoute,
+  AuthenticatedDeviceDeviceIdRoute: AuthenticatedDeviceDeviceIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
