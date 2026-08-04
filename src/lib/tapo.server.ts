@@ -106,6 +106,8 @@ export async function tapoDeviceList(
       isOnline: status !== 0,
     };
   });
+
+  return { devices, raw: redact(data) };
 }
 
 /** Cloud passthrough. Tapo devices usually reject this ("Device is offline"). */
