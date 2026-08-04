@@ -97,48 +97,29 @@ function HomePage() {
   ];
 
   if (devices.isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold sm:text-3xl">{greeting()}, Joel</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {activeCount > 0
+    <div className={stacks.page}>
+      <PageHeader
+        title={`${greeting()}, Joel`}
+        description={
+          activeCount > 0
             ? `${activeCount} Geräte sind gerade aktiv.`
-            : "Aktuell ist alles ausgeschaltet."}
-        </p>
-      </header>
+            : "Aktuell ist alles ausgeschaltet."
+        }
+      />
 
       <WeatherClock />
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className={grids.stats}>
         {stats.map((stat) => (
-          <div key={stat.label} className="panel-glass flex h-full flex-col justify-between p-4">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">{stat.label}</p>
-            <p
-              className={cn(
-                "stat-value mt-2 text-2xl",
-                stat.tone === "primary" && "text-primary",
-                stat.tone === "accent" && "text-accent",
-                stat.tone === "destructive" && "text-destructive",
-              )}
-            >
-              {stat.value}
-            </p>
-          </div>
+          <StatTile key={stat.label} label={stat.label} value={stat.value} tone={stat.tone} />
         ))}
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Schnellaktionen
-        </h2>
+      <Section title="Schnellaktionen">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <QuickAction
             icon={Lightbulb}
