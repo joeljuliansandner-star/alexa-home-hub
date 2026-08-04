@@ -248,54 +248,95 @@ function Dashboard() {
         </section>
       ) : null}
 
-      <section className="panel-glass grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Gerät suchen…"
-            aria-label="Gerät suchen"
-            className="h-11 pl-9"
-          />
+      <section className="panel-glass space-y-3 p-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Gerät suchen…"
+              aria-label="Gerät suchen"
+              className="h-11 pl-9"
+            />
+          </div>
+          <Select value={roomFilter} onValueChange={setRoomFilter}>
+            <SelectTrigger className="h-11" aria-label="Raum filtern">
+              <SelectValue placeholder="Raum" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Räume</SelectItem>
+              {(rooms.data ?? []).map((room) => (
+                <SelectItem key={room.id} value={room.id}>
+                  {room.name}
+                </SelectItem>
+              ))}
+              <SelectItem value="none">Ohne Raum</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={kindFilter} onValueChange={setKindFilter}>
+            <SelectTrigger className="h-11" aria-label="Typ filtern">
+              <SelectValue placeholder="Typ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Typen</SelectItem>
+              {Object.entries(deviceKindLabel).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortId)}>
+            <SelectTrigger className="h-11" aria-label="Sortierung">
+              <SelectValue placeholder="Sortieren" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Sortieren: Name</SelectItem>
+              <SelectItem value="room">Sortieren: Raum</SelectItem>
+              <SelectItem value="status">Sortieren: Status</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={roomFilter} onValueChange={setRoomFilter}>
-          <SelectTrigger className="h-11" aria-label="Raum filtern">
-            <SelectValue placeholder="Raum" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Räume</SelectItem>
-            {(rooms.data ?? []).map((room) => (
-              <SelectItem key={room.id} value={room.id}>
-                {room.name}
-              </SelectItem>
-            ))}
-            <SelectItem value="none">Ohne Raum</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={kindFilter} onValueChange={setKindFilter}>
-          <SelectTrigger className="h-11" aria-label="Typ filtern">
-            <SelectValue placeholder="Typ" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Typen</SelectItem>
-            {Object.entries(deviceKindLabel).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          type="button"
-          variant={onlyFavorites ? "default" : "secondary"}
-          className="h-11 gap-2"
-          onClick={() => setOnlyFavorites((v) => !v)}
-        >
-          <Star className={onlyFavorites ? "size-4 fill-current" : "size-4"} />
-          Favoriten
-        </Button>
+
+        <div className="-mx-1 flex flex-wrap gap-2 px-1">
+          {chips.map((item) => {
+            const active = chip === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setChip(item.id)}
+                className={cn(
+                  "flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+                  active
+                    ? "border-primary/50 bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_var(--primary)]"
+                    : "border-border bg-secondary text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {item.id === "favorite" ? (
+                  <Star className={cn("size-4", active && "fill-current")} />
+                ) : null}
+                {item.label}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setOnlyFavorites((v) => !v)}
+            className={cn(
+              "flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+              onlyFavorites
+                ? "border-primary/50 bg-primary/15 text-primary"
+                : "border-border bg-secondary text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Star className={cn("size-4", onlyFavorites && "fill-current")} />
+            Nur Favoriten
+          </button>
+        </div>
       </section>
+
 
 
 
