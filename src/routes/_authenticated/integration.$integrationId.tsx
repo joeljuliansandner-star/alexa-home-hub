@@ -103,6 +103,10 @@ function IntegrationDetailPage() {
             ],
             errors: result.errors,
             unsupported: result.unsupported,
+            api: result.api,
+            hubs: result.hubs,
+            children: result.children,
+            raw: result.raw,
           } satisfies DebugLog,
         };
       }
