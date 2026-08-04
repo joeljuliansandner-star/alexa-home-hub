@@ -116,7 +116,9 @@ function IntegrationDetailPage() {
             api: result.api,
             hubs: result.hubs,
             children: result.children,
+            hubReports: result.hubReports,
             raw: result.raw,
+
           } satisfies DebugLog,
         };
       }
