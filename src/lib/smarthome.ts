@@ -589,3 +589,35 @@ export function useBulkToggleKind() {
     onSuccess: () => invalidateAll(qc),
   });
 }
+
+/* --------------------------- Geräte-Hilfsfunktionen ----------------------- */
+
+/** Kameras haben keinen eigenen Enum-Wert – wir erkennen sie am Modell/Namen. */
+export function isCameraDevice(device: Device) {
+  const haystack = `${device.model ?? ""} ${device.name} ${device.manufacturer ?? ""}`.toLowerCase();
+  return /cam|kamera|tc\d{2}|c\d{3}\b/.test(haystack);
+}
+
+export const deviceSourceLabel: Record<string, string> = {
+  tuya: "Smart Life (Tuya)",
+  tapo: "Tapo (TP-Link)",
+  dreame: "Dreame Cloud",
+};
+
+/** Verlauf der letzten Schaltvorgänge eines Geräts (aus dem Aktivitätsprotokoll). */
+export function useDeviceHistory(deviceName: string | undefined) {
+  return useQuery({
+    queryKey: ["activity", "device", deviceName],
+    enabled: Boolean(deviceName),
+    queryFn: async (): Promise<ActivityEntry[]> => {
+      const { data, error } = await supabase
+        .from("activity_log")
+        .select("*")
+        .ilike("message", `%${deviceName}%`)
+        .order("created_at", { ascending: false })
+        .limit(15);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}

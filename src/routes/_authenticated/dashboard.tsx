@@ -18,11 +18,13 @@ import {
   useRunScene,
   useSeedDemo,
   useToggleFavorite,
+  isCameraDevice,
   useUpdateDevice,
   type DeviceKind,
   deviceKindLabel,
 } from "@/lib/smarthome";
 import { DeviceCard } from "@/components/DeviceCard";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +45,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+
+type ChipId = "all" | "light" | "plug" | "sensor" | "camera" | "favorite";
+type SortId = "name" | "room" | "status";
+
+const chips: { id: ChipId; label: string }[] = [
+  { id: "all", label: "Alle" },
+  { id: "light", label: "Lichter" },
+  { id: "plug", label: "Steckdosen" },
+  { id: "sensor", label: "Sensoren" },
+  { id: "camera", label: "Kameras" },
+  { id: "favorite", label: "Favoriten" },
+];
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -85,21 +99,46 @@ function Dashboard() {
   const [roomFilter, setRoomFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [chip, setChip] = useState<ChipId>("all");
+  const [sort, setSort] = useState<SortId>("name");
 
   const list = devices.data ?? [];
   const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
   const sensors = list.filter((d) => d.kind === "sensor" || d.kind === "thermostat");
 
+  const roomName = useMemo(() => {
+    const map = new Map((rooms.data ?? []).map((r) => [r.id, r.name]));
+    return (id: string | null) => (id ? (map.get(id) ?? "Ohne Raum") : "Ohne Raum");
+  }, [rooms.data]);
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return list.filter((d) => {
+    const result = list.filter((d) => {
       if (term && !d.name.toLowerCase().includes(term)) return false;
       if (roomFilter !== "all" && (d.room_id ?? "none") !== roomFilter) return false;
       if (kindFilter !== "all" && d.kind !== kindFilter) return false;
       if (onlyFavorites && !d.is_favorite) return false;
+      if (chip === "favorite" && !d.is_favorite) return false;
+      if (chip === "camera" && !isCameraDevice(d)) return false;
+      if (chip === "light" && d.kind !== "light") return false;
+      if (chip === "plug" && d.kind !== "plug") return false;
+      if (chip === "sensor" && d.kind !== "sensor" && d.kind !== "thermostat") return false;
       return true;
     });
-  }, [list, search, roomFilter, kindFilter, onlyFavorites]);
+
+    return [...result].sort((a, b) => {
+      if (sort === "room") {
+        const diff = roomName(a.room_id).localeCompare(roomName(b.room_id), "de");
+        if (diff !== 0) return diff;
+      }
+      if (sort === "status") {
+        const rank = (d: typeof a) => (d.is_online ? 0 : 1) * 2 + (d.is_on ? 0 : 1);
+        const diff = rank(a) - rank(b);
+        if (diff !== 0) return diff;
+      }
+      return a.name.localeCompare(b.name, "de");
+    });
+  }, [list, search, roomFilter, kindFilter, onlyFavorites, chip, sort, roomName]);
 
   const grouped = useMemo(() => {
     const roomList = rooms.data ?? [];
@@ -112,6 +151,7 @@ function Dashboard() {
       { id: "none", name: "Ohne Raum", devices: filtered.filter((d) => !d.room_id) },
     ].filter((group) => group.devices.length > 0);
   }, [rooms.data, filtered]);
+
 
 
   const loading = rooms.isLoading || devices.isLoading;
@@ -209,54 +249,95 @@ function Dashboard() {
         </section>
       ) : null}
 
-      <section className="panel-glass grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Gerät suchen…"
-            aria-label="Gerät suchen"
-            className="h-11 pl-9"
-          />
+      <section className="panel-glass space-y-3 p-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Gerät suchen…"
+              aria-label="Gerät suchen"
+              className="h-11 pl-9"
+            />
+          </div>
+          <Select value={roomFilter} onValueChange={setRoomFilter}>
+            <SelectTrigger className="h-11" aria-label="Raum filtern">
+              <SelectValue placeholder="Raum" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Räume</SelectItem>
+              {(rooms.data ?? []).map((room) => (
+                <SelectItem key={room.id} value={room.id}>
+                  {room.name}
+                </SelectItem>
+              ))}
+              <SelectItem value="none">Ohne Raum</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={kindFilter} onValueChange={setKindFilter}>
+            <SelectTrigger className="h-11" aria-label="Typ filtern">
+              <SelectValue placeholder="Typ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Typen</SelectItem>
+              {Object.entries(deviceKindLabel).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortId)}>
+            <SelectTrigger className="h-11" aria-label="Sortierung">
+              <SelectValue placeholder="Sortieren" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Sortieren: Name</SelectItem>
+              <SelectItem value="room">Sortieren: Raum</SelectItem>
+              <SelectItem value="status">Sortieren: Status</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={roomFilter} onValueChange={setRoomFilter}>
-          <SelectTrigger className="h-11" aria-label="Raum filtern">
-            <SelectValue placeholder="Raum" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Räume</SelectItem>
-            {(rooms.data ?? []).map((room) => (
-              <SelectItem key={room.id} value={room.id}>
-                {room.name}
-              </SelectItem>
-            ))}
-            <SelectItem value="none">Ohne Raum</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={kindFilter} onValueChange={setKindFilter}>
-          <SelectTrigger className="h-11" aria-label="Typ filtern">
-            <SelectValue placeholder="Typ" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Typen</SelectItem>
-            {Object.entries(deviceKindLabel).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          type="button"
-          variant={onlyFavorites ? "default" : "secondary"}
-          className="h-11 gap-2"
-          onClick={() => setOnlyFavorites((v) => !v)}
-        >
-          <Star className={onlyFavorites ? "size-4 fill-current" : "size-4"} />
-          Favoriten
-        </Button>
+
+        <div className="-mx-1 flex flex-wrap gap-2 px-1">
+          {chips.map((item) => {
+            const active = chip === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setChip(item.id)}
+                className={cn(
+                  "flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+                  active
+                    ? "border-primary/50 bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_var(--primary)]"
+                    : "border-border bg-secondary text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {item.id === "favorite" ? (
+                  <Star className={cn("size-4", active && "fill-current")} />
+                ) : null}
+                {item.label}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setOnlyFavorites((v) => !v)}
+            className={cn(
+              "flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
+              onlyFavorites
+                ? "border-primary/50 bg-primary/15 text-primary"
+                : "border-border bg-secondary text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Star className={cn("size-4", onlyFavorites && "fill-current")} />
+            Nur Favoriten
+          </button>
+        </div>
       </section>
+
 
 
 
