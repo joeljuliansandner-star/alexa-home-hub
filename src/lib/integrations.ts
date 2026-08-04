@@ -1,0 +1,246 @@
+import {
+  Boxes,
+  Cloud,
+  Lightbulb,
+  Mic,
+  Network,
+  Radio,
+  Server,
+  Wifi,
+  type LucideIcon,
+} from "lucide-react";
+
+import type { Device } from "@/lib/smarthome";
+
+/**
+ * Zentrale Registry aller Smart-Home-Integrationen.
+ *
+ * Neue Dienste werden ausschließlich hier ergänzt – Übersicht und Detailseite
+ * lesen alles aus dieser Datei. `externalSource` verweist auf
+ * `devices.external_source`; sobald eine echte API angebunden ist, reicht es,
+ * `sync` in der Detailseite zu verdrahten.
+ */
+export type IntegrationId =
+  | "tuya"
+  | "tapo"
+  | "dreame"
+  | "alexa"
+  | "homeassistant"
+  | "mqtt"
+  | "hue"
+  | "shelly"
+  | "zigbee";
+
+export type IntegrationDef = {
+  id: IntegrationId;
+  name: string;
+  description: string;
+  icon: LucideIcon;
+  tone: "primary" | "accent" | "muted";
+  /** Passt zu `devices.external_source`, falls Geräte importiert werden. */
+  externalSource: string | null;
+  /** Echte Synchronisierung bereits verdrahtet? */
+  live: boolean;
+  /** Platzhalter-Angaben für Konto/Server – später aus echten Quellen. */
+  account: { label: string; value: string }[];
+  /** Platzhalter für erweiterte Einstellungen. */
+  advanced: { label: string; hint: string }[];
+};
+
+export const integrations: IntegrationDef[] = [
+  {
+    id: "tuya",
+    name: "Tuya / Smart Life",
+    description: "Geräte aus der Smart-Life-App schalten, dimmen und abgleichen.",
+    icon: Cloud,
+    tone: "accent",
+    externalSource: "tuya",
+    live: true,
+    account: [
+      { label: "Konto", value: "Tuya IoT Cloud" },
+      { label: "Region", value: "Central Europe" },
+      { label: "Zugang", value: "Access ID hinterlegt" },
+    ],
+    advanced: [
+      { label: "Abgleich-Intervall", value: "", hint: "15 Sekunden (Live-Abgleich)" } as never,
+      { label: "Geräte automatisch importieren", hint: "Neue Geräte beim Abgleich übernehmen" },
+    ].map((entry) => ({
+      label: (entry as { label: string }).label,
+      hint: (entry as { hint: string }).hint,
+    })),
+  },
+  {
+    id: "tapo",
+    name: "TP-Link Tapo",
+    description: "Kameras, Hubs und Sensoren aus dem Tapo-Konto importieren.",
+    icon: Wifi,
+    tone: "primary",
+    externalSource: "tapo",
+    live: true,
+    account: [
+      { label: "Konto", value: "Tapo Cloud" },
+      { label: "Zugang", value: "E-Mail und Passwort hinterlegt" },
+      { label: "Schalten", value: "Cloud-Befehle von TP-Link gesperrt" },
+    ],
+    advanced: [
+      { label: "Nur Status abrufen", hint: "Schaltbefehle über die Cloud deaktiviert" },
+      { label: "Kameras einbeziehen", hint: "TC-Modelle beim Abgleich übernehmen" },
+    ],
+  },
+  {
+    id: "dreame",
+    name: "Dreame",
+    description: "Staubsauger-Roboter mit Status, Saugkraft und Wartung.",
+    icon: Boxes,
+    tone: "accent",
+    externalSource: "dreame",
+    live: true,
+    account: [
+      { label: "Konto", value: "Dreame Cloud" },
+      { label: "Gerät", value: "Staubi" },
+      { label: "Standby", value: "Aufwecken per Wiederholversuch" },
+    ],
+    advanced: [
+      { label: "Aufweck-Versuche", hint: "4 Versuche mit 1200 ms Pause" },
+      { label: "Wartungswerte anzeigen", hint: "Bürste, Filter, Wischtuch" },
+    ],
+  },
+  {
+    id: "alexa",
+    name: "Amazon Alexa",
+    description: "Sprachsteuerung über Alexa – Namen der Geräte werden abgeglichen.",
+    icon: Mic,
+    tone: "muted",
+    externalSource: null,
+    live: false,
+    account: [
+      { label: "Konto", value: "Noch nicht verbunden" },
+      { label: "Skill", value: "Platzhalter" },
+    ],
+    advanced: [
+      { label: "Gerätenamen synchronisieren", hint: "Namen exakt wie in der Alexa-App" },
+      { label: "Routinen auslösen", hint: "Platzhalter für spätere Webhooks" },
+    ],
+  },
+  {
+    id: "homeassistant",
+    name: "Home Assistant",
+    description: "Brücke ins Heimnetz für lokale Geräte und Zigbee-Hubs.",
+    icon: Server,
+    tone: "muted",
+    externalSource: null,
+    live: false,
+    account: [
+      { label: "Server", value: "http://homeassistant.local:8123" },
+      { label: "Token", value: "Noch nicht hinterlegt" },
+    ],
+    advanced: [
+      { label: "Nur ausgewählte Entitäten", hint: "Filter nach Bereich oder Label" },
+      { label: "Lokale Verbindung bevorzugen", hint: "Cloud nur als Rückfallebene" },
+    ],
+  },
+  {
+    id: "mqtt",
+    name: "MQTT",
+    description: "Direkter Draht zu Brokern für eigene Sensoren und Aktoren.",
+    icon: Network,
+    tone: "muted",
+    externalSource: null,
+    live: false,
+    account: [
+      { label: "Broker", value: "mqtt://192.168.1.10:1883" },
+      { label: "Benutzer", value: "Noch nicht hinterlegt" },
+    ],
+    advanced: [
+      { label: "Basis-Topic", hint: "smarthome/#" },
+      { label: "QoS", hint: "Stufe 1 (mindestens einmal)" },
+    ],
+  },
+  {
+    id: "hue",
+    name: "Philips Hue",
+    description: "Lampen und Lichtszenen der Hue-Bridge übernehmen.",
+    icon: Lightbulb,
+    tone: "muted",
+    externalSource: null,
+    live: false,
+    account: [
+      { label: "Bridge", value: "Noch nicht gefunden" },
+      { label: "Konto", value: "Platzhalter" },
+    ],
+    advanced: [
+      { label: "Lichtszenen importieren", hint: "Hue-Szenen als Szenen übernehmen" },
+      { label: "Übergangszeit", hint: "400 ms" },
+    ],
+  },
+  {
+    id: "shelly",
+    name: "Shelly",
+    description: "Relais und Messsteckdosen inklusive Verbrauchswerten.",
+    icon: Radio,
+    tone: "muted",
+    externalSource: null,
+    live: false,
+    account: [
+      { label: "Konto", value: "Shelly Cloud" },
+      { label: "Zugang", value: "Noch nicht hinterlegt" },
+    ],
+    advanced: [
+      { label: "Verbrauch erfassen", hint: "Platzhalter für Energiewerte" },
+      { label: "Lokale Steuerung", hint: "Direkt im Heimnetz schalten" },
+    ],
+  },
+  {
+    id: "zigbee",
+    name: "Zigbee",
+    description: "Zigbee-Geräte über einen Koordinator im Heimnetz einbinden.",
+    icon: Boxes,
+    tone: "muted",
+    externalSource: null,
+    live: false,
+    account: [
+      { label: "Koordinator", value: "Noch nicht verbunden" },
+      { label: "Kanal", value: "Platzhalter" },
+    ],
+    advanced: [
+      { label: "Anlernmodus", hint: "60 Sekunden Kopplungsfenster" },
+      { label: "Netzwerkkarte", hint: "Platzhalter für Mesh-Ansicht" },
+    ],
+  },
+];
+
+export function getIntegration(id: string): IntegrationDef | undefined {
+  return integrations.find((entry) => entry.id === id);
+}
+
+/** Geräte, die zu einer Integration gehören. */
+export function devicesFor(integration: IntegrationDef, devices: Device[]): Device[] {
+  if (!integration.externalSource) return [];
+  return devices.filter((device) => device.external_source === integration.externalSource);
+}
+
+/** Verbunden = es liegen bereits importierte Geräte vor. */
+export function isConnected(integration: IntegrationDef, devices: Device[]): boolean {
+  return devicesFor(integration, devices).length > 0;
+}
+
+/** Letzte Synchronisierung = jüngstes `updated_at` der importierten Geräte. */
+export function lastSync(integration: IntegrationDef, devices: Device[]): Date | null {
+  const own = devicesFor(integration, devices);
+  if (!own.length) return null;
+  const newest = own.reduce((max, device) => {
+    const value = new Date(device.updated_at).getTime();
+    return value > max ? value : max;
+  }, 0);
+  return newest ? new Date(newest) : null;
+}
+
+export function formatSync(date: Date | null): string {
+  if (!date) return "Noch nie";
+  return date.toLocaleString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
