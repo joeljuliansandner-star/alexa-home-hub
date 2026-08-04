@@ -24,6 +24,8 @@ import {
   deviceKindLabel,
 } from "@/lib/smarthome";
 import { DeviceCard } from "@/components/DeviceCard";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+
 import { cn } from "@/lib/utils";
 import { EmptyState, EntryList, EntryRow, LoadingState, Section, grids } from "@/components/kit";
 import { Button } from "@/components/ui/button";
@@ -219,6 +221,10 @@ function Dashboard() {
           <AddDeviceDialog rooms={rooms.data ?? []} />
         </div>
       </header>
+
+      <DashboardOverview />
+
+
 
       {scenes.data?.length ? (
         <Section title="Schnellzugriff">
