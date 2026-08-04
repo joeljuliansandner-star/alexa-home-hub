@@ -51,6 +51,14 @@ export const Route = createFileRoute("/_authenticated/integration/$integrationId
   component: IntegrationDetailPage,
 });
 
+type HubReport = {
+  hub: string;
+  model: string;
+  cloudSupported: boolean;
+  children: number;
+  attempts: Array<{ method: string; found: number; ok: boolean; message: string }>;
+};
+
 type DebugLog = {
   lines: string[];
   errors: string[];
@@ -58,8 +66,10 @@ type DebugLog = {
   api?: { library: string; endpoint: string; methods: string[] };
   hubs?: number;
   children?: number;
+  hubReports?: HubReport[];
   raw?: { deviceList: string; childLists: Array<{ hub: string; payload: string }> };
 };
+
 
 function IntegrationDetailPage() {
   const { integrationId } = useParams({ from: "/_authenticated/integration/$integrationId" });
@@ -106,7 +116,9 @@ function IntegrationDetailPage() {
             api: result.api,
             hubs: result.hubs,
             children: result.children,
+            hubReports: result.hubReports,
             raw: result.raw,
+
           } satisfies DebugLog,
         };
       }
@@ -288,6 +300,41 @@ function IntegrationDetailPage() {
                 <StatTile label="Untergeräte" value={String(debug.children ?? 0)} tone="primary" />
                 <StatTile label="API-Fehler" value={String(debug.errors.length)} tone={debug.errors.length ? "muted" : "primary"} />
               </div>
+
+              {debug.hubReports?.length ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Untergeräte-Prüfung je Steuerzentrale</p>
+                  {debug.hubReports.map((report) => (
+                    <div
+                      key={`${report.hub}-${report.model}`}
+                      className={
+                        report.cloudSupported
+                          ? "rounded-lg border border-border bg-muted/30 p-3"
+                          : "rounded-lg border border-destructive/40 bg-destructive/10 p-3"
+                      }
+                    >
+                      <p className="text-sm font-medium">
+                        {report.hub} ({report.model})
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {report.cloudSupported
+                          ? `Cloud-API vorhanden – ${report.children} Untergeräte nachgeladen.`
+                          : "Die TP-Link Cloud stellt für diesen Hub keine Untergeräte bereit. Child Devices sind nur im Heimnetz abrufbar."}
+                      </p>
+                      <ul className="mt-2 space-y-1 font-mono text-[11px] text-muted-foreground">
+                        {report.attempts.map((attempt) => (
+                          <li key={attempt.method}>
+                            {attempt.found > 0 ? "✓" : attempt.ok ? "○" : "✕"} {attempt.method} –{" "}
+                            {attempt.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+
 
               <div>
                 <p className="text-sm font-medium">Rohantwort Geräteabfrage</p>

@@ -30,6 +30,14 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
     const unsupported: string[] = [];
     const list: SyncedDevice[] = [];
     const rawChildren: Array<{ hub: string; payload: unknown }> = [];
+    const hubReports: Array<{
+      hub: string;
+      model: string;
+      cloudSupported: boolean;
+      children: number;
+      attempts: Array<{ method: string; found: number; ok: boolean; message: string }>;
+    }> = [];
+
 
     type DevicePayload = Database["public"]["Tables"]["devices"]["Insert"];
 
@@ -82,9 +90,20 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
 
       if (!hub) continue;
 
-      const { children, error, raw } = await tapoChildDevices(token, device.deviceId);
+      const { children, error, raw, attempts, cloudSupported } = await tapoChildDevices(
+        token,
+        device.deviceId,
+      );
       for (const payload of raw) rawChildren.push({ hub: device.alias, payload });
       if (error) errors.push(`${device.alias}: ${error}`);
+      hubReports.push({
+        hub: device.alias,
+        model: device.deviceModel,
+        cloudSupported,
+        children: children.length,
+        attempts,
+      });
+
 
       for (const child of children) {
         childCount += 1;
@@ -140,11 +159,20 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       errors,
       unsupported,
       devices: list,
+      hubReports,
       api: {
         library: "Eigene Implementierung (fetch) – TP-Link Cloud API",
         endpoint: "https://eu-wap.tplinkcloud.com/",
-        methods: ["login", "getDeviceList", "passthrough → get_child_device_list"],
+        methods: [
+          "login",
+          "getDeviceList",
+          "passthrough → get_child_device_list",
+          "passthrough → get_child_device_component_list",
+          "passthrough → system.get_sysinfo",
+          "getChildDeviceList",
+        ],
       },
+
       raw: {
         deviceList: JSON.stringify(rawDeviceList, null, 2),
         childLists: rawChildren.map((entry) => ({
