@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { getAlexaDevice } from "@/lib/alexa.functions";
-import { alexaValue } from "@/lib/alexa/model";
+import { ALEXA_NO_DEVICE_API, alexaValue } from "@/lib/alexa/model";
 import { useAlexaControl } from "@/lib/alexa/hooks";
 
 export const Route = createFileRoute("/_authenticated/alexa/$deviceId")({
@@ -73,7 +73,8 @@ function AlexaDevicePage() {
     );
   }
 
-  const canControl = item.isOnline;
+  // Amazon bietet über Login with Amazon keine dokumentierte Steuer-API.
+  const canControl = false;
 
   return (
     <div className={stacks.pageTight}>
@@ -133,11 +134,7 @@ function AlexaDevicePage() {
             />
           </div>
 
-          {!canControl ? (
-            <p className="text-xs text-destructive">
-              Das Gerät ist offline – Befehle werden von Amazon abgelehnt.
-            </p>
-          ) : null}
+          <p className="text-xs text-muted-foreground">{ALEXA_NO_DEVICE_API}</p>
         </Panel>
       </Section>
 

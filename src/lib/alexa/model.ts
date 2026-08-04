@@ -8,6 +8,13 @@
 
 export const ALEXA_UNAVAILABLE = "Von Amazon derzeit nicht verfügbar." as const;
 
+/**
+ * Amazon bietet über „Login with Amazon" keine öffentlich dokumentierte API,
+ * um Echo-Geräte eines Kontos aufzulisten oder zu steuern.
+ */
+export const ALEXA_NO_DEVICE_API =
+  "Amazon stellt über Login with Amazon keine öffentliche Schnittstelle bereit, um Echo-Geräte aufzulisten oder zu steuern. Es werden bewusst keine inoffiziellen Endpunkte verwendet." as const;
+
 /** Von Amazon offiziell benannte Echo-Produktfamilien. */
 export type AlexaDeviceTypeId =
   | "echo-dot"

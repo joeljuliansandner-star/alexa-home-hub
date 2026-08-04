@@ -16,7 +16,7 @@ import {
 } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { formatSync } from "@/lib/integrations";
-import { alexaValue } from "@/lib/alexa/model";
+import { ALEXA_NO_DEVICE_API, alexaValue } from "@/lib/alexa/model";
 import {
   useAlexaDevices,
   useAlexaDisconnect,
@@ -72,9 +72,14 @@ export function AlexaIntegrationPanel() {
         <div className="ml-auto flex flex-wrap gap-2">
           {connected ? (
             <>
-              <Button className="gap-2" disabled={sync.isPending} onClick={() => sync.mutate()}>
+              <Button
+                variant="secondary"
+                className="gap-2"
+                disabled={sync.isPending}
+                onClick={() => sync.mutate()}
+              >
                 <RefreshCw className={sync.isPending ? "size-4 animate-spin" : "size-4"} />
-                Abgleich starten
+                Verbindung prüfen
               </Button>
               <Button
                 variant="secondary"
@@ -119,6 +124,20 @@ export function AlexaIntegrationPanel() {
         </Panel>
       ) : null}
 
+      <Panel className="space-y-2 border-amber-500/40">
+        <p className="text-sm font-medium">Keine Echo-Geräteliste über Amazon verfügbar</p>
+        <p className="text-xs text-muted-foreground">{ALEXA_NO_DEVICE_API}</p>
+        <p className="text-xs text-muted-foreground">
+          Die früher genutzten Adressen unter <code>api.amazonalexa.com</code> gehören zu den
+          Skill-gebundenen Schnittstellen (Alexa Smart Home / Skill Messaging) und antworten für
+          Login-with-Amazon-Tokens mit <strong>HTTP 404</strong>. Sie wurden entfernt. Die
+          Anmeldung bleibt bestehen und liefert ausschließlich die Kontodaten (Name, E-Mail).
+          Für echte Gerätesteuerung wäre ein eigener, bei Amazon zertifizierter Alexa-Skill mit
+          Account-Linking nötig.
+        </p>
+      </Panel>
+
+
       <div className={grids.stats}>
         <StatTile
           label="Status"
@@ -159,8 +178,7 @@ export function AlexaIntegrationPanel() {
         ) : (
           <EmptyState
             description={
-              info?.lastError ??
-              "Noch keine Echo-Geräte übernommen. Melde dich an und starte einen Abgleich."
+              info?.lastError ?? ALEXA_NO_DEVICE_API
             }
           />
         )}
@@ -182,7 +200,7 @@ export function AlexaIntegrationPanel() {
         <Panel className="space-y-3">
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li>Anmeldung: Login with Amazon (OAuth 2.0, api.amazon.com)</li>
-            <li>Geräte: Alexa Device API (api.amazonalexa.com)</li>
+            <li>Geräte: keine öffentliche Amazon-API vorhanden – Aufrufe entfernt</li>
             <li>Tokens werden serverseitig gespeichert und nie im Browser abgelegt.</li>
           </ul>
           {log.data?.length ? (
