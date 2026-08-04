@@ -189,87 +189,223 @@ function decodeNickname(raw: unknown, fallback: string): string {
   return decodeAlias(raw, fallback);
 }
 
-/**
- * Untergeräte einer Steuerzentrale laden (Tapo H100, Kasa KH100).
- * Die Cloud liefert die Liste per Passthrough; schläft der Hub, wirft sie einen Fehler.
- */
-export async function tapoChildDevices(
+export interface ChildProbeAttempt {
+  /** Name der versuchten Cloud-Schnittstelle. */
+  method: string;
+  /** Wurden Untergeräte geliefert? */
+  found: number;
+  /** Hat die Cloud die Abfrage überhaupt beantwortet? */
+  ok: boolean;
+  message: string;
+}
+
+export interface HubChildResult {
+  children: TapoChildDevice[];
+  attempts: ChildProbeAttempt[];
+  /** true, wenn irgendeine Cloud-Schnittstelle Untergeräte geliefert hat. */
+  cloudSupported: boolean;
+  error: string | null;
+  raw: unknown[];
+}
+
+function parseChild(entry: Record<string, unknown>, hubId: string): TapoChildDevice {
+  const model = String(entry["model"] ?? entry["deviceModel"] ?? "Gerät");
+  const temperature = entry["current_temp"] ?? entry["temperature"] ?? entry["target_temp"];
+  const humidity = entry["current_humidity"] ?? entry["humidity"];
+  const hasTemp = typeof temperature === "number";
+  const status = entry["status"];
+  return {
+    deviceId: String(entry["device_id"] ?? entry["deviceId"] ?? entry["mac"] ?? ""),
+    parentId: hubId,
+    name: decodeNickname(entry["nickname"] ?? entry["alias"], model),
+    model,
+    category: String(entry["category"] ?? entry["type"] ?? entry["deviceType"] ?? ""),
+    online: status === undefined ? true : String(status).toLowerCase() !== "offline",
+    battery:
+      typeof entry["battery_percentage"] === "number" ? (entry["battery_percentage"] as number) : null,
+    sensorValue: hasTemp ? (temperature as number) : typeof humidity === "number" ? humidity : null,
+    sensorUnit: hasTemp ? "°C" : typeof humidity === "number" ? "%" : null,
+  };
+}
+
+/** Ein Passthrough-Aufruf an die Steuerzentrale; liefert das entpackte Ergebnis. */
+async function hubPassthrough(
   token: string,
   hubId: string,
-): Promise<{ children: TapoChildDevice[]; error: string | null; raw: unknown[] }> {
-  const children: TapoChildDevice[] = [];
-  const raw: unknown[] = [];
-  let startIndex = 0;
-
-  for (let page = 0; page < 6; page += 1) {
-    let payload: CloudResponse<{ responseData: string }>;
-    try {
-      payload = await cloudCall<{ responseData: string }>(
-        `${CLOUD_URL}?token=${encodeURIComponent(token)}`,
-        {
-          method: "passthrough",
-          params: {
-            deviceId: hubId,
-            requestData: JSON.stringify({
-              method: "get_child_device_list",
-              params: { start_index: startIndex },
-            }),
-          },
-        },
-      );
-    } catch (err) {
-      return { children, raw, error: err instanceof Error ? err.message : "Unbekannter Fehler" };
-    }
-
-    if (payload.error_code !== 0) {
-      raw.push(redact(payload));
-      return {
-        children,
-        raw,
-        error:
-          payload.error_code === -20571
-            ? "Die Steuerzentrale nimmt über die Cloud keine Abfragen an (nur im Heimnetz erreichbar)."
-            : `Untergeräte konnten nicht geladen werden (Code ${payload.error_code}).`,
-      };
-    }
-
-    let inner: { error_code?: number; result?: { child_device_list?: Array<Record<string, unknown>>; sum?: number } };
-    try {
-      inner = JSON.parse(String(payload.result?.responseData ?? "{}"));
-    } catch {
-      return { children, raw, error: "Antwort der Steuerzentrale war unlesbar." };
-    }
-    raw.push(redact(inner));
-
-    if (inner.error_code && inner.error_code !== 0) {
-      return { children, raw, error: `Steuerzentrale meldet Fehler ${inner.error_code}.` };
-    }
-
-    const list = inner.result?.child_device_list ?? [];
-    if (!list.length) break;
-
-
-    for (const raw of list) {
-      const model = String(raw["model"] ?? "Gerät");
-      const temperature = raw["current_temp"] ?? raw["temperature"] ?? raw["target_temp"];
-      const humidity = raw["current_humidity"] ?? raw["humidity"];
-      const hasTemp = typeof temperature === "number";
-      children.push({
-        deviceId: String(raw["device_id"] ?? ""),
-        parentId: hubId,
-        name: decodeNickname(raw["nickname"], model),
-        model,
-        category: String(raw["category"] ?? raw["type"] ?? ""),
-        online: raw["status"] === undefined ? true : String(raw["status"]).toLowerCase() !== "offline",
-        battery: typeof raw["battery_percentage"] === "number" ? (raw["battery_percentage"] as number) : null,
-        sensorValue: hasTemp ? (temperature as number) : typeof humidity === "number" ? humidity : null,
-        sensorUnit: hasTemp ? "°C" : typeof humidity === "number" ? "%" : null,
-      });
-    }
-
-    startIndex += list.length;
-    if (inner.result?.sum !== undefined && startIndex >= Number(inner.result.sum)) break;
+  request: unknown,
+): Promise<{ ok: boolean; message: string; inner: Record<string, unknown> | null }> {
+  let payload: CloudResponse<{ responseData: string }>;
+  try {
+    payload = await cloudCall<{ responseData: string }>(
+      `${CLOUD_URL}?token=${encodeURIComponent(token)}`,
+      { method: "passthrough", params: { deviceId: hubId, requestData: JSON.stringify(request) } },
+    );
+  } catch (err) {
+    return { ok: false, inner: null, message: err instanceof Error ? err.message : "Unbekannter Fehler" };
   }
 
-  return { children, error: null, raw };
+  if (payload.error_code !== 0) {
+    return {
+      ok: false,
+      inner: null,
+      message:
+        payload.error_code === -20571
+          ? "Die TP-Link Cloud gibt diese Abfrage nicht an die Steuerzentrale weiter (nur im Heimnetz erreichbar)."
+          : payload.msg ?? `Cloud-Fehler ${payload.error_code}`,
+    };
+  }
+
+  try {
+    const inner = JSON.parse(String(payload.result?.responseData ?? "{}")) as Record<string, unknown>;
+    return { ok: true, inner, message: "Antwort erhalten" };
+  } catch {
+    return { ok: false, inner: null, message: "Antwort der Steuerzentrale war unlesbar." };
+  }
 }
+
+/** Sammelt Untergeräte-Listen aus beliebig verschachtelten Antworten. */
+function collectChildEntries(value: unknown): Array<Record<string, unknown>> {
+  const out: Array<Record<string, unknown>> = [];
+  const walk = (node: unknown) => {
+    if (Array.isArray(node)) {
+      for (const item of node) walk(item);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    for (const [key, child] of Object.entries(node as Record<string, unknown>)) {
+      if (/child(_?device)?(_?list|ren)/i.test(key) && Array.isArray(child)) {
+        for (const item of child) {
+          if (item && typeof item === "object") out.push(item as Record<string, unknown>);
+        }
+        continue;
+      }
+      walk(child);
+    }
+  };
+  walk(value);
+  return out;
+}
+
+/**
+ * Prüft nacheinander alle bekannten Cloud-Wege, um Untergeräte einer
+ * Steuerzentrale (Tapo H100 / Kasa KH100) zu laden. Liefert keine der
+ * Schnittstellen Daten, wird das im Ergebnis klar gekennzeichnet.
+ */
+export async function tapoChildDevices(token: string, hubId: string): Promise<HubChildResult> {
+  const attempts: ChildProbeAttempt[] = [];
+  const raw: unknown[] = [];
+  const children: TapoChildDevice[] = [];
+  const seen = new Set<string>();
+
+  const push = (entries: Array<Record<string, unknown>>) => {
+    let added = 0;
+    for (const entry of entries) {
+      const child = parseChild(entry, hubId);
+      const key = child.deviceId || `${child.model}-${child.name}`;
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      children.push(child);
+      added += 1;
+    }
+    return added;
+  };
+
+  // 1) Tapo-Standard: get_child_device_list, seitenweise.
+  let startIndex = 0;
+  let pagedFound = 0;
+  let pagedMessage = "Keine Untergeräte in der Antwort";
+  let pagedOk = false;
+  for (let page = 0; page < 6; page += 1) {
+    const res = await hubPassthrough(token, hubId, {
+      method: "get_child_device_list",
+      params: { start_index: startIndex },
+    });
+    if (!res.ok) {
+      pagedMessage = res.message;
+      break;
+    }
+    pagedOk = true;
+    raw.push(redact(res.inner));
+    const errorCode = Number((res.inner as Record<string, unknown>)["error_code"] ?? 0);
+    if (errorCode !== 0) {
+      pagedMessage = `Steuerzentrale meldet Fehler ${errorCode}`;
+      break;
+    }
+    const entries = collectChildEntries(res.inner);
+    if (!entries.length) break;
+    pagedFound += push(entries);
+    startIndex += entries.length;
+    const sum = (res.inner?.["result"] as Record<string, unknown> | undefined)?.["sum"];
+    if (sum !== undefined && startIndex >= Number(sum)) break;
+  }
+  attempts.push({
+    method: "passthrough → get_child_device_list",
+    found: pagedFound,
+    ok: pagedOk,
+    message: pagedFound ? `${pagedFound} Untergeräte geliefert` : pagedMessage,
+  });
+
+  // 2) Alternative Tapo-Schnittstelle (Komponentenliste).
+  if (!children.length) {
+    const res = await hubPassthrough(token, hubId, {
+      method: "get_child_device_component_list",
+      params: { start_index: 0 },
+    });
+    if (res.ok) raw.push(redact(res.inner));
+    const entries = res.ok ? collectChildEntries(res.inner) : [];
+    const added = push(entries);
+    attempts.push({
+      method: "passthrough → get_child_device_component_list",
+      found: added,
+      ok: res.ok,
+      message: added ? `${added} Untergeräte geliefert` : res.ok ? "Keine Untergeräte enthalten" : res.message,
+    });
+  }
+
+  // 3) Kasa-Legacy: get_sysinfo enthält bei KH100 die Kinderliste.
+  if (!children.length) {
+    const res = await hubPassthrough(token, hubId, { system: { get_sysinfo: {} } });
+    if (res.ok) raw.push(redact(res.inner));
+    const entries = res.ok ? collectChildEntries(res.inner) : [];
+    const added = push(entries);
+    attempts.push({
+      method: "passthrough → system.get_sysinfo",
+      found: added,
+      ok: res.ok,
+      message: added ? `${added} Untergeräte geliefert` : res.ok ? "Keine Untergeräte enthalten" : res.message,
+    });
+  }
+
+  // 4) Direkte Cloud-Methode (falls TP-Link sie für das Konto freigibt).
+  if (!children.length) {
+    let ok = false;
+    let message = "Cloud kennt diese Methode nicht";
+    let added = 0;
+    try {
+      const payload = await cloudCall<Record<string, unknown>>(
+        `${CLOUD_URL}?token=${encodeURIComponent(token)}`,
+        { method: "getChildDeviceList", params: { deviceId: hubId } },
+      );
+      raw.push(redact(payload));
+      ok = payload.error_code === 0;
+      message = ok ? "Antwort erhalten" : payload.msg ?? `Cloud-Fehler ${payload.error_code}`;
+      if (ok) added = push(collectChildEntries(payload.result));
+    } catch (err) {
+      message = err instanceof Error ? err.message : "Unbekannter Fehler";
+    }
+    attempts.push({
+      method: "Cloud → getChildDeviceList",
+      found: added,
+      ok,
+      message: added ? `${added} Untergeräte geliefert` : message,
+    });
+  }
+
+  const cloudSupported = children.length > 0;
+  const error = cloudSupported
+    ? null
+    : "Die TP-Link Cloud stellt für diese Steuerzentrale keine Untergeräte bereit (keine der bekannten Cloud-Schnittstellen liefert Child Devices).";
+
+  return { children, attempts, cloudSupported, error, raw };
+}
+
