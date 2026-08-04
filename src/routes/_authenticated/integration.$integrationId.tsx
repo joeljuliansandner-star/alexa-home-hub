@@ -50,30 +50,73 @@ export const Route = createFileRoute("/_authenticated/integration/$integrationId
   component: IntegrationDetailPage,
 });
 
+type DebugLog = {
+  lines: string[];
+  errors: string[];
+  unsupported: string[];
+};
+
 function IntegrationDetailPage() {
   const { integrationId } = useParams({ from: "/_authenticated/integration/$integrationId" });
   const devices = useDevices();
   const qc = useQueryClient();
+  const [debug, setDebug] = useState<DebugLog | null>(null);
 
   const integration = getIntegration(integrationId);
 
   const sync = useMutation({
     mutationFn: async () => {
+      const stamp = new Date().toLocaleTimeString("de-DE");
       if (integrationId === "tuya") {
         const result = await syncTuyaDevices();
-        return `${result.imported} Geräte und ${result.rooms} Räume übernommen`;
+        return {
+          message: `${result.imported} Geräte und ${result.rooms} Räume übernommen`,
+          log: {
+            lines: [`${stamp} – ${result.imported} Geräte, ${result.rooms} Räume`],
+            errors: [],
+            unsupported: [],
+          } satisfies DebugLog,
+        };
       }
       if (integrationId === "tapo") {
         const result = await syncTapoDevices();
-        return `${result.imported} Geräte übernommen`;
+        return {
+          message: `${result.imported} Geräte übernommen (${result.children} über Steuerzentralen)`,
+          log: {
+            lines: [
+              `${stamp} – Abgleich abgeschlossen`,
+              `Steuerzentralen gefunden: ${result.hubs}`,
+              `Direkte Geräte: ${result.imported - result.children}`,
+              `Untergeräte an Hubs: ${result.children}`,
+              `Online: ${result.online} von ${result.imported}`,
+              ...result.devices.map(
+                (d) =>
+                  `• ${d.name} – ${d.label} (${d.model})${d.viaHub ? ` über ${d.viaHub}` : ""} – ${
+                    d.online ? "online" : "offline"
+                  }`,
+              ),
+            ],
+            errors: result.errors,
+            unsupported: result.unsupported,
+          } satisfies DebugLog,
+        };
       }
       throw new Error("Für diesen Dienst ist noch keine Verbindung hinterlegt.");
     },
-    onSuccess: (message) => {
+    onSuccess: (result) => {
       qc.invalidateQueries();
-      toast.success(message);
+      setDebug(result.log);
+      toast.success(result.message);
+      for (const problem of result.log.errors) toast.warning(problem);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      setDebug({
+        lines: [`${new Date().toLocaleTimeString("de-DE")} – Abgleich fehlgeschlagen`],
+        errors: [error.message],
+        unsupported: [],
+      });
+      toast.error(error.message);
+    },
   });
 
   if (!integration) {
