@@ -301,6 +301,41 @@ function IntegrationDetailPage() {
                 <StatTile label="API-Fehler" value={String(debug.errors.length)} tone={debug.errors.length ? "muted" : "primary"} />
               </div>
 
+              {debug.hubReports?.length ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Untergeräte-Prüfung je Steuerzentrale</p>
+                  {debug.hubReports.map((report) => (
+                    <div
+                      key={`${report.hub}-${report.model}`}
+                      className={
+                        report.cloudSupported
+                          ? "rounded-lg border border-border bg-muted/30 p-3"
+                          : "rounded-lg border border-destructive/40 bg-destructive/10 p-3"
+                      }
+                    >
+                      <p className="text-sm font-medium">
+                        {report.hub} ({report.model})
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {report.cloudSupported
+                          ? `Cloud-API vorhanden – ${report.children} Untergeräte nachgeladen.`
+                          : "Die TP-Link Cloud stellt für diesen Hub keine Untergeräte bereit. Child Devices sind nur im Heimnetz abrufbar."}
+                      </p>
+                      <ul className="mt-2 space-y-1 font-mono text-[11px] text-muted-foreground">
+                        {report.attempts.map((attempt) => (
+                          <li key={attempt.method}>
+                            {attempt.found > 0 ? "✓" : attempt.ok ? "○" : "✕"} {attempt.method} –{" "}
+                            {attempt.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+
+
               <div>
                 <p className="text-sm font-medium">Rohantwort Geräteabfrage</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
