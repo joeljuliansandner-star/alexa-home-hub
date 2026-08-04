@@ -62,12 +62,9 @@ export const integrations: IntegrationDef[] = [
       { label: "Zugang", value: "Access ID hinterlegt" },
     ],
     advanced: [
-      { label: "Abgleich-Intervall", value: "", hint: "15 Sekunden (Live-Abgleich)" } as never,
+      { label: "Abgleich-Intervall", hint: "15 Sekunden (Live-Abgleich)" },
       { label: "Geräte automatisch importieren", hint: "Neue Geräte beim Abgleich übernehmen" },
-    ].map((entry) => ({
-      label: (entry as { label: string }).label,
-      hint: (entry as { hint: string }).hint,
-    })),
+    ],
   },
   {
     id: "tapo",
