@@ -15,10 +15,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedRoomsRouteImport } from './routes/_authenticated/rooms'
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVacuumRouteImport } from './routes/_authenticated/vacuum'
 import { Route as AuthenticatedDeviceDeviceIdRouteImport } from './routes/_authenticated/device.$deviceId'
+import { Route as AuthenticatedRoomRoomIdRouteImport } from './routes/_authenticated/room.$roomId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -50,6 +52,11 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRoomsRoute = AuthenticatedRoomsRouteImport.update({
+  id: '/rooms',
+  path: '/rooms',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedScenesRoute = AuthenticatedScenesRouteImport.update({
   id: '/scenes',
   path: '/scenes',
@@ -71,6 +78,11 @@ const AuthenticatedDeviceDeviceIdRoute =
     path: '/device/$deviceId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedRoomRoomIdRoute = AuthenticatedRoomRoomIdRouteImport.update({
+  id: '/room/$roomId',
+  path: '/room/$roomId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,10 +90,12 @@ export interface FileRoutesByFullPath {
   '/automations': typeof AuthenticatedAutomationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
   '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
+  '/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,10 +103,12 @@ export interface FileRoutesByTo {
   '/automations': typeof AuthenticatedAutomationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
   '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
+  '/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,10 +118,12 @@ export interface FileRoutesById {
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/rooms': typeof AuthenticatedRoomsRoute
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/vacuum': typeof AuthenticatedVacuumRoute
   '/_authenticated/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
+  '/_authenticated/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -115,10 +133,12 @@ export interface FileRouteTypes {
     | '/automations'
     | '/dashboard'
     | '/home'
+    | '/rooms'
     | '/scenes'
     | '/settings'
     | '/vacuum'
     | '/device/$deviceId'
+    | '/room/$roomId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -126,10 +146,12 @@ export interface FileRouteTypes {
     | '/automations'
     | '/dashboard'
     | '/home'
+    | '/rooms'
     | '/scenes'
     | '/settings'
     | '/vacuum'
     | '/device/$deviceId'
+    | '/room/$roomId'
   id:
     | '__root__'
     | '/'
@@ -138,10 +160,12 @@ export interface FileRouteTypes {
     | '/_authenticated/automations'
     | '/_authenticated/dashboard'
     | '/_authenticated/home'
+    | '/_authenticated/rooms'
     | '/_authenticated/scenes'
     | '/_authenticated/settings'
     | '/_authenticated/vacuum'
     | '/_authenticated/device/$deviceId'
+    | '/_authenticated/room/$roomId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rooms': {
+      id: '/_authenticated/rooms'
+      path: '/rooms'
+      fullPath: '/rooms'
+      preLoaderRoute: typeof AuthenticatedRoomsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/scenes': {
       id: '/_authenticated/scenes'
       path: '/scenes'
@@ -222,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDeviceDeviceIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/room/$roomId': {
+      id: '/_authenticated/room/$roomId'
+      path: '/room/$roomId'
+      fullPath: '/room/$roomId'
+      preLoaderRoute: typeof AuthenticatedRoomRoomIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -229,20 +267,24 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedRoomsRoute: typeof AuthenticatedRoomsRoute
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedVacuumRoute: typeof AuthenticatedVacuumRoute
   AuthenticatedDeviceDeviceIdRoute: typeof AuthenticatedDeviceDeviceIdRoute
+  AuthenticatedRoomRoomIdRoute: typeof AuthenticatedRoomRoomIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedRoomsRoute: AuthenticatedRoomsRoute,
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedVacuumRoute: AuthenticatedVacuumRoute,
   AuthenticatedDeviceDeviceIdRoute: AuthenticatedDeviceDeviceIdRoute,
+  AuthenticatedRoomRoomIdRoute: AuthenticatedRoomRoomIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
