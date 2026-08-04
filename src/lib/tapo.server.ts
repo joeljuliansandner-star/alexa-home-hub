@@ -196,8 +196,9 @@ function decodeNickname(raw: unknown, fallback: string): string {
 export async function tapoChildDevices(
   token: string,
   hubId: string,
-): Promise<{ children: TapoChildDevice[]; error: string | null }> {
+): Promise<{ children: TapoChildDevice[]; error: string | null; raw: unknown[] }> {
   const children: TapoChildDevice[] = [];
+  const raw: unknown[] = [];
   let startIndex = 0;
 
   for (let page = 0; page < 6; page += 1) {
@@ -217,12 +218,14 @@ export async function tapoChildDevices(
         },
       );
     } catch (err) {
-      return { children, error: err instanceof Error ? err.message : "Unbekannter Fehler" };
+      return { children, raw, error: err instanceof Error ? err.message : "Unbekannter Fehler" };
     }
 
     if (payload.error_code !== 0) {
+      raw.push(redact(payload));
       return {
         children,
+        raw,
         error:
           payload.error_code === -20571
             ? "Die Steuerzentrale nimmt über die Cloud keine Abfragen an (nur im Heimnetz erreichbar)."
@@ -234,15 +237,17 @@ export async function tapoChildDevices(
     try {
       inner = JSON.parse(String(payload.result?.responseData ?? "{}"));
     } catch {
-      return { children, error: "Antwort der Steuerzentrale war unlesbar." };
+      return { children, raw, error: "Antwort der Steuerzentrale war unlesbar." };
     }
+    raw.push(redact(inner));
 
     if (inner.error_code && inner.error_code !== 0) {
-      return { children, error: `Steuerzentrale meldet Fehler ${inner.error_code}.` };
+      return { children, raw, error: `Steuerzentrale meldet Fehler ${inner.error_code}.` };
     }
 
     const list = inner.result?.child_device_list ?? [];
     if (!list.length) break;
+
 
     for (const raw of list) {
       const model = String(raw["model"] ?? "Gerät");
