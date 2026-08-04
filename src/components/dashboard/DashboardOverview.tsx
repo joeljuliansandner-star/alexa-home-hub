@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { DeviceCard } from "@/components/DeviceCard";
+import { AlexaStatusCard } from "@/components/alexa/AlexaStatusCard";
 import { EmptyState, EntryList, EntryRow, IconTile, Panel, Section, StatTile } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
