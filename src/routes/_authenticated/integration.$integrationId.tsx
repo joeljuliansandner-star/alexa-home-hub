@@ -29,6 +29,7 @@ import {
   grids,
   stacks,
 } from "@/components/kit";
+import { AlexaIntegrationPanel } from "@/components/alexa/AlexaIntegrationPanel";
 
 export const Route = createFileRoute("/_authenticated/integration/$integrationId")({
   head: () => ({
