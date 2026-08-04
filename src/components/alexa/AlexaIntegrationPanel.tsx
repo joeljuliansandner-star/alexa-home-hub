@@ -72,9 +72,14 @@ export function AlexaIntegrationPanel() {
         <div className="ml-auto flex flex-wrap gap-2">
           {connected ? (
             <>
-              <Button className="gap-2" disabled={sync.isPending} onClick={() => sync.mutate()}>
+              <Button
+                variant="secondary"
+                className="gap-2"
+                disabled={sync.isPending}
+                onClick={() => sync.mutate()}
+              >
                 <RefreshCw className={sync.isPending ? "size-4 animate-spin" : "size-4"} />
-                Abgleich starten
+                Verbindung prüfen
               </Button>
               <Button
                 variant="secondary"
