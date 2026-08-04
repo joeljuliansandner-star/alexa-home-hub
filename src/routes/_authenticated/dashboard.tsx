@@ -71,6 +71,8 @@ function Dashboard() {
   const runScene = useRunScene();
   const seed = useSeedDemo();
   const deleteDevice = useDeleteRow("devices");
+  const toggleFavorite = useToggleFavorite();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const syncTuya = useMutation({
     mutationFn: () => syncTuyaDevices(),
@@ -79,10 +81,25 @@ function Dashboard() {
     },
   });
 
+  const [search, setSearch] = useState("");
+  const [roomFilter, setRoomFilter] = useState("all");
+  const [kindFilter, setKindFilter] = useState("all");
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
 
   const list = devices.data ?? [];
   const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
   const sensors = list.filter((d) => d.kind === "sensor" || d.kind === "thermostat");
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return list.filter((d) => {
+      if (term && !d.name.toLowerCase().includes(term)) return false;
+      if (roomFilter !== "all" && (d.room_id ?? "none") !== roomFilter) return false;
+      if (kindFilter !== "all" && d.kind !== kindFilter) return false;
+      if (onlyFavorites && !d.is_favorite) return false;
+      return true;
+    });
+  }, [list, search, roomFilter, kindFilter, onlyFavorites]);
 
   const grouped = useMemo(() => {
     const roomList = rooms.data ?? [];
@@ -90,11 +107,12 @@ function Dashboard() {
       ...roomList.map((room) => ({
         id: room.id,
         name: room.name,
-        devices: list.filter((d) => d.room_id === room.id),
+        devices: filtered.filter((d) => d.room_id === room.id),
       })),
-      { id: "none", name: "Ohne Raum", devices: list.filter((d) => !d.room_id) },
+      { id: "none", name: "Ohne Raum", devices: filtered.filter((d) => !d.room_id) },
     ].filter((group) => group.devices.length > 0);
-  }, [rooms.data, list]);
+  }, [rooms.data, filtered]);
+
 
   const loading = rooms.isLoading || devices.isLoading;
 
