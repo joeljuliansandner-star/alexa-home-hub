@@ -76,13 +76,17 @@ export async function tapoDeviceList(token: string): Promise<TapoCloudDevice[]> 
 
   return (data.result?.deviceList ?? []).map((raw) => {
     const model = String(raw["deviceModel"] ?? "Gerät");
+    // Fehlt das Statusfeld, gilt ein gelistetes Gerät als erreichbar.
+    const rawStatus = raw["status"];
+    const status = rawStatus === undefined || rawStatus === null ? 1 : Number(rawStatus);
     return {
       deviceId: String(raw["deviceId"] ?? ""),
       alias: decodeAlias(String(raw["alias"] ?? ""), String(raw["deviceName"] ?? model)),
       deviceModel: model,
       deviceType: String(raw["deviceType"] ?? ""),
       fwVer: String(raw["fwVer"] ?? ""),
-      status: Number(raw["status"] ?? 0),
+      status,
+      isOnline: status !== 0,
     };
   });
 }
