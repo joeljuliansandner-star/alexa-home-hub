@@ -15,6 +15,7 @@ import {
   Mail,
   Mic,
   Palette,
+  PlugZap,
   RefreshCw,
   Save,
   ShieldCheck,
