@@ -23,6 +23,7 @@ import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { controlVacuum, getVacuumStates } from "@/lib/tuya.functions";
 import {
+import { PageHeader, stacks } from "@/components/kit";
   cleanDreameRooms,
   controlDreameVacuum,
   getDreameVacuums,
@@ -175,25 +176,23 @@ function VacuumPage() {
   const busy = control.isPending || setting.isPending || rooms.isPending;
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Staubsauger</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Voller Zugriff wie in der App: Reinigung, Saugkraft, Wasser, Räume und Wartung.
-          </p>
-        </div>
-        <Button
-          variant="secondary"
-          className="gap-2"
-          onClick={() => {
-            qc.invalidateQueries({ queryKey: ["dreame-vacuums"] });
-            qc.invalidateQueries({ queryKey: ["vacuums"] });
-          }}
-        >
-          <RefreshCw className="size-4" /> Aktualisieren
-        </Button>
-      </header>
+    <div className={stacks.pageTight}>
+      <PageHeader
+        title="Staubsauger"
+        description="Voller Zugriff wie in der App: Reinigung, Saugkraft, Wasser, Räume und Wartung."
+        actions={
+          <Button
+            variant="secondary"
+            className="min-h-11 gap-2"
+            onClick={() => {
+              qc.invalidateQueries({ queryKey: ["dreame-vacuums"] });
+              qc.invalidateQueries({ queryKey: ["vacuums"] });
+            }}
+          >
+            <RefreshCw className="size-4" /> Aktualisieren
+          </Button>
+        }
+      />
 
       {dreameError && (
         <div className="panel p-4 text-sm text-muted-foreground">Dreame-Konto: {dreameError}</div>

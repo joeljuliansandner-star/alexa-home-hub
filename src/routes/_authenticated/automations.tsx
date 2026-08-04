@@ -25,6 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+import { LoadingState, PageHeader, stacks } from "@/components/kit";
   Select,
   SelectContent,
   SelectItem,
@@ -61,21 +62,15 @@ function AutomationsPage() {
     scenes.data?.find((s) => s.id === id)?.name ?? "Keine Szene";
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold sm:text-3xl">Automationen</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Regeln lösen Szenen aus – zeitgesteuert oder über Sensorwerte.
-          </p>
-        </div>
-        <NewAutomationDialog />
-      </header>
+    <div className={stacks.pageTight}>
+      <PageHeader
+        title="Automationen"
+        description="Regeln lösen Szenen aus – zeitgesteuert oder über Sensorwerte."
+        actions={<NewAutomationDialog />}
+      />
 
       {automations.isLoading ? (
-        <div className="flex h-40 items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
-        </div>
+        <LoadingState size="section" />
       ) : automations.data?.length ? (
         <div className="space-y-3">
           {automations.data.map((automation) => {
