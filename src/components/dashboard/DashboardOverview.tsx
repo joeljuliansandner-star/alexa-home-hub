@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { DeviceCard } from "@/components/DeviceCard";
+import { AlexaStatusCard } from "@/components/alexa/AlexaStatusCard";
 import { EmptyState, EntryList, EntryRow, IconTile, Panel, Section, StatTile } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -220,6 +221,9 @@ export function DashboardOverview() {
               <p className="text-xs text-muted-foreground">Geräteverbindung</p>
             </div>
           </Panel>
+          <AlexaStatusCard />
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Panel className="flex items-center gap-3">
             <IconTile icon={Cloud} tone="muted" />
             <div className="min-w-0">

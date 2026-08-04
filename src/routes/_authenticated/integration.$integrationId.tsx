@@ -29,6 +29,7 @@ import {
   grids,
   stacks,
 } from "@/components/kit";
+import { AlexaIntegrationPanel } from "@/components/alexa/AlexaIntegrationPanel";
 
 export const Route = createFileRoute("/_authenticated/integration/$integrationId")({
   head: () => ({
@@ -139,6 +140,8 @@ function IntegrationDetailPage() {
       toast.error(error.message);
     },
   });
+
+  if (integrationId === "alexa") return <AlexaIntegrationPanel />;
 
   if (!integration) {
     return (

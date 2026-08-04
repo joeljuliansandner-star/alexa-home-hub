@@ -32,6 +32,7 @@ import { useDevices, useRooms } from "@/lib/smarthome";
 import { syncTapoDevices } from "@/lib/tapo.functions";
 import { syncTuyaDevices } from "@/lib/tuya.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { AlexaSettingsSection } from "@/components/alexa/AlexaSettingsSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -547,6 +548,8 @@ function SettingsPage() {
           </div>
         </Panel>
       </Section>
+
+      <AlexaSettingsSection />
 
       {/* Backup */}
       <Section title="Backup">

@@ -20,6 +20,8 @@ import { Route as AuthenticatedRoomsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVacuumRouteImport } from './routes/_authenticated/vacuum'
+import { Route as AuthenticatedAlexaDeviceIdRouteImport } from './routes/_authenticated/alexa.$deviceId'
+import { Route as AuthenticatedAlexaCallbackRouteImport } from './routes/_authenticated/alexa.callback'
 import { Route as AuthenticatedDeviceDeviceIdRouteImport } from './routes/_authenticated/device.$deviceId'
 import { Route as AuthenticatedIntegrationIntegrationIdRouteImport } from './routes/_authenticated/integration.$integrationId'
 import { Route as AuthenticatedRoomRoomIdRouteImport } from './routes/_authenticated/room.$roomId'
@@ -80,6 +82,18 @@ const AuthenticatedVacuumRoute = AuthenticatedVacuumRouteImport.update({
   path: '/vacuum',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAlexaDeviceIdRoute =
+  AuthenticatedAlexaDeviceIdRouteImport.update({
+    id: '/alexa/$deviceId',
+    path: '/alexa/$deviceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAlexaCallbackRoute =
+  AuthenticatedAlexaCallbackRouteImport.update({
+    id: '/alexa/callback',
+    path: '/alexa/callback',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDeviceDeviceIdRoute =
   AuthenticatedDeviceDeviceIdRouteImport.update({
     id: '/device/$deviceId',
@@ -109,6 +123,8 @@ export interface FileRoutesByFullPath {
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
+  '/alexa/$deviceId': typeof AuthenticatedAlexaDeviceIdRoute
+  '/alexa/callback': typeof AuthenticatedAlexaCallbackRoute
   '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
   '/integration/$integrationId': typeof AuthenticatedIntegrationIntegrationIdRoute
   '/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
@@ -124,6 +140,8 @@ export interface FileRoutesByTo {
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
+  '/alexa/$deviceId': typeof AuthenticatedAlexaDeviceIdRoute
+  '/alexa/callback': typeof AuthenticatedAlexaCallbackRoute
   '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
   '/integration/$integrationId': typeof AuthenticatedIntegrationIntegrationIdRoute
   '/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
@@ -141,6 +159,8 @@ export interface FileRoutesById {
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/vacuum': typeof AuthenticatedVacuumRoute
+  '/_authenticated/alexa/$deviceId': typeof AuthenticatedAlexaDeviceIdRoute
+  '/_authenticated/alexa/callback': typeof AuthenticatedAlexaCallbackRoute
   '/_authenticated/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
   '/_authenticated/integration/$integrationId': typeof AuthenticatedIntegrationIntegrationIdRoute
   '/_authenticated/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
@@ -158,6 +178,8 @@ export interface FileRouteTypes {
     | '/scenes'
     | '/settings'
     | '/vacuum'
+    | '/alexa/$deviceId'
+    | '/alexa/callback'
     | '/device/$deviceId'
     | '/integration/$integrationId'
     | '/room/$roomId'
@@ -173,6 +195,8 @@ export interface FileRouteTypes {
     | '/scenes'
     | '/settings'
     | '/vacuum'
+    | '/alexa/$deviceId'
+    | '/alexa/callback'
     | '/device/$deviceId'
     | '/integration/$integrationId'
     | '/room/$roomId'
@@ -189,6 +213,8 @@ export interface FileRouteTypes {
     | '/_authenticated/scenes'
     | '/_authenticated/settings'
     | '/_authenticated/vacuum'
+    | '/_authenticated/alexa/$deviceId'
+    | '/_authenticated/alexa/callback'
     | '/_authenticated/device/$deviceId'
     | '/_authenticated/integration/$integrationId'
     | '/_authenticated/room/$roomId'
@@ -279,6 +305,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVacuumRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/alexa/$deviceId': {
+      id: '/_authenticated/alexa/$deviceId'
+      path: '/alexa/$deviceId'
+      fullPath: '/alexa/$deviceId'
+      preLoaderRoute: typeof AuthenticatedAlexaDeviceIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/alexa/callback': {
+      id: '/_authenticated/alexa/callback'
+      path: '/alexa/callback'
+      fullPath: '/alexa/callback'
+      preLoaderRoute: typeof AuthenticatedAlexaCallbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/device/$deviceId': {
       id: '/_authenticated/device/$deviceId'
       path: '/device/$deviceId'
@@ -312,6 +352,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedVacuumRoute: typeof AuthenticatedVacuumRoute
+  AuthenticatedAlexaDeviceIdRoute: typeof AuthenticatedAlexaDeviceIdRoute
+  AuthenticatedAlexaCallbackRoute: typeof AuthenticatedAlexaCallbackRoute
   AuthenticatedDeviceDeviceIdRoute: typeof AuthenticatedDeviceDeviceIdRoute
   AuthenticatedIntegrationIntegrationIdRoute: typeof AuthenticatedIntegrationIntegrationIdRoute
   AuthenticatedRoomRoomIdRoute: typeof AuthenticatedRoomRoomIdRoute
@@ -326,6 +368,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedVacuumRoute: AuthenticatedVacuumRoute,
+  AuthenticatedAlexaDeviceIdRoute: AuthenticatedAlexaDeviceIdRoute,
+  AuthenticatedAlexaCallbackRoute: AuthenticatedAlexaCallbackRoute,
   AuthenticatedDeviceDeviceIdRoute: AuthenticatedDeviceDeviceIdRoute,
   AuthenticatedIntegrationIntegrationIdRoute:
     AuthenticatedIntegrationIntegrationIdRoute,
