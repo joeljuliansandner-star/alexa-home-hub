@@ -68,19 +68,21 @@ export const integrations: IntegrationDef[] = [
   },
   {
     id: "tapo",
-    name: "TP-Link Tapo",
-    description: "Kameras, Hubs und Sensoren aus dem Tapo-Konto importieren.",
+    name: "TP-Link Tapo & Kasa",
+    description:
+      "Kameras, Steckdosen sowie H100- und KH100-Steuerzentralen samt Sensoren und Thermostaten.",
     icon: Wifi,
     tone: "primary",
     externalSource: "tapo",
     live: true,
     account: [
-      { label: "Konto", value: "Tapo Cloud" },
+      { label: "Konto", value: "Tapo / Kasa Cloud" },
       { label: "Zugang", value: "E-Mail und Passwort hinterlegt" },
+      { label: "Steuerzentralen", value: "H100 und KH100 inkl. Untergeräte" },
       { label: "Schalten", value: "Cloud-Befehle von TP-Link gesperrt" },
     ],
     advanced: [
-      { label: "Nur Status abrufen", hint: "Schaltbefehle über die Cloud deaktiviert" },
+      { label: "Untergeräte abrufen", hint: "Sensoren und Thermostate über den Hub laden" },
       { label: "Kameras einbeziehen", hint: "TC-Modelle beim Abgleich übernehmen" },
     ],
   },
