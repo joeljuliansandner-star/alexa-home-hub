@@ -52,6 +52,7 @@ export interface TapoCloudDevice {
   deviceType: string;
   fwVer: string;
   status: number;
+  isOnline: boolean;
 }
 
 function decodeAlias(raw: string, fallback: string): string {
