@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Plus, Loader2, Sparkles, Trash2, RefreshCw } from "lucide-react";
+import { Plus, Loader2, Sparkles, Trash2, RefreshCw, Search, Star } from "lucide-react";
 import { toast } from "sonner";
 
 import { syncTuyaDevices } from "@/lib/tuya.functions";
@@ -17,6 +17,7 @@ import {
   useScenes,
   useRunScene,
   useSeedDemo,
+  useToggleFavorite,
   useUpdateDevice,
   type DeviceKind,
   deviceKindLabel,
@@ -41,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
