@@ -24,6 +24,15 @@ import {
   useUpdateDevice,
 } from "@/lib/smarthome";
 import { cn } from "@/lib/utils";
+import {
+  EmptyState,
+  LoadingState,
+  PageHeader,
+  Section,
+  StatTile,
+  grids,
+  stacks,
+} from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/home")({
   ssr: false,
