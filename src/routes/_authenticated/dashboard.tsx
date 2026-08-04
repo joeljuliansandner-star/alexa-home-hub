@@ -209,6 +209,57 @@ function Dashboard() {
         </section>
       ) : null}
 
+      <section className="panel-glass grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Gerät suchen…"
+            aria-label="Gerät suchen"
+            className="h-11 pl-9"
+          />
+        </div>
+        <Select value={roomFilter} onValueChange={setRoomFilter}>
+          <SelectTrigger className="h-11" aria-label="Raum filtern">
+            <SelectValue placeholder="Raum" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Räume</SelectItem>
+            {(rooms.data ?? []).map((room) => (
+              <SelectItem key={room.id} value={room.id}>
+                {room.name}
+              </SelectItem>
+            ))}
+            <SelectItem value="none">Ohne Raum</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={kindFilter} onValueChange={setKindFilter}>
+          <SelectTrigger className="h-11" aria-label="Typ filtern">
+            <SelectValue placeholder="Typ" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Typen</SelectItem>
+            {Object.entries(deviceKindLabel).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          type="button"
+          variant={onlyFavorites ? "default" : "secondary"}
+          className="h-11 gap-2"
+          onClick={() => setOnlyFavorites((v) => !v)}
+        >
+          <Star className={onlyFavorites ? "size-4 fill-current" : "size-4"} />
+          Favoriten
+        </Button>
+      </section>
+
+
+
       {sensors.length ? (
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {sensors.map((sensor) => (
