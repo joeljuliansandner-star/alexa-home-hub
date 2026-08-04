@@ -55,6 +55,10 @@ type DebugLog = {
   lines: string[];
   errors: string[];
   unsupported: string[];
+  api?: { library: string; endpoint: string; methods: string[] };
+  hubs?: number;
+  children?: number;
+  raw?: { deviceList: string; childLists: Array<{ hub: string; payload: string }> };
 };
 
 function IntegrationDetailPage() {
