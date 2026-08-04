@@ -88,6 +88,7 @@ export type Database = {
           external_id: string | null
           external_source: string | null
           id: string
+          is_favorite: boolean
           is_on: boolean
           is_online: boolean
           kind: Database["public"]["Enums"]["device_kind"]
@@ -110,6 +111,7 @@ export type Database = {
           external_id?: string | null
           external_source?: string | null
           id?: string
+          is_favorite?: boolean
           is_on?: boolean
           is_online?: boolean
           kind?: Database["public"]["Enums"]["device_kind"]
@@ -132,6 +134,7 @@ export type Database = {
           external_id?: string | null
           external_source?: string | null
           id?: string
+          is_favorite?: boolean
           is_on?: boolean
           is_online?: boolean
           kind?: Database["public"]["Enums"]["device_kind"]
