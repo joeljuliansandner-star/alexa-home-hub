@@ -85,21 +85,46 @@ function Dashboard() {
   const [roomFilter, setRoomFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [chip, setChip] = useState<ChipId>("all");
+  const [sort, setSort] = useState<SortId>("name");
 
   const list = devices.data ?? [];
   const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
   const sensors = list.filter((d) => d.kind === "sensor" || d.kind === "thermostat");
 
+  const roomName = useMemo(() => {
+    const map = new Map((rooms.data ?? []).map((r) => [r.id, r.name]));
+    return (id: string | null) => (id ? (map.get(id) ?? "Ohne Raum") : "Ohne Raum");
+  }, [rooms.data]);
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return list.filter((d) => {
+    const result = list.filter((d) => {
       if (term && !d.name.toLowerCase().includes(term)) return false;
       if (roomFilter !== "all" && (d.room_id ?? "none") !== roomFilter) return false;
       if (kindFilter !== "all" && d.kind !== kindFilter) return false;
       if (onlyFavorites && !d.is_favorite) return false;
+      if (chip === "favorite" && !d.is_favorite) return false;
+      if (chip === "camera" && !isCameraDevice(d)) return false;
+      if (chip === "light" && d.kind !== "light") return false;
+      if (chip === "plug" && d.kind !== "plug") return false;
+      if (chip === "sensor" && d.kind !== "sensor" && d.kind !== "thermostat") return false;
       return true;
     });
-  }, [list, search, roomFilter, kindFilter, onlyFavorites]);
+
+    return [...result].sort((a, b) => {
+      if (sort === "room") {
+        const diff = roomName(a.room_id).localeCompare(roomName(b.room_id), "de");
+        if (diff !== 0) return diff;
+      }
+      if (sort === "status") {
+        const rank = (d: typeof a) => (d.is_online ? 0 : 1) * 2 + (d.is_on ? 0 : 1);
+        const diff = rank(a) - rank(b);
+        if (diff !== 0) return diff;
+      }
+      return a.name.localeCompare(b.name, "de");
+    });
+  }, [list, search, roomFilter, kindFilter, onlyFavorites, chip, sort, roomName]);
 
   const grouped = useMemo(() => {
     const roomList = rooms.data ?? [];
@@ -112,6 +137,7 @@ function Dashboard() {
       { id: "none", name: "Ohne Raum", devices: filtered.filter((d) => !d.room_id) },
     ].filter((group) => group.devices.length > 0);
   }, [rooms.data, filtered]);
+
 
 
   const loading = rooms.isLoading || devices.isLoading;
