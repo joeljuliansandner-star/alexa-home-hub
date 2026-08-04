@@ -8,6 +8,7 @@ import {
   Settings2,
   Home,
   Bot,
+  DoorOpen,
   LogOut,
   House,
 } from "lucide-react";
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/_authenticated")({
 const nav = [
   { to: "/home", label: "Startseite", shortLabel: "Start", icon: Home },
   { to: "/dashboard", label: "Übersicht", shortLabel: "Geräte", icon: LayoutDashboard },
+  { to: "/rooms", label: "Räume", shortLabel: "Räume", icon: DoorOpen },
   { to: "/vacuum", label: "Staubsauger", shortLabel: "Staubi", icon: Bot },
   { to: "/scenes", label: "Szenen", shortLabel: "Szenen", icon: Sparkles },
   { to: "/automations", label: "Automationen", shortLabel: "Regeln", icon: Timer },
@@ -110,7 +112,7 @@ function AuthenticatedLayout() {
           </div>
 
           <nav
-            className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 gap-0.5 border-t border-border bg-surface/95 px-1 pt-1 backdrop-blur md:hidden"
+            className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 gap-0.5 border-t border-border bg-surface/95 px-1 pt-1 backdrop-blur md:hidden"
             style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom))" }}
           >
             {nav.map((item) => (
