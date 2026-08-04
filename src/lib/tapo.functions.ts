@@ -20,7 +20,7 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       await import("./tapo.server");
 
     const token = await tapoLogin();
-    const cloudDevices = await tapoDeviceList(token);
+    const { devices: cloudDevices, raw: rawDeviceList } = await tapoDeviceList(token);
 
     let imported = 0;
     let online = 0;
@@ -29,6 +29,7 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
     const errors: string[] = [];
     const unsupported: string[] = [];
     const list: SyncedDevice[] = [];
+    const rawChildren: Array<{ hub: string; payload: unknown }> = [];
 
     type DevicePayload = Database["public"]["Tables"]["devices"]["Insert"];
 
