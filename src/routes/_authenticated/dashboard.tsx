@@ -220,6 +220,10 @@ function Dashboard() {
         </div>
       </header>
 
+      <DashboardOverview />
+
+
+
       {scenes.data?.length ? (
         <Section title="Schnellzugriff">
           <div className="flex flex-wrap gap-2">
