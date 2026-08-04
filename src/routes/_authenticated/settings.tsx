@@ -548,6 +548,8 @@ function SettingsPage() {
         </Panel>
       </Section>
 
+      <AlexaSettingsSection />
+
       {/* Backup */}
       <Section title="Backup">
         <div className={grids.cards}>
