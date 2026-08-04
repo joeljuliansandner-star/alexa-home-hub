@@ -15,11 +15,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedRoomsRouteImport } from './routes/_authenticated/rooms'
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVacuumRouteImport } from './routes/_authenticated/vacuum'
 import { Route as AuthenticatedDeviceDeviceIdRouteImport } from './routes/_authenticated/device.$deviceId'
+import { Route as AuthenticatedIntegrationIntegrationIdRouteImport } from './routes/_authenticated/integration.$integrationId'
 import { Route as AuthenticatedRoomRoomIdRouteImport } from './routes/_authenticated/room.$roomId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +54,12 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedIntegrationsRoute =
+  AuthenticatedIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRoomsRoute = AuthenticatedRoomsRouteImport.update({
   id: '/rooms',
   path: '/rooms',
@@ -78,6 +86,12 @@ const AuthenticatedDeviceDeviceIdRoute =
     path: '/device/$deviceId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIntegrationIntegrationIdRoute =
+  AuthenticatedIntegrationIntegrationIdRouteImport.update({
+    id: '/integration/$integrationId',
+    path: '/integration/$integrationId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRoomRoomIdRoute = AuthenticatedRoomRoomIdRouteImport.update({
   id: '/room/$roomId',
   path: '/room/$roomId',
@@ -90,11 +104,13 @@ export interface FileRoutesByFullPath {
   '/automations': typeof AuthenticatedAutomationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
   '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
+  '/integration/$integrationId': typeof AuthenticatedIntegrationIntegrationIdRoute
   '/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
 }
 export interface FileRoutesByTo {
@@ -103,11 +119,13 @@ export interface FileRoutesByTo {
   '/automations': typeof AuthenticatedAutomationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
   '/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
+  '/integration/$integrationId': typeof AuthenticatedIntegrationIntegrationIdRoute
   '/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
 }
 export interface FileRoutesById {
@@ -118,11 +136,13 @@ export interface FileRoutesById {
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/rooms': typeof AuthenticatedRoomsRoute
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/vacuum': typeof AuthenticatedVacuumRoute
   '/_authenticated/device/$deviceId': typeof AuthenticatedDeviceDeviceIdRoute
+  '/_authenticated/integration/$integrationId': typeof AuthenticatedIntegrationIntegrationIdRoute
   '/_authenticated/room/$roomId': typeof AuthenticatedRoomRoomIdRoute
 }
 export interface FileRouteTypes {
@@ -133,11 +153,13 @@ export interface FileRouteTypes {
     | '/automations'
     | '/dashboard'
     | '/home'
+    | '/integrations'
     | '/rooms'
     | '/scenes'
     | '/settings'
     | '/vacuum'
     | '/device/$deviceId'
+    | '/integration/$integrationId'
     | '/room/$roomId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -146,11 +168,13 @@ export interface FileRouteTypes {
     | '/automations'
     | '/dashboard'
     | '/home'
+    | '/integrations'
     | '/rooms'
     | '/scenes'
     | '/settings'
     | '/vacuum'
     | '/device/$deviceId'
+    | '/integration/$integrationId'
     | '/room/$roomId'
   id:
     | '__root__'
@@ -160,11 +184,13 @@ export interface FileRouteTypes {
     | '/_authenticated/automations'
     | '/_authenticated/dashboard'
     | '/_authenticated/home'
+    | '/_authenticated/integrations'
     | '/_authenticated/rooms'
     | '/_authenticated/scenes'
     | '/_authenticated/settings'
     | '/_authenticated/vacuum'
     | '/_authenticated/device/$deviceId'
+    | '/_authenticated/integration/$integrationId'
     | '/_authenticated/room/$roomId'
   fileRoutesById: FileRoutesById
 }
@@ -218,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rooms': {
       id: '/_authenticated/rooms'
       path: '/rooms'
@@ -253,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDeviceDeviceIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/integration/$integrationId': {
+      id: '/_authenticated/integration/$integrationId'
+      path: '/integration/$integrationId'
+      fullPath: '/integration/$integrationId'
+      preLoaderRoute: typeof AuthenticatedIntegrationIntegrationIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/room/$roomId': {
       id: '/_authenticated/room/$roomId'
       path: '/room/$roomId'
@@ -267,11 +307,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedRoomsRoute: typeof AuthenticatedRoomsRoute
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedVacuumRoute: typeof AuthenticatedVacuumRoute
   AuthenticatedDeviceDeviceIdRoute: typeof AuthenticatedDeviceDeviceIdRoute
+  AuthenticatedIntegrationIntegrationIdRoute: typeof AuthenticatedIntegrationIntegrationIdRoute
   AuthenticatedRoomRoomIdRoute: typeof AuthenticatedRoomRoomIdRoute
 }
 
@@ -279,11 +321,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedRoomsRoute: AuthenticatedRoomsRoute,
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedVacuumRoute: AuthenticatedVacuumRoute,
   AuthenticatedDeviceDeviceIdRoute: AuthenticatedDeviceDeviceIdRoute,
+  AuthenticatedIntegrationIntegrationIdRoute:
+    AuthenticatedIntegrationIntegrationIdRoute,
   AuthenticatedRoomRoomIdRoute: AuthenticatedRoomRoomIdRoute,
 }
 
@@ -298,13 +343,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

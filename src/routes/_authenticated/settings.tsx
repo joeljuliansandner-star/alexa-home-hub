@@ -15,6 +15,7 @@ import {
   Mail,
   Mic,
   Palette,
+  PlugZap,
   RefreshCw,
   Save,
   ShieldCheck,
@@ -239,6 +240,19 @@ function SettingsPage() {
             </Button>
           </Panel>
         </div>
+
+        <Panel className="flex flex-wrap items-center gap-3" hover as="article">
+          <IconTile icon={PlugZap} tone="accent" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Integrationen</p>
+            <p className="text-xs text-muted-foreground">
+              Tuya, Tapo, Alexa, Home Assistant, MQTT, Hue, Shelly und Zigbee verwalten.
+            </p>
+          </div>
+          <Button asChild variant="secondary" size="sm" className="ml-auto">
+            <Link to="/integrations">Öffnen</Link>
+          </Button>
+        </Panel>
 
         <Panel className="space-y-1">
           <p className="text-sm font-semibold">Standards für neue Geräte</p>
