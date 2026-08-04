@@ -5,7 +5,11 @@ import { LoadingState, PageHeader, Panel, stacks } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { useAlexaCallback } from "@/lib/alexa/hooks";
 
-type CallbackSearch = { code?: string; error?: string; error_description?: string };
+type CallbackSearch = {
+  code: string | undefined;
+  error: string | undefined;
+  error_description: string | undefined;
+};
 
 export const Route = createFileRoute("/_authenticated/alexa/callback")({
   validateSearch: (search: Record<string, unknown>): CallbackSearch => ({
