@@ -47,11 +47,12 @@ export function DeviceCard({
   return (
     <div
       className={cn(
-        "panel panel-hover flex h-full flex-col gap-4 p-4",
-        active && "tile-on",
+        "panel panel-hover flex h-full flex-col gap-4 p-4 transition-all duration-300",
+        active && "tile-on bg-primary/[0.06]",
         onOpen && "hover:-translate-y-0.5",
       )}
     >
+
       <div className="flex items-start justify-between gap-3">
         <button
           type="button"
