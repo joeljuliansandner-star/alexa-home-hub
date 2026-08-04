@@ -240,7 +240,7 @@ function Dashboard() {
               </Button>
             ))}
           </div>
-        </section>
+        </Section>
       ) : null}
 
       <section className="panel-glass space-y-3 p-4">
@@ -415,7 +415,7 @@ function Dashboard() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       ) : null}
     </div>
   );
