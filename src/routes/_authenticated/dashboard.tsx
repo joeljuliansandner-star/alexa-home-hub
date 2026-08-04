@@ -316,6 +316,14 @@ function Dashboard() {
         </section>
       ))}
 
+      {grouped.length === 0 ? (
+        <div className="panel-glass p-8 text-center text-sm text-muted-foreground">
+          Keine Geräte gefunden. Passe Suche oder Filter an.
+        </div>
+      ) : null}
+
+
+
       {activity.data?.length ? (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
