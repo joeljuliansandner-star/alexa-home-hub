@@ -29,11 +29,8 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
     const unsupported: string[] = [];
     const list: SyncedDevice[] = [];
 
-    type DevicePayload = Parameters<
-      ReturnType<typeof context.supabase.from<"devices">>["insert"]
-    >[0] extends (infer T)[] | infer T
-      ? T
-      : never;
+    type DevicePayload = Database["public"]["Tables"]["devices"]["Insert"];
+
 
     const save = async (payload: DevicePayload, externalId: string) => {
       const { data: existing } = await context.supabase
