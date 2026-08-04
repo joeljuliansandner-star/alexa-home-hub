@@ -146,8 +146,11 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
         methods: ["login", "getDeviceList", "passthrough → get_child_device_list"],
       },
       raw: {
-        deviceList: rawDeviceList,
-        childLists: rawChildren,
+        deviceList: JSON.stringify(rawDeviceList, null, 2),
+        childLists: rawChildren.map((entry) => ({
+          hub: entry.hub,
+          payload: JSON.stringify(entry.payload, null, 2),
+        })),
       },
     };
   });
