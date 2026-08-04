@@ -4,7 +4,6 @@ import {
   Bell,
   LayoutDashboard,
   Lightbulb,
-  Loader2,
   Plug,
   RefreshCw,
   Star,
