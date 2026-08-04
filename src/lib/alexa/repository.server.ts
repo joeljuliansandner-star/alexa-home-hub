@@ -4,7 +4,7 @@
  * Server-only. Verbindungsdaten (Tokens) liegen in einer Tabelle, auf die
  * ausschließlich der Server-Schlüssel Zugriff hat.
  */
-import type { Tables } from "@/integrations/supabase/types";
+import type { Json, Tables } from "@/integrations/supabase/types";
 import {
   classifyAlexaDevice,
   alexaDeviceTypeLabel,
@@ -209,7 +209,7 @@ export type AlexaLogInput = {
   durationMs: number | null;
   ok: boolean;
   message: string | null;
-  details?: Record<string, unknown>;
+  details?: Json;
 };
 
 export async function addLogEntries(userId: string, entries: AlexaLogInput[]): Promise<void> {
