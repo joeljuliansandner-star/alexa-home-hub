@@ -92,8 +92,8 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
             ? ("thermostat" as const)
             : kindForModel(child.category, child.model).kind;
 
-        if (readable === "Sensor" && !child.model) {
-          unsupported.push(`${child.name} (${child.model || "unbekannt"})`);
+        if (readable === "Sensor") {
+          unsupported.push(`${child.name} (${child.model || "unbekannter Typ"})`);
         }
         if (child.online) online += 1;
 
