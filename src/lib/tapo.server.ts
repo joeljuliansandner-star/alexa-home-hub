@@ -271,5 +271,5 @@ export async function tapoChildDevices(
     if (inner.result?.sum !== undefined && startIndex >= Number(inner.result.sum)) break;
   }
 
-  return { children, error: null };
+  return { children, error: null, raw };
 }
