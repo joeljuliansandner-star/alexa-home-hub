@@ -65,7 +65,24 @@ function decodeAlias(raw: string, fallback: string): string {
   }
 }
 
-export async function tapoDeviceList(token: string): Promise<TapoCloudDevice[]> {
+/** Entfernt Tokens, Passwörter und Konto-Daten aus Rohantworten. */
+const SECRET_KEY = /token|password|passwd|secret|key|email|account|terminal|username|ssid|mac|ip/i;
+
+export function redact(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redact);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = SECRET_KEY.test(k) ? "«entfernt»" : redact(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+export async function tapoDeviceList(
+  token: string,
+): Promise<{ devices: TapoCloudDevice[]; raw: unknown }> {
   const data = await cloudCall<{ deviceList: Array<Record<string, unknown>> }>(
     `${CLOUD_URL}?token=${encodeURIComponent(token)}`,
     { method: "getDeviceList" },
@@ -74,7 +91,7 @@ export async function tapoDeviceList(token: string): Promise<TapoCloudDevice[]> 
     throw new Error(`Geräteliste konnte nicht geladen werden (Code ${data.error_code}).`);
   }
 
-  return (data.result?.deviceList ?? []).map((raw) => {
+  const devices = (data.result?.deviceList ?? []).map((raw) => {
     const model = String(raw["deviceModel"] ?? "Gerät");
     // Fehlt das Statusfeld, gilt ein gelistetes Gerät als erreichbar.
     const rawStatus = raw["status"];
