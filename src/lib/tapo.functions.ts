@@ -82,7 +82,8 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
 
       if (!hub) continue;
 
-      const { children, error } = await tapoChildDevices(token, device.deviceId);
+      const { children, error, raw } = await tapoChildDevices(token, device.deviceId);
+      for (const payload of raw) rawChildren.push({ hub: device.alias, payload });
       if (error) errors.push(`${device.alias}: ${error}`);
 
       for (const child of children) {
