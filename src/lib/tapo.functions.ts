@@ -30,6 +30,14 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
     const unsupported: string[] = [];
     const list: SyncedDevice[] = [];
     const rawChildren: Array<{ hub: string; payload: unknown }> = [];
+    const hubReports: Array<{
+      hub: string;
+      model: string;
+      cloudSupported: boolean;
+      children: number;
+      attempts: Array<{ method: string; found: number; ok: boolean; message: string }>;
+    }> = [];
+
 
     type DevicePayload = Database["public"]["Tables"]["devices"]["Insert"];
 
