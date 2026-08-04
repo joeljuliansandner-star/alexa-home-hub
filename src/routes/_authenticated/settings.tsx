@@ -17,6 +17,7 @@ import { useDevices } from "@/lib/smarthome";
 import { syncTapoDevices } from "@/lib/tapo.functions";
 import { syncTuyaDevices } from "@/lib/tuya.functions";
 import { Button } from "@/components/ui/button";
+import { PageHeader, stacks } from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -62,13 +63,11 @@ function SettingsPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold sm:text-3xl">Einstellungen</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Smart Life, Tapo, Geräte-Abgleich und Alexa-Zuordnung.
-        </p>
-      </header>
+    <div className={stacks.pageTight}>
+      <PageHeader
+        title="Einstellungen"
+        description="Smart Life, Tapo, Geräte-Abgleich und Alexa-Zuordnung."
+      />
 
       <section className="panel space-y-4 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">

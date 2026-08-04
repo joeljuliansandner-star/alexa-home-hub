@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { EmptyState, EntryList, EntryRow, LoadingState, grids, stacks } from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/device/$deviceId")({
   head: () => ({
@@ -66,21 +67,21 @@ function DeviceDetail() {
   }, [device?.id, device?.name, device?.room_id]);
 
   if (devices.isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!device) {
     return (
-      <div className="panel flex flex-col items-center gap-4 p-10 text-center">
-        <h1 className="text-xl font-semibold">Gerät nicht gefunden</h1>
-        <Button asChild variant="secondary">
-          <Link to="/dashboard">Zurück zur Übersicht</Link>
-        </Button>
-      </div>
+      <EmptyState
+        variant="card"
+        title="Gerät nicht gefunden"
+        description="Dieses Gerät existiert nicht mehr oder wurde entfernt."
+        actions={
+          <Button asChild variant="secondary" className="min-h-11">
+            <Link to="/dashboard">Zurück zur Übersicht</Link>
+          </Button>
+        }
+      />
     );
   }
 
@@ -119,7 +120,7 @@ function DeviceDetail() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className={stacks.pageTight}>
       <button
         onClick={() => navigate({ to: "/dashboard" })}
         className="flex min-h-11 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -270,35 +271,30 @@ function DeviceDetail() {
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : history.data?.length ? (
-          <ul className="panel divide-y divide-border p-1">
+          <EntryList>
             {history.data.map((entry) => (
-              <li
+              <EntryRow
                 key={entry.id}
-                className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm"
+                meta={new Date(entry.created_at).toLocaleString("de-DE", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               >
-                <span className="truncate">{entry.message}</span>
-                <time className="shrink-0 text-xs text-muted-foreground">
-                  {new Date(entry.created_at).toLocaleString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </time>
-              </li>
+                {entry.message}
+              </EntryRow>
             ))}
-          </ul>
+          </EntryList>
         ) : (
-          <p className="panel-glass p-5 text-sm text-muted-foreground">
-            Noch keine Schaltvorgänge protokolliert.
-          </p>
+          <EmptyState description="Noch keine Schaltvorgänge protokolliert." />
         )}
       </section>
 
       <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         Geräteinformationen
       </h2>
-      <section className="grid gap-3 sm:grid-cols-2">
+      <section className={grids.pairs}>
         {facts.map((fact) => (
           <div key={fact.label} className="panel h-full p-4">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">{fact.label}</p>

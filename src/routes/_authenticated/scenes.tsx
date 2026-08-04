@@ -25,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { LoadingState, PageHeader, stacks } from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/scenes")({
   head: () => ({
@@ -54,21 +55,15 @@ function ScenesPage() {
   const deviceName = (id: string) => devices.data?.find((d) => d.id === id)?.name ?? "Gerät";
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold sm:text-3xl">Szenen</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Eine Szene schaltet mehrere Geräte gleichzeitig.
-          </p>
-        </div>
-        <NewSceneDialog />
-      </header>
+    <div className={stacks.pageTight}>
+      <PageHeader
+        title="Szenen"
+        description="Eine Szene schaltet mehrere Geräte gleichzeitig."
+        actions={<NewSceneDialog />}
+      />
 
       {scenes.isLoading ? (
-        <div className="flex h-40 items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
-        </div>
+        <LoadingState size="section" />
       ) : scenes.data?.length ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {scenes.data.map((scene) => {

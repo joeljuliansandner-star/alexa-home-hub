@@ -25,6 +25,7 @@ import {
 } from "@/lib/smarthome";
 import { DeviceCard } from "@/components/DeviceCard";
 import { cn } from "@/lib/utils";
+import { EmptyState, EntryList, EntryRow, LoadingState, Section, grids } from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -157,11 +158,7 @@ function Dashboard() {
   const loading = rooms.isLoading || devices.isLoading;
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (list.length === 0) {
@@ -224,10 +221,7 @@ function Dashboard() {
       </header>
 
       {scenes.data?.length ? (
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Schnellzugriff
-          </h2>
+        <Section title="Schnellzugriff">
           <div className="flex flex-wrap gap-2">
             {scenes.data.map((scene) => (
               <Button
@@ -246,7 +240,7 @@ function Dashboard() {
               </Button>
             ))}
           </div>
-        </section>
+        </Section>
       ) : null}
 
       <section className="panel-glass space-y-3 p-4">
@@ -363,7 +357,7 @@ function Dashboard() {
               {group.devices.filter((d) => d.is_on && d.kind !== "sensor").length} aktiv
             </span>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className={grids.cards}>
             {group.devices.map((device) => (
               <div key={device.id} className="group relative">
                 <DeviceCard
@@ -398,35 +392,27 @@ function Dashboard() {
       ))}
 
       {grouped.length === 0 ? (
-        <div className="panel-glass p-8 text-center text-sm text-muted-foreground">
-          Keine Geräte gefunden. Passe Suche oder Filter an.
-        </div>
+        <EmptyState description="Keine Geräte gefunden. Passe Suche oder Filter an." />
       ) : null}
 
 
 
       {activity.data?.length ? (
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Letzte Aktivität
-          </h2>
-          <ul className="panel divide-y divide-border p-1">
+        <Section title="Letzte Aktivität">
+          <EntryList>
             {activity.data.slice(0, 8).map((entry) => (
-              <li
+              <EntryRow
                 key={entry.id}
-                className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm"
+                meta={new Date(entry.created_at).toLocaleTimeString("de-DE", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               >
-                <span className="truncate">{entry.message}</span>
-                <time className="shrink-0 text-xs text-muted-foreground">
-                  {new Date(entry.created_at).toLocaleTimeString("de-DE", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </time>
-              </li>
+                {entry.message}
+              </EntryRow>
             ))}
-          </ul>
-        </section>
+          </EntryList>
+        </Section>
       ) : null}
     </div>
   );
