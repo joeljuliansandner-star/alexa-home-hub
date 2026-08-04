@@ -51,6 +51,14 @@ export const Route = createFileRoute("/_authenticated/integration/$integrationId
   component: IntegrationDetailPage,
 });
 
+type HubReport = {
+  hub: string;
+  model: string;
+  cloudSupported: boolean;
+  children: number;
+  attempts: Array<{ method: string; found: number; ok: boolean; message: string }>;
+};
+
 type DebugLog = {
   lines: string[];
   errors: string[];
@@ -58,8 +66,10 @@ type DebugLog = {
   api?: { library: string; endpoint: string; methods: string[] };
   hubs?: number;
   children?: number;
+  hubReports?: HubReport[];
   raw?: { deviceList: string; childLists: Array<{ hub: string; payload: string }> };
 };
+
 
 function IntegrationDetailPage() {
   const { integrationId } = useParams({ from: "/_authenticated/integration/$integrationId" });
