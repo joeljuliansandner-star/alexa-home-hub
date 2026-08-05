@@ -53,6 +53,18 @@ function AuthenticatedLayout() {
   // Änderungen aus der Smart-Life-App laufend ins Panel übernehmen
   useTuyaLiveSync();
 
+  // Home Assistant: beim App-Start automatisch verbinden und live aktualisieren
+  useHomeAssistantLive();
+  const haConnection = useHaConnection();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  useEffect(() => {
+    if (haConnection.isLoading) return;
+    if (haConnection.data) return;
+    if (pathname.startsWith("/setup") || pathname.startsWith("/integration")) return;
+    navigate({ to: "/setup", replace: true });
+  }, [haConnection.isLoading, haConnection.data, pathname, navigate]);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? "Gastzugang"));
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
