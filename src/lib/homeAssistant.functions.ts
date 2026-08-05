@@ -36,7 +36,7 @@ export const haProxy = createServerFn({ method: "POST" })
           Authorization: `Bearer ${data.token}`,
           "Content-Type": "application/json",
         },
-        body: data.body ?? undefined,
+        body: data.body,
       });
       const text = await response.text();
       return { ok: response.ok, status: response.status, body: text, error: null as string | null };
