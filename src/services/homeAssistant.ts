@@ -863,7 +863,7 @@ export function kindForDomain(domain: string) {
       return "speaker" as const;
     case "vacuum":
     case "lawn_mower":
-ության      return "vacuum" as const;
+return "vacuum" as const;
     default:
       return "sensor" as const;
   }
