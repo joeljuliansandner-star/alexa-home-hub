@@ -17,11 +17,11 @@ export function Pressable({
   longPressMs = 450,
 }: {
   children: ReactNode;
-  className?: string;
-  onPress?: () => void;
-  onLongPress?: () => void;
-  disabled?: boolean;
-  ariaLabel?: string;
+  className?: string | undefined;
+  onPress?: (() => void) | undefined;
+  onLongPress?: (() => void) | undefined;
+  disabled?: boolean | undefined;
+  ariaLabel?: string | undefined;
   longPressMs?: number;
 }) {
   const [ripples, setRipples] = useState<Ripple[]>([]);
