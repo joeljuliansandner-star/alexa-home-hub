@@ -585,6 +585,13 @@ export function useBulkToggleKind() {
   return useMutation({
     mutationFn: async ({ devices, on }: { devices: Device[]; on: boolean }) => {
       for (const device of devices) {
+        if (device.external_source === "homeassistant" && device.external_id) {
+          try {
+            await homeAssistant.control(device.external_id, { on });
+          } catch {
+            /* Gerät offline – lokaler Zustand wird trotzdem gesetzt */
+          }
+        }
         if (device.external_source === "tuya" && device.external_id) {
           try {
             await controlTuyaDevice({ data: { externalId: device.external_id, on } });
