@@ -71,6 +71,9 @@ function AutomationsPage() {
         actions={<NewAutomationDialog />}
       />
 
+      <HaAutomationsSection />
+
+
       {automations.isLoading ? (
         <LoadingState size="section" />
       ) : automations.data?.length ? (
