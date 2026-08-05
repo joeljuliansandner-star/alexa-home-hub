@@ -26,6 +26,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { LoadingState, PageHeader, stacks } from "@/components/kit";
+import { HaScenesSection } from "@/components/homeassistant/HaAutomationSections";
+
 
 export const Route = createFileRoute("/_authenticated/scenes")({
   head: () => ({
@@ -61,6 +63,9 @@ function ScenesPage() {
         description="Eine Szene schaltet mehrere Geräte gleichzeitig."
         actions={<NewSceneDialog />}
       />
+
+      <HaScenesSection />
+
 
       {scenes.isLoading ? (
         <LoadingState size="section" />

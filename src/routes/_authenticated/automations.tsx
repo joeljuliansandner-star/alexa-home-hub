@@ -32,6 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LoadingState, PageHeader, stacks } from "@/components/kit";
+import { HaAutomationsSection } from "@/components/homeassistant/HaAutomationSections";
+
 
 export const Route = createFileRoute("/_authenticated/automations")({
   head: () => ({
@@ -68,6 +70,9 @@ function AutomationsPage() {
         description="Regeln lösen Szenen aus – zeitgesteuert oder über Sensorwerte."
         actions={<NewAutomationDialog />}
       />
+
+      <HaAutomationsSection />
+
 
       {automations.isLoading ? (
         <LoadingState size="section" />

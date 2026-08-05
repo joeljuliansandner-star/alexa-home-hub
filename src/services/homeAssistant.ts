@@ -45,25 +45,40 @@ export type HaStatus = {
   baseUrl: string | null;
 };
 
-export const SUPPORTED_DOMAINS = [
-  "light",
-  "switch",
-  "sensor",
-  "binary_sensor",
-  "camera",
-  "cover",
-  "fan",
-  "climate",
-  "vacuum",
-  "media_player",
-  "weather",
-  "scene",
+/**
+ * Es gibt bewusst KEINE Liste unterstützter Gerätetypen mehr.
+ * Alles, was Home Assistant liefert, wird übernommen – ausgenommen reine
+ * System-/Hilfsdomänen ohne Gerätebezug.
+ */
+export const IGNORED_DOMAINS = new Set([
+  "zone",
+  "persistent_notification",
+  "sun",
+  "update",
+  "tts",
+  "stt",
+  "conversation",
+  "todo",
+  "tag",
+  "device_tracker",
+  "script",
   "automation",
-  "lock",
-  "person",
-] as const;
+  "scene",
+  "input_text",
+  "input_boolean",
+  "input_number",
+  "input_select",
+  "input_datetime",
+  "schedule",
+  "timer",
+  "counter",
+  "event",
+  "assist_satellite",
+  "wake_word",
+]);
 
-export type HaDomain = (typeof SUPPORTED_DOMAINS)[number];
+export type HaDomain = string;
+
 
 const STORAGE_KEY = "ha.connection";
 const DISCOVERY_CANDIDATES = [
@@ -103,7 +118,10 @@ class HomeAssistantService {
   states = new Map<string, HaEntity>();
   /** Entitäten, deren neuer Zustand noch nicht in die App-Datenbank geschrieben wurde. */
   dirty = new Set<string>();
+  /** Zähler für Änderungen an der Entity-/Device-/Area-Registry. */
+  registryVersion = 0;
   areas: HaArea[] = [];
+
   status: HaStatus = {
     rest: "unknown",
     websocket: "closed",
@@ -461,7 +479,18 @@ class HomeAssistantService {
           break;
         }
         case "event": {
+          const eventType = message.event?.event_type as string | undefined;
           const data = message.event?.data;
+          if (
+            eventType === "entity_registry_updated" ||
+            eventType === "device_registry_updated" ||
+            eventType === "area_registry_updated"
+          ) {
+            // Neue oder entfernte Geräte/Räume: Abgleich anstoßen.
+            this.registryVersion += 1;
+            this.emit();
+            break;
+          }
           if (data?.entity_id && data.new_state) {
             this.states.set(data.entity_id, data.new_state as HaEntity);
             this.dirty.add(data.entity_id);
@@ -482,10 +511,18 @@ class HomeAssistantService {
   }
 
   private async afterAuth() {
-    await this.send({ type: "subscribe_events", event_type: "state_changed" }).catch(() => null);
+    for (const eventType of [
+      "state_changed",
+      "entity_registry_updated",
+      "device_registry_updated",
+      "area_registry_updated",
+    ]) {
+      await this.send({ type: "subscribe_events", event_type: eventType }).catch(() => null);
+    }
     await this.loadStates().catch(() => null);
     await this.loadAreas().catch(() => null);
   }
+
 
   private scheduleReconnect() {
     if (this.reconnectTimer) return;
@@ -703,9 +740,10 @@ class HomeAssistantService {
     let created = 0;
     let updated = 0;
     let skipped = 0;
-    const relevant = states.filter((entity) =>
-      (SUPPORTED_DOMAINS as readonly string[]).includes(domainOf(entity.entity_id)),
+    const relevant = states.filter(
+      (entity) => !IGNORED_DOMAINS.has(domainOf(entity.entity_id)),
     );
+
 
     for (const entity of relevant) {
       const domain = domainOf(entity.entity_id);
@@ -742,6 +780,23 @@ class HomeAssistantService {
       }
     }
 
+    /* In Home Assistant gelöschte Geräte auch hier entfernen */
+    let removed = 0;
+    const liveIds = new Set(relevant.map((entity) => entity.entity_id));
+    const { data: known } = await supabase
+      .from("devices")
+      .select("id, external_id")
+      .eq("user_id", userId)
+      .eq("external_source", "homeassistant");
+    const orphans = (known ?? [])
+      .filter((row) => !row.external_id || !liveIds.has(row.external_id))
+      .map((row) => row.id);
+    if (orphans.length) {
+      await supabase.from("scene_actions").delete().in("device_id", orphans);
+      const { error } = await supabase.from("devices").delete().in("id", orphans);
+      if (!error) removed = orphans.length;
+    }
+
     const lastSyncAt = new Date().toISOString();
     await supabase
       .from("ha_connections")
@@ -757,12 +812,153 @@ class HomeAssistantService {
       created,
       updated,
       skipped,
+      removed,
       rooms: areas.length,
       roomsImported,
       durationMs: Math.round(performance.now() - started),
     };
   }
+
+  /* --------------------- Erweiterte Steuerung (Services) ------------------ */
+
+  /** Beliebiger Service-Aufruf – deckt auch zukünftige Integrationen ab. */
+  async call(domain: string, service: string, data: Record<string, unknown> = {}) {
+    return this.callService(domain, service, data);
+  }
+
+  async setRgbColor(entityId: string, rgb: [number, number, number]) {
+    return this.callService("light", "turn_on", { entity_id: entityId, rgb_color: rgb });
+  }
+
+  async setColorTemp(entityId: string, kelvin: number) {
+    return this.callService("light", "turn_on", { entity_id: entityId, color_temp_kelvin: kelvin });
+  }
+
+  async setCoverPosition(entityId: string, position: number) {
+    return this.callService("cover", "set_cover_position", {
+      entity_id: entityId,
+      position: Math.max(0, Math.min(100, Math.round(position))),
+    });
+  }
+
+  async stopCover(entityId: string) {
+    return this.callService("cover", "stop_cover", { entity_id: entityId });
+  }
+
+  async setFanMode(entityId: string, fanMode: string) {
+    return this.callService("climate", "set_fan_mode", { entity_id: entityId, fan_mode: fanMode });
+  }
+
+  async setPresetMode(entityId: string, preset: string) {
+    return this.callService(domainOf(entityId), "set_preset_mode", {
+      entity_id: entityId,
+      preset_mode: preset,
+    });
+  }
+
+  async setSource(entityId: string, source: string) {
+    return this.callService("media_player", "select_source", { entity_id: entityId, source });
+  }
+
+  async mediaCommand(entityId: string, command: "play" | "pause" | "stop" | "next" | "previous") {
+    const service = {
+      play: "media_play",
+      pause: "media_pause",
+      stop: "media_stop",
+      next: "media_next_track",
+      previous: "media_previous_track",
+    }[command];
+    return this.callService("media_player", service, { entity_id: entityId });
+  }
+
+  async setVacuumFanSpeed(entityId: string, fanSpeed: string) {
+    return this.callService("vacuum", "set_fan_speed", { entity_id: entityId, fan_speed: fanSpeed });
+  }
+
+  /* ---------------------- Szenen, Skripte, Automationen ------------------- */
+
+  /** Alle Szenen-Entitäten aus Home Assistant. */
+  listScenes(): HaEntity[] {
+    return [...this.states.values()].filter((e) => domainOf(e.entity_id) === "scene");
+  }
+
+  /** Alle Automations-Entitäten aus Home Assistant. */
+  listAutomations(): HaEntity[] {
+    return [...this.states.values()].filter((e) => domainOf(e.entity_id) === "automation");
+  }
+
+  async activateScene(entityId: string) {
+    return this.callService("scene", "turn_on", { entity_id: entityId });
+  }
+
+  async triggerAutomation(entityId: string) {
+    return this.callService("automation", "trigger", { entity_id: entityId });
+  }
+
+  async setAutomationEnabled(entityId: string, enabled: boolean) {
+    return this.callService("automation", enabled ? "turn_on" : "turn_off", { entity_id: entityId });
+  }
+
+  async runScript(entityId: string) {
+    return this.callService("script", "turn_on", { entity_id: entityId });
+  }
+
+  /* ----------------------------- Zusatzdaten ------------------------------ */
+
+  /** Persistente Benachrichtigungen aus Home Assistant. */
+  async notifications() {
+    try {
+      const list = await this.send<
+        { notification_id: string; title?: string; message: string; created_at?: string }[]
+      >({ type: "persistent_notification/get" });
+      return list ?? [];
+    } catch {
+      return [];
+    }
+  }
+
+  async dismissNotification(notificationId: string) {
+    return this.callService("persistent_notification", "dismiss", {
+      notification_id: notificationId,
+    });
+  }
+
+  /** Verlaufsdaten einer Entität (Standard: letzte 24 Stunden). */
+  async history(entityId: string, hours = 24): Promise<HaEntity[]> {
+    const start = new Date(Date.now() - hours * 3600_000).toISOString();
+    const result = await this.rest<HaEntity[][]>(
+      `/history/period/${start}?filter_entity_id=${encodeURIComponent(entityId)}&minimal_response`,
+    );
+    return result?.[0] ?? [];
+  }
+
+  /** Direkter Bild-Endpunkt einer Kamera (Snapshot bzw. MJPEG-Stream). */
+  cameraStreamUrl(entity: HaEntity): string | null {
+    const path = entity.attributes?.["entity_picture"] as string | undefined;
+    if (!path || !this.connection) return null;
+    return `${this.connection.baseUrl}${path}`;
+  }
+
+  /** Globale Suche über alle Entitäten (Name, Entity-ID, Zustand). */
+  search(term: string, limit = 40): HaEntity[] {
+    const needle = term.trim().toLowerCase();
+    if (!needle) return [];
+    const hits: HaEntity[] = [];
+    for (const entity of this.states.values()) {
+      const name = String(entity.attributes?.["friendly_name"] ?? "");
+      if (
+        entity.entity_id.toLowerCase().includes(needle) ||
+        name.toLowerCase().includes(needle) ||
+        entity.state.toLowerCase().includes(needle)
+      ) {
+        hits.push(entity);
+        if (hits.length >= limit) break;
+      }
+    }
+    return hits;
+  }
 }
+
 
 /** Wandelt eine Entität in eine Zeile der bestehenden `devices`-Tabelle. */
 export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
@@ -782,7 +978,23 @@ export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
     name,
     kind,
     room_id: roomId,
-    is_on: ["on", "open", "playing", "cleaning", "home", "heat", "cool", "auto"].includes(entity.state),
+    is_on: [
+      "on",
+      "open",
+      "opening",
+      "playing",
+      "cleaning",
+      "mowing",
+      "running",
+      "home",
+      "heat",
+      "cool",
+      "heat_cool",
+      "dry",
+      "fan_only",
+      "auto",
+    ].includes(entity.state),
+
     brightness:
       brightnessRaw !== undefined
         ? Math.round((brightnessRaw / 255) * 100)
@@ -802,33 +1014,37 @@ export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
   };
 }
 
+/**
+ * Ordnet eine beliebige Home-Assistant-Domäne einer Darstellungskategorie zu.
+ * Unbekannte (auch zukünftige) Domänen landen automatisch bei „sensor“ und
+ * erscheinen damit ohne Codeänderung in der App.
+ */
 export function kindForDomain(domain: string) {
   switch (domain) {
     case "light":
       return "light" as const;
     case "switch":
     case "fan":
-    case "automation":
-    case "scene":
     case "lock":
+    case "humidifier":
+    case "siren":
+    case "valve":
+    case "water_heater":
       return "plug" as const;
     case "climate":
       return "thermostat" as const;
     case "cover":
       return "blind" as const;
     case "media_player":
+    case "remote":
       return "speaker" as const;
     case "vacuum":
-      return "vacuum" as const;
-    case "sensor":
-    case "binary_sensor":
-    case "camera":
-    case "weather":
-    case "person":
-      return "sensor" as const;
+    case "lawn_mower":
+return "vacuum" as const;
     default:
-      return null;
+      return "sensor" as const;
   }
+
 }
 
 export const homeAssistant = new HomeAssistantService();

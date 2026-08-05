@@ -23,7 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTuyaLiveSync } from "@/lib/smarthome";
+
 import { useHaConnection, useHomeAssistantLive } from "@/services/homeAssistant.hooks";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -50,11 +50,10 @@ function AuthenticatedLayout() {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
 
-  // Änderungen aus der Smart-Life-App laufend ins Panel übernehmen
-  useTuyaLiveSync();
-
-  // Home Assistant: beim App-Start automatisch verbinden und live aktualisieren
+  // Home Assistant ist die einzige Datenquelle: verbinden, live aktualisieren
+  // und Registry-Änderungen automatisch abgleichen.
   useHomeAssistantLive();
+
   const haConnection = useHaConnection();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
