@@ -23,7 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTuyaLiveSync } from "@/lib/smarthome";
+
 import { useHaConnection, useHomeAssistantLive } from "@/services/homeAssistant.hooks";
 
 export const Route = createFileRoute("/_authenticated")({
