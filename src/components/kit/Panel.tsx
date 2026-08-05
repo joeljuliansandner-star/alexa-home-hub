@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /** Standardkarte des Design-Systems. */
@@ -6,15 +6,20 @@ export function Panel({
   className,
   children,
   hover = false,
+  style,
   as: Tag = "div",
 }: {
   className?: string;
   children?: ReactNode;
   hover?: boolean;
+  style?: CSSProperties;
   as?: "div" | "section" | "article" | "li";
 }) {
   return (
-    <Tag className={cn("panel p-5", hover && "panel-hover hover:-translate-y-0.5", className)}>
+    <Tag
+      style={style}
+      className={cn("panel p-5", hover && "panel-hover hover:-translate-y-0.5", className)}
+    >
       {children}
     </Tag>
   );

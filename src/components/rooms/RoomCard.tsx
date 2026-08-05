@@ -3,11 +3,14 @@ import { ChevronRight, Droplets, Thermometer, WifiOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { Device, Room } from "@/lib/smarthome";
+import { usePins } from "@/lib/os/prefs";
 import { roomIcon, roomStats } from "./roomStats";
 
 /** Große Raumkarte mit Illustration, Kennzahlen und Aktivitätsstatus. */
 export function RoomCard({ room, devices }: { room: Room; devices: Device[] }) {
   const stats = roomStats(devices);
+  const { isPinned, toggle } = usePins();
+  const pinned = isPinned("room", room.id);
   const Icon = roomIcon(room.icon);
   const active = stats.active > 0;
 
