@@ -718,9 +718,10 @@ class HomeAssistantService {
     let created = 0;
     let updated = 0;
     let skipped = 0;
-    const relevant = states.filter((entity) =>
-      (SUPPORTED_DOMAINS as readonly string[]).includes(domainOf(entity.entity_id)),
+    const relevant = states.filter(
+      (entity) => !IGNORED_DOMAINS.has(domainOf(entity.entity_id)),
     );
+
 
     for (const entity of relevant) {
       const domain = domainOf(entity.entity_id);
