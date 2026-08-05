@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Brain, HeartPulse, Lightbulb, Search, Zap } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { DailyBriefing } from "@/components/os/DailyBriefing";
 import { HouseReportPanel } from "@/components/os/HouseReportPanel";
@@ -72,7 +72,7 @@ function InsightsPage() {
         <StatTile label="Score" value={`${report.score}`} />
         <StatTile label="Hinweise" value={`${insights.length}`} />
         <StatTile label="Trend" value={energy.trend} />
-        <StatTile label="Kritisch" value={`${criticalCount}`} tone={criticalCount ? "warn" : "ok"} />
+        <StatTile label="Kritisch" value={`${criticalCount}`} tone={criticalCount ? "destructive" : "accent"} />
       </div>
 
 
