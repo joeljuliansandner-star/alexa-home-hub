@@ -170,9 +170,10 @@ export function HomeAssistantWizard({ onConnected }: { onConnected?: () => void 
           ) : null}
 
           <p className="text-xs text-muted-foreground">
-            Hinweis: Diese Seite läuft über HTTPS. Eine reine <code>http://</code>-Adresse im Heimnetz
-            blockieren Browser aus Sicherheitsgründen. Nutze dann die Home-Assistant-Cloud-Adresse
-            (Nabu Casa) oder einen HTTPS-Zugang zu deiner Instanz.
+            Hinweis: Der Test nutzt ausschließlich <code>GET /api/</code> mit deinem Long-Lived
+            Access Token – kein OAuth-Login. Öffentliche Adressen (z. B. Nabu Casa) werden bei
+            Browser-Blockaden automatisch über den Server der App geprüft; lokale Adressen direkt
+            aus dem Heimnetz.
           </p>
         </Panel>
       </Section>

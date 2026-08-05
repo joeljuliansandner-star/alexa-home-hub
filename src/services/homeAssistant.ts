@@ -13,6 +13,7 @@
  * Alle Seiten dürfen ausschließlich diesen Service verwenden.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { haProxy } from "@/lib/homeAssistant.functions";
 
 export type HaConnection = {
   baseUrl: string;
@@ -236,70 +237,126 @@ class HomeAssistantService {
 
   /* -------------------------------- REST -------------------------------- */
 
+  /**
+   * Führt eine REST-Anfrage aus. Zuerst direkt aus dem Browser (nötig für
+   * lokale Adressen im Heimnetz), bei einem Netzwerk-/CORS-Fehler automatisch
+   * über den Server der App (nötig für Nabu Casa & Co.).
+   */
+  private async request(
+    baseUrl: string,
+    token: string,
+    path: string,
+    method = "GET",
+    body: string | null = null,
+  ): Promise<{ ok: boolean; status: number; text: string; error: string | null }> {
+    const url = `${normalizeUrl(baseUrl)}/api${path.startsWith("/") ? path : `/${path}`}`;
+
+    // 1) Direkt aus dem Browser
+    try {
+      const response = await fetch(url, {
+        method,
+        mode: "cors",
+        credentials: "omit",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body,
+      });
+      return { ok: response.ok, status: response.status, text: await response.text(), error: null };
+    } catch {
+      /* CORS oder Netzwerk – jetzt über den Server versuchen */
+    }
+
+    // 2) Über den Server der App (umgeht CORS bei öffentlich erreichbaren Instanzen)
+    try {
+      const result = await haProxy({
+        data: { baseUrl: normalizeUrl(baseUrl), token, path, method, body },
+      });
+      return { ok: result.ok, status: result.status, text: result.body, error: result.error };
+    } catch (error) {
+      return {
+        ok: false,
+        status: 0,
+        text: "",
+        error: error instanceof Error ? error.message : "Verbindung fehlgeschlagen",
+      };
+    }
+  }
+
   async rest<T>(path: string, init?: RequestInit): Promise<T> {
     const connection = this.connection ?? (await this.loadConnection());
     if (!connection) throw new Error("Keine Home-Assistant-Verbindung hinterlegt");
 
     const started = performance.now();
-    try {
-      const response = await fetch(`${connection.baseUrl}/api${path}`, {
-        ...init,
-        headers: {
-          Authorization: `Bearer ${connection.token}`,
-          "Content-Type": "application/json",
-          ...(init?.headers ?? {}),
-        },
-      });
-      const latencyMs = Math.round(performance.now() - started);
-      if (!response.ok) {
-        this.patchStatus({ rest: "error", latencyMs, lastError: `HTTP ${response.status}` });
-        throw new Error(`Home Assistant antwortete mit HTTP ${response.status}`);
-      }
-      this.patchStatus({ rest: "ok", latencyMs, lastError: null });
-      return (await response.json()) as T;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unbekannter Fehler";
-      this.patchStatus({ rest: "error", lastError: message });
+    const result = await this.request(
+      connection.baseUrl,
+      connection.token,
+      path,
+      init?.method ?? "GET",
+      typeof init?.body === "string" ? init.body : null,
+    );
+    const latencyMs = Math.round(performance.now() - started);
+
+    if (!result.ok) {
+      const message = result.error ?? `Home Assistant antwortete mit HTTP ${result.status}`;
+      this.patchStatus({ rest: "error", latencyMs, lastError: message });
       throw new Error(message);
+    }
+
+    this.patchStatus({ rest: "ok", latencyMs, lastError: null });
+    if (!result.text) return null as T;
+    try {
+      return JSON.parse(result.text) as T;
+    } catch {
+      return result.text as unknown as T;
     }
   }
 
-  /** Prüft Adresse und Token, ohne etwas zu speichern. */
+  /** Prüft Adresse und Token über GET /api/ – ohne OAuth, nur mit dem Token. */
   async testConnection(baseUrl: string, token: string) {
     const url = normalizeUrl(baseUrl);
     const started = performance.now();
-    try {
-      const response = await fetch(`${url}/api/config`, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      });
-      const latencyMs = Math.round(performance.now() - started);
-      if (response.status === 401) {
-        return { ok: false as const, message: "Token wurde abgelehnt (401).", latencyMs };
-      }
-      if (!response.ok) {
-        return { ok: false as const, message: `HTTP ${response.status} von ${url}`, latencyMs };
-      }
-      const config = (await response.json()) as { version?: string; location_name?: string };
-      const socketOk = await this.probeSocket(url, token);
-      return {
-        ok: true as const,
-        message: "Verbindung erfolgreich",
-        latencyMs,
-        version: config.version ?? null,
-        locationName: config.location_name ?? null,
-        websocket: socketOk,
-      };
-    } catch (error) {
+
+    const ping = await this.request(url, token, "/");
+    const latencyMs = Math.round(performance.now() - started);
+
+    if (ping.status === 401 || ping.status === 403) {
+      return { ok: false as const, message: "Token wurde abgelehnt (401).", latencyMs };
+    }
+    if (!ping.ok) {
       return {
         ok: false as const,
-        message:
-          error instanceof Error
-            ? `${error.message} – ist die Adresse aus diesem Gerät erreichbar? Bei einer HTTPS-Seite muss auch Home Assistant über HTTPS erreichbar sein (z. B. Nabu Casa).`
-            : "Verbindung fehlgeschlagen",
-        latencyMs: null,
+        message: ping.error
+          ? `${ping.error} – Adresse nicht erreichbar (${url}).`
+          : `HTTP ${ping.status} von ${url}`,
+        latencyMs,
       };
     }
+
+    // Zusatzinfos sind optional – der Test gilt bereits als bestanden.
+    let version: string | null = null;
+    let locationName: string | null = null;
+    const config = await this.request(url, token, "/config");
+    if (config.ok && config.text) {
+      try {
+        const parsed = JSON.parse(config.text) as { version?: string; location_name?: string };
+        version = parsed.version ?? null;
+        locationName = parsed.location_name ?? null;
+      } catch {
+        /* Konfiguration ist optional */
+      }
+    }
+
+    const socketOk = await this.probeSocket(url, token);
+    return {
+      ok: true as const,
+      message: "Verbindung erfolgreich",
+      latencyMs,
+      version,
+      locationName,
+      websocket: socketOk,
+    };
   }
+
+
 
   /** Sucht Home Assistant automatisch im Heimnetz. */
   async discover(extraCandidates: string[] = []) {
