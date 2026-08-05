@@ -150,6 +150,7 @@ export function HaAutomationsSection() {
               </div>
 
               <div className="flex items-center gap-2">
+                <PinButton kind="automation" entity={automation} />
                 <Button
                   size="sm"
                   variant="secondary"
