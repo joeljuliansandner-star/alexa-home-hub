@@ -118,7 +118,10 @@ class HomeAssistantService {
   states = new Map<string, HaEntity>();
   /** Entitäten, deren neuer Zustand noch nicht in die App-Datenbank geschrieben wurde. */
   dirty = new Set<string>();
+  /** Zähler für Änderungen an der Entity-/Device-/Area-Registry. */
+  registryVersion = 0;
   areas: HaArea[] = [];
+
   status: HaStatus = {
     rest: "unknown",
     websocket: "closed",
