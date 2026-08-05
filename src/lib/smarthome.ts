@@ -623,6 +623,7 @@ export function isCameraDevice(device: Device) {
 }
 
 export const deviceSourceLabel: Record<string, string> = {
+  homeassistant: "Home Assistant",
   tuya: "Smart Life (Tuya)",
   tapo: "Tapo (TP-Link)",
   dreame: "Dreame Cloud",
