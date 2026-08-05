@@ -100,6 +100,8 @@ class HomeAssistantService {
 
   /** Cache der letzten bekannten Zustände (entity_id -> Entität). */
   states = new Map<string, HaEntity>();
+  /** Entitäten, deren neuer Zustand noch nicht in die App-Datenbank geschrieben wurde. */
+  dirty = new Set<string>();
   areas: HaArea[] = [];
   status: HaStatus = {
     rest: "unknown",
