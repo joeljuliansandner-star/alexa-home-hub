@@ -128,24 +128,23 @@ export function HomeAssistantPanel() {
           <Section title="Entwicklerbereich (Debug)">
             <Panel>
               <EntryList>
-                <EntryRow title="REST API" meta={restLabel[status.rest] ?? status.rest} />
+                <EntryRow meta={restLabel[status.rest] ?? status.rest}>REST API</EntryRow>
+                <EntryRow meta={websocketLabel[status.websocket] ?? status.websocket}>
+                  WebSocket API
+                </EntryRow>
+                <EntryRow meta={status.latencyMs != null ? `${status.latencyMs} ms` : "—"}>
+                  Antwortzeit
+                </EntryRow>
+                <EntryRow meta={status.version ?? "unbekannt"}>Home Assistant Version</EntryRow>
+                <EntryRow meta={status.locationName ?? "—"}>Standort</EntryRow>
+                <EntryRow meta={String(status.entityCount)}>Entitäten</EntryRow>
+                <EntryRow meta={String(status.deviceCount)}>Geräte (Registry)</EntryRow>
                 <EntryRow
-                  title="WebSocket API"
-                  meta={websocketLabel[status.websocket] ?? status.websocket}
-                />
-                <EntryRow
-                  title="Antwortzeit"
-                  meta={status.latencyMs != null ? `${status.latencyMs} ms` : "—"}
-                />
-                <EntryRow title="Home Assistant Version" meta={status.version ?? "unbekannt"} />
-                <EntryRow title="Standort" meta={status.locationName ?? "—"} />
-                <EntryRow title="Entitäten" meta={String(status.entityCount)} />
-                <EntryRow title="Geräte (Registry)" meta={String(status.deviceCount)} />
-                <EntryRow
-                  title="Letzte Synchronisierung"
                   meta={status.lastSyncAt ? new Date(status.lastSyncAt).toLocaleString("de-DE") : "Noch nie"}
-                />
-                <EntryRow title="Letzter Fehler" meta={status.lastError ?? "Keiner"} />
+                >
+                  Letzte Synchronisierung
+                </EntryRow>
+                <EntryRow meta={status.lastError ?? "Keiner"}>Letzter Fehler</EntryRow>
               </EntryList>
             </Panel>
           </Section>
