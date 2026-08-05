@@ -355,8 +355,7 @@ class HomeAssistantService {
     };
   }
 
-    }
-  }
+
 
   /** Sucht Home Assistant automatisch im Heimnetz. */
   async discover(extraCandidates: string[] = []) {
