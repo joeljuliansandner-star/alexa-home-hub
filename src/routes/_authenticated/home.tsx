@@ -1,37 +1,47 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   LayoutDashboard,
   Lightbulb,
-  Plug,
-  RefreshCw,
+  LogOut,
+  Moon,
+  PlayCircle,
+  ShieldCheck,
+  Sparkles,
   Star,
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { WeatherClock } from "@/components/WeatherClock";
 import { DeviceCard } from "@/components/DeviceCard";
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { HeroHeader } from "@/components/dashboard/HeroHeader";
+import { StatusCards } from "@/components/dashboard/StatusCards";
+import { WeatherPanel } from "@/components/dashboard/WeatherPanel";
+import { RoomCard } from "@/components/rooms/RoomCard";
 import { Button } from "@/components/ui/button";
+import {
+  EmptyState,
+  Pressable,
+  Section,
+  Skeleton,
+  SkeletonGrid,
+  grids,
+  stacks,
+} from "@/components/kit";
 import {
   useActivity,
   useBulkToggleKind,
   useDevices,
   useRooms,
+  useRunScene,
+  useScenes,
   useToggleFavorite,
   useUpdateDevice,
 } from "@/lib/smarthome";
 import { cn } from "@/lib/utils";
-import {
-  EmptyState,
-  LoadingState,
-  PageHeader,
-  Section,
-  StatTile,
-  grids,
-  stacks,
-} from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/home")({
   ssr: false,
@@ -40,133 +50,131 @@ export const Route = createFileRoute("/_authenticated/home")({
       { title: "Startseite – Smarthome Control" },
       {
         name: "description",
-        content: "Begrüßung, Status deines Zuhauses, Favoriten und Wetter in Wurzen.",
+        content: "Begrüßung, Hausstatus, Wetter, Favoriten, Räume und Aktivitäten auf einen Blick.",
       },
       { property: "og:title", content: "Startseite – Smarthome Control" },
       {
         property: "og:description",
-        content: "Begrüßung, Status deines Zuhauses, Favoriten und Wetter in Wurzen.",
+        content: "Begrüßung, Hausstatus, Wetter, Favoriten, Räume und Aktivitäten auf einen Blick.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: HomePage,
 });
 
-function greeting() {
-  const hour = new Date().getHours();
-  if (hour < 5) return "Gute Nacht";
-  if (hour < 11) return "Guten Morgen";
-  if (hour < 18) return "Guten Tag";
-  return "Guten Abend";
-}
-
 function HomePage() {
   const devices = useDevices();
   const rooms = useRooms();
   const activity = useActivity();
+  const scenes = useScenes();
   const updateDevice = useUpdateDevice();
   const toggleFavorite = useToggleFavorite();
   const bulkToggle = useBulkToggleKind();
+  const runScene = useRunScene();
   const navigate = useNavigate();
+  const [away, setAway] = useState(false);
+  const [armed, setArmed] = useState(false);
 
-  const list = devices.data ?? [];
+  const list = useMemo(() => devices.data ?? [], [devices.data]);
   const lights = list.filter((d) => d.kind === "light");
-  const plugs = list.filter((d) => d.kind === "plug");
   const favorites = list.filter((d) => d.is_favorite);
-  const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
+  const switchable = list.filter((d) => d.kind !== "sensor" && d.kind !== "thermostat");
+  const activeCount = switchable.filter((d) => d.is_on).length;
   const offline = list.filter((d) => !d.is_online);
+  const roomList = rooms.data ?? [];
+  const firstScene = (scenes.data ?? [])[0];
 
-  const lastSync = useMemo(() => {
-    if (!list.length) return "—";
-    const newest = Math.max(...list.map((d) => new Date(d.updated_at).getTime()));
-    const minutes = Math.round((Date.now() - newest) / 60_000);
-    if (minutes <= 1) return "gerade eben";
-    if (minutes < 60) return `vor ${minutes} Min.`;
-    return new Date(newest).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-  }, [list]);
+  const allOff = (label: string, target = switchable) =>
+    bulkToggle.mutate(
+      { devices: target.filter((d) => d.is_on), on: false },
+      { onSuccess: (count) => toast.success(`${label}: ${count} Geräte ausgeschaltet`) },
+    );
 
-  const anyLightOn = lights.some((d) => d.is_on);
-  const anyPlugOn = plugs.some((d) => d.is_on);
-
-  const stats = [
-    { label: "Aktive Geräte", value: String(activeCount), tone: "primary" as const },
-    { label: "Räume", value: String((rooms.data ?? []).length), tone: "accent" as const },
-    { label: "Offline", value: String(offline.length), tone: offline.length ? ("destructive" as const) : ("muted" as const) },
-    { label: "Letzte Sync", value: lastSync, tone: "muted" as const },
-  ];
-
-  if (devices.isLoading) {
-    return <LoadingState />;
-  }
+  const loading = devices.isLoading;
 
   return (
     <div className={stacks.page}>
-      <PageHeader
-        title={`${greeting()}, Joel`}
-        description={
-          activeCount > 0
-            ? `${activeCount} Geräte sind gerade aktiv.`
-            : "Aktuell ist alles ausgeschaltet."
+      <HeroHeader
+        name="Joel"
+        away={away}
+        onAwayChange={setAway}
+        subtitle={
+          loading
+            ? "Dein Zuhause wird geladen…"
+            : activeCount > 0
+              ? `${activeCount} von ${switchable.length} Geräten sind aktiv.`
+              : "Alles ruhig – nichts ist eingeschaltet."
         }
       />
 
-      <WeatherClock />
+      <WeatherPanel />
 
-      <section className={grids.stats}>
-        {stats.map((stat) => (
-          <StatTile key={stat.label} label={stat.label} value={stat.value} tone={stat.tone} />
-        ))}
-      </section>
+      <Section title="Status">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-[86px] rounded-2xl" />
+            ))}
+          </div>
+        ) : (
+          <StatusCards devices={list} />
+        )}
+      </Section>
 
       <Section title="Schnellaktionen">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
           <QuickAction
             icon={Lightbulb}
-            label="Alle Lichter"
-            hint={`${lights.filter((d) => d.is_on).length}/${lights.length} an`}
-            active={anyLightOn}
-            disabled={!lights.length || bulkToggle.isPending}
-            onClick={() =>
-              bulkToggle.mutate(
-                { devices: lights, on: !anyLightOn },
-                {
-                  onSuccess: (count) =>
-                    toast.success(`${count} Lichter ${anyLightOn ? "aus" : "an"}geschaltet`),
-                },
-              )
-            }
+            label="Alle Lichter aus"
+            hint={`${lights.filter((d) => d.is_on).length} an`}
+            disabled={!lights.some((d) => d.is_on) || bulkToggle.isPending}
+            onPress={() => allOff("Lichter", lights)}
           />
           <QuickAction
-            icon={Plug}
-            label="Alle Steckdosen"
-            hint={`${plugs.filter((d) => d.is_on).length}/${plugs.length} an`}
-            active={anyPlugOn}
-            disabled={!plugs.length || bulkToggle.isPending}
-            onClick={() =>
-              bulkToggle.mutate(
-                { devices: plugs, on: !anyPlugOn },
-                {
-                  onSuccess: (count) =>
-                    toast.success(`${count} Steckdosen ${anyPlugOn ? "aus" : "an"}geschaltet`),
-                },
-              )
-            }
-          />
-          <QuickAction
-            icon={Star}
-            label="Favoriten"
-            hint={`${favorites.length} gemerkt`}
-            onClick={() => {
-              document
-                .getElementById("favoriten")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            icon={LogOut}
+            label="Haus verlassen"
+            hint="Alles ausschalten"
+            disabled={bulkToggle.isPending || !activeCount}
+            onPress={() => {
+              setAway(true);
+              allOff("Haus verlassen");
             }}
           />
           <QuickAction
-            icon={LayoutDashboard}
-            label="Geräteübersicht"
-            hint={`${list.length} Geräte`}
-            onClick={() => navigate({ to: "/dashboard" })}
+            icon={Moon}
+            label="Gute Nacht"
+            hint="Lichter & Steckdosen"
+            disabled={bulkToggle.isPending || !activeCount}
+            onPress={() => {
+              allOff("Gute Nacht");
+            }}
+          />
+          <QuickAction
+            icon={ShieldCheck}
+            label="Alarm"
+            hint={armed ? "aktiviert" : "deaktiviert"}
+            active={armed}
+            onPress={() => {
+              setArmed((value) => !value);
+              toast.success(armed ? "Alarm deaktiviert" : "Alarm aktiviert");
+            }}
+          />
+          <QuickAction
+            icon={firstScene ? PlayCircle : Sparkles}
+            label={firstScene ? firstScene.name : "Szenen"}
+            hint={firstScene ? "Szene starten" : "Szene anlegen"}
+            disabled={runScene.isPending}
+            onPress={() => {
+              if (firstScene) {
+                runScene.mutate(firstScene, {
+                  onSuccess: () => toast.success(`Szene „${firstScene.name}" gestartet`),
+                });
+              } else {
+                navigate({ to: "/scenes" });
+              }
+            }}
           />
         </div>
       </Section>
@@ -181,94 +189,121 @@ function HomePage() {
           </Link>
         }
       >
-        {favorites.length ? (
+        {loading ? (
+          <SkeletonGrid count={3} />
+        ) : favorites.length ? (
           <div className={grids.cards}>
-            {favorites.map((device) => (
-              <DeviceCard
+            {favorites.map((device, index) => (
+              <div
                 key={device.id}
-                device={device}
-                onToggle={(next) =>
-                  updateDevice.mutate({
-                    device,
-                    patch: { is_on: next },
-                    log: `${device.name} ${next ? "eingeschaltet" : "ausgeschaltet"}`,
-                  })
-                }
-                onBrightness={(value) => updateDevice.mutate({ device, patch: { brightness: value } })}
-                onFavorite={(value) => toggleFavorite.mutate({ device, value })}
-                onOpen={() =>
-                  navigate({ to: "/device/$deviceId", params: { deviceId: device.id } })
-                }
-              />
+                className="rise-in h-full"
+                style={{ animationDelay: `${index * 45}ms` }}
+              >
+                <DeviceCard
+                  device={device}
+                  onToggle={(next) =>
+                    updateDevice.mutate({
+                      device,
+                      patch: { is_on: next },
+                      log: `${device.name} ${next ? "eingeschaltet" : "ausgeschaltet"}`,
+                    })
+                  }
+                  onBrightness={(value) =>
+                    updateDevice.mutate({ device, patch: { brightness: value } })
+                  }
+                  onFavorite={(value) => toggleFavorite.mutate({ device, value })}
+                  onOpen={() =>
+                    navigate({ to: "/device/$deviceId", params: { deviceId: device.id } })
+                  }
+                />
+              </div>
             ))}
           </div>
         ) : (
           <EmptyState
+            className="text-left"
             description={
               <span className="flex flex-col items-start gap-3">
                 <span>
-                  Noch keine Favoriten. Markiere Geräte in der Übersicht mit dem Stern, um sie
-                  hier schnell zu erreichen.
+                  Noch keine Favoriten. Markiere Geräte mit dem Stern – ein Tipp schaltet, langes
+                  Drücken öffnet die Details.
                 </span>
                 <Button asChild variant="secondary" className="min-h-11">
                   <Link to="/dashboard">Geräte auswählen</Link>
                 </Button>
               </span>
             }
-            className="text-left"
           />
         )}
       </Section>
 
-      <Section title="Benachrichtigungen">
-        <div className="panel-glass divide-y divide-border p-1">
-          {offline.length ? (
-            <div className="flex items-start gap-3 px-3 py-3">
-              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-destructive/15 text-destructive">
-                <WifiOff className="size-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">
-                  {offline.length} {offline.length === 1 ? "Gerät ist" : "Geräte sind"} offline
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {offline.map((d) => d.name).join(", ")}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start gap-3 px-3 py-3">
-              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-success/15 text-success">
-                <Bell className="size-4" />
-              </span>
-              <div>
-                <p className="text-sm font-medium">Alles in Ordnung</p>
-                <p className="text-xs text-muted-foreground">Alle Geräte sind erreichbar.</p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-start gap-3 px-3 py-3">
-            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
-              <RefreshCw className="size-4" />
-            </span>
-            <div>
-              <p className="text-sm font-medium">Letzte Synchronisierung</p>
-              <p className="text-xs text-muted-foreground">{lastSync}</p>
-            </div>
+      <Section
+        title="Räume"
+        action={
+          <Link to="/rooms" className="text-xs text-muted-foreground hover:text-foreground">
+            Alle Räume
+          </Link>
+        }
+      >
+        {loading ? (
+          <SkeletonGrid count={3} />
+        ) : roomList.length ? (
+          <div className={grids.cards}>
+            {roomList.slice(0, 6).map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                devices={list.filter((d) => d.room_id === room.id)}
+              />
+            ))}
           </div>
+        ) : (
+          <EmptyState description="Noch keine Räume – sie kommen beim nächsten Abgleich automatisch dazu." />
+        )}
+      </Section>
 
-          {(activity.data ?? []).slice(0, 3).map((entry) => (
-            <div key={entry.id} className="flex items-center justify-between gap-4 px-3 py-3">
-              <span className="truncate text-sm">{entry.message}</span>
-              <time className="shrink-0 text-xs text-muted-foreground">
-                {new Date(entry.created_at).toLocaleTimeString("de-DE", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </time>
-            </div>
-          ))}
+      <Section
+        title="Letzte Aktivitäten"
+        action={
+          <span className="text-xs text-muted-foreground">
+            {offline.length ? `${offline.length} offline` : "alles erreichbar"}
+          </span>
+        }
+      >
+        {activity.data?.length ? (
+          <ActivityFeed entries={activity.data} />
+        ) : (
+          <div className="panel-glass flex items-center gap-3 p-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-success/15 text-success">
+              {offline.length ? (
+                <WifiOff className="size-4 text-destructive" />
+              ) : (
+                <Bell className="size-4" />
+              )}
+            </span>
+            <p className="text-sm text-muted-foreground">
+              {offline.length
+                ? `${offline.length} Geräte sind offline.`
+                : "Noch keine Ereignisse aufgezeichnet."}
+            </p>
+          </div>
+        )}
+      </Section>
+
+      <Section title="Weiter">
+        <div className="grid grid-cols-2 gap-3">
+          <Button asChild variant="secondary" className="h-14 justify-start gap-2 rounded-2xl">
+            <Link to="/dashboard">
+              <LayoutDashboard className="size-4 text-primary" />
+              Geräteübersicht
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" className="h-14 justify-start gap-2 rounded-2xl">
+            <Link to="/scenes">
+              <Star className="size-4 text-primary" />
+              Szenen
+            </Link>
+          </Button>
         </div>
       </Section>
     </div>
@@ -281,29 +316,28 @@ function QuickAction({
   hint,
   active,
   disabled,
-  onClick,
+  onPress,
 }: {
-  icon: typeof Lightbulb;
+  icon: LucideIcon;
   label: string;
   hint: string;
   active?: boolean;
   disabled?: boolean;
-  onClick: () => void;
+  onPress: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <Pressable
+      onPress={onPress}
       disabled={disabled}
       className={cn(
-        "panel panel-hover flex h-full min-h-24 flex-col items-start justify-between gap-3 p-4 text-left",
-        "hover:-translate-y-0.5 disabled:opacity-50",
+        "panel panel-hover flex h-full min-h-28 flex-col items-start justify-between gap-3 p-4",
+        "hover:-translate-y-0.5",
         active && "tile-on",
       )}
     >
       <span
         className={cn(
-          "flex size-10 items-center justify-center rounded-xl transition-colors",
+          "flex size-11 items-center justify-center rounded-2xl transition-colors duration-300",
           active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground",
         )}
       >
@@ -313,6 +347,6 @@ function QuickAction({
         <span className="block truncate text-sm font-semibold">{label}</span>
         <span className="block truncate text-xs text-muted-foreground">{hint}</span>
       </span>
-    </button>
+    </Pressable>
   );
 }
