@@ -405,6 +405,7 @@ class HomeAssistantService {
           const data = message.event?.data;
           if (data?.entity_id && data.new_state) {
             this.states.set(data.entity_id, data.new_state as HaEntity);
+            this.dirty.add(data.entity_id);
             this.emit();
           }
           break;
