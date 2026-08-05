@@ -45,25 +45,40 @@ export type HaStatus = {
   baseUrl: string | null;
 };
 
-export const SUPPORTED_DOMAINS = [
-  "light",
-  "switch",
-  "sensor",
-  "binary_sensor",
-  "camera",
-  "cover",
-  "fan",
-  "climate",
-  "vacuum",
-  "media_player",
-  "weather",
-  "scene",
+/**
+ * Es gibt bewusst KEINE Liste unterstützter Gerätetypen mehr.
+ * Alles, was Home Assistant liefert, wird übernommen – ausgenommen reine
+ * System-/Hilfsdomänen ohne Gerätebezug.
+ */
+export const IGNORED_DOMAINS = new Set([
+  "zone",
+  "persistent_notification",
+  "sun",
+  "update",
+  "tts",
+  "stt",
+  "conversation",
+  "todo",
+  "tag",
+  "device_tracker",
+  "script",
   "automation",
-  "lock",
-  "person",
-] as const;
+  "scene",
+  "input_text",
+  "input_boolean",
+  "input_number",
+  "input_select",
+  "input_datetime",
+  "schedule",
+  "timer",
+  "counter",
+  "event",
+  "assist_satellite",
+  "wake_word",
+]);
 
-export type HaDomain = (typeof SUPPORTED_DOMAINS)[number];
+export type HaDomain = string;
+
 
 const STORAGE_KEY = "ha.connection";
 const DISCOVERY_CANDIDATES = [
