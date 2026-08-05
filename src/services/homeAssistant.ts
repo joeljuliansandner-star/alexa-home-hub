@@ -476,7 +476,18 @@ class HomeAssistantService {
           break;
         }
         case "event": {
+          const eventType = message.event?.event_type as string | undefined;
           const data = message.event?.data;
+          if (
+            eventType === "entity_registry_updated" ||
+            eventType === "device_registry_updated" ||
+            eventType === "area_registry_updated"
+          ) {
+            // Neue oder entfernte Geräte/Räume: Abgleich anstoßen.
+            this.registryVersion += 1;
+            this.emit();
+            break;
+          }
           if (data?.entity_id && data.new_state) {
             this.states.set(data.entity_id, data.new_state as HaEntity);
             this.dirty.add(data.entity_id);
@@ -497,10 +508,18 @@ class HomeAssistantService {
   }
 
   private async afterAuth() {
-    await this.send({ type: "subscribe_events", event_type: "state_changed" }).catch(() => null);
+    for (const eventType of [
+      "state_changed",
+      "entity_registry_updated",
+      "device_registry_updated",
+      "area_registry_updated",
+    ]) {
+      await this.send({ type: "subscribe_events", event_type: eventType }).catch(() => null);
+    }
     await this.loadStates().catch(() => null);
     await this.loadAreas().catch(() => null);
   }
+
 
   private scheduleReconnect() {
     if (this.reconnectTimer) return;
