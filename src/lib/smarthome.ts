@@ -183,6 +183,22 @@ export function useUpdateDevice() {
     }) => {
       let note: string | null = null;
 
+      // Home Assistant ist die zentrale Plattform – Befehle laufen über Services.
+      if (
+        device.external_source === "homeassistant" &&
+        device.external_id &&
+        (patch.is_on !== undefined || patch.brightness !== undefined)
+      ) {
+        try {
+          await homeAssistant.control(device.external_id, {
+            ...(patch.is_on !== undefined ? { on: patch.is_on } : {}),
+            ...(patch.brightness !== undefined ? { brightness: patch.brightness } : {}),
+          });
+        } catch (error) {
+          note = error instanceof Error ? error.message : "Home Assistant nicht erreichbar";
+        }
+      }
+
       // Real hardware: try to switch the physical Tapo device first.
       if (device.external_source === "tapo" && device.external_id && patch.is_on !== undefined) {
         try {
