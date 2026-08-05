@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { useHaConnection, useHomeAssistantLive } from "@/services/homeAssistant.hooks";
+import { useTelemetryRecorder } from "@/lib/os/telemetry";
 import { GlobalSearch, GlobalSearchButton } from "@/components/os/GlobalSearch";
 import { NotificationCenter } from "@/components/os/NotificationCenter";
 
@@ -52,6 +53,7 @@ const nav = [
 ] as const;
 
 const osNav = [
+  { to: "/insights", label: "Smart Insights", icon: Brain },
   { to: "/status", label: "Hausstatus", icon: Activity },
   { to: "/energy", label: "Energie", icon: Zap },
   { to: "/cameras", label: "Kameras", icon: Camera },
@@ -67,6 +69,9 @@ function AuthenticatedLayout() {
   // Home Assistant ist die einzige Datenquelle: verbinden, live aktualisieren
   // und Registry-Änderungen automatisch abgleichen.
   useHomeAssistantLive();
+
+  // Version 5.0: lokale Telemetrie für Muster- und Trendanalysen aufzeichnen.
+  useTelemetryRecorder();
 
   const haConnection = useHaConnection();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
