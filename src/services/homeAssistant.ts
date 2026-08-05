@@ -837,33 +837,37 @@ export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
   };
 }
 
+/**
+ * Ordnet eine beliebige Home-Assistant-Domäne einer Darstellungskategorie zu.
+ * Unbekannte (auch zukünftige) Domänen landen automatisch bei „sensor“ und
+ * erscheinen damit ohne Codeänderung in der App.
+ */
 export function kindForDomain(domain: string) {
   switch (domain) {
     case "light":
       return "light" as const;
     case "switch":
     case "fan":
-    case "automation":
-    case "scene":
     case "lock":
+    case "humidifier":
+    case "siren":
+    case "valve":
+    case "water_heater":
       return "plug" as const;
     case "climate":
       return "thermostat" as const;
     case "cover":
       return "blind" as const;
     case "media_player":
+    case "remote":
       return "speaker" as const;
     case "vacuum":
-      return "vacuum" as const;
-    case "sensor":
-    case "binary_sensor":
-    case "camera":
-    case "weather":
-    case "person":
-      return "sensor" as const;
+    case "lawn_mower":
+ության      return "vacuum" as const;
     default:
-      return null;
+      return "sensor" as const;
   }
+
 }
 
 export const homeAssistant = new HomeAssistantService();
