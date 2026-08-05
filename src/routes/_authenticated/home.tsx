@@ -25,7 +25,6 @@ import { StatusCards } from "@/components/dashboard/StatusCards";
 import { WeatherPanel } from "@/components/dashboard/WeatherPanel";
 import { RoomCard } from "@/components/rooms/RoomCard";
 import { HouseStatusPanel } from "@/components/os/HouseStatusPanel";
-import { AssistantPanel } from "@/components/os/AssistantPanel";
 import { DailyBriefing } from "@/components/os/DailyBriefing";
 import { SmartInsightsList } from "@/components/os/SmartInsightsList";
 import { useSmartInsights } from "@/lib/os/intelligence.hooks";
@@ -87,6 +86,7 @@ function HomePage() {
   const navigate = useNavigate();
   const haEntities = useHaEntities();
   const haStatus = useHaStatus();
+  const insights = useSmartInsights();
   const { pins } = usePins();
   const [away, setAway] = useState(false);
   const [armed, setArmed] = useState(false);
@@ -123,6 +123,8 @@ function HomePage() {
         }
       />
 
+      <DailyBriefing />
+
       <WeatherPanel />
 
       <Section
@@ -136,7 +138,14 @@ function HomePage() {
         <HouseStatusPanel entities={haEntities} status={haStatus} compact />
       </Section>
 
-      <Section title="Assistent">
+      <Section
+        title="Assistent"
+        action={
+          <Link to="/insights" className="text-xs text-muted-foreground hover:text-foreground">
+            Alle Insights
+          </Link>
+        }
+      >
         <SmartInsightsList insights={insights} limit={4} />
       </Section>
 

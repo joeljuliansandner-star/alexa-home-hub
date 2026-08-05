@@ -19,6 +19,7 @@ import {
   LogOut,
   House,
   Activity,
+  Brain,
   Zap,
   Camera,
   Bell,
