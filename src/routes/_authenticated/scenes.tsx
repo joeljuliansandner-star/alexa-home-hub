@@ -62,6 +62,9 @@ function ScenesPage() {
         actions={<NewSceneDialog />}
       />
 
+      <HaScenesSection />
+
+
       {scenes.isLoading ? (
         <LoadingState size="section" />
       ) : scenes.data?.length ? (
