@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { controlTapoDevice } from "@/lib/tapo.functions";
+import { homeAssistant } from "@/services/homeAssistant";
 import { controlTuyaDevice, refreshTuyaStates } from "@/lib/tuya.functions";
 import type { Tables } from "@/integrations/supabase/types";
 import {
