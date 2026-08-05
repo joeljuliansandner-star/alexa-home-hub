@@ -13,6 +13,7 @@
  * Alle Seiten dürfen ausschließlich diesen Service verwenden.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { haProxy } from "@/lib/homeAssistant.functions";
 
 export type HaConnection = {
   baseUrl: string;
