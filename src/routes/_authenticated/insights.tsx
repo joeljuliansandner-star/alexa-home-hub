@@ -69,11 +69,12 @@ function InsightsPage() {
       <DailyBriefing />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile icon={Brain} label="Score" value={`${report.score}`} />
-        <StatTile icon={Lightbulb} label="Hinweise" value={`${insights.length}`} />
-        <StatTile icon={Zap} label="Trend" value={energy.trend} />
-        <StatTile icon={HeartPulse} label="Kritisch" value={`${criticalCount}`} />
+        <StatTile label="Score" value={`${report.score}`} />
+        <StatTile label="Hinweise" value={`${insights.length}`} />
+        <StatTile label="Trend" value={energy.trend} />
+        <StatTile label="Kritisch" value={`${criticalCount}`} tone={criticalCount ? "warn" : "ok"} />
       </div>
+
 
       <Tabs defaultValue="bericht">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">

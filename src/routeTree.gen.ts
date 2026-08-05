@@ -17,6 +17,7 @@ import { Route as AuthenticatedCamerasRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEnergyRouteImport } from './routes/_authenticated/energy'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedRoomsRouteImport } from './routes/_authenticated/rooms'
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
@@ -68,6 +69,11 @@ const AuthenticatedEnergyRoute = AuthenticatedEnergyRouteImport.update({
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedIntegrationsRoute =
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/energy': typeof AuthenticatedEnergyRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/insights': typeof AuthenticatedInsightsRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/energy': typeof AuthenticatedEnergyRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/insights': typeof AuthenticatedInsightsRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/energy': typeof AuthenticatedEnergyRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/rooms': typeof AuthenticatedRoomsRoute
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/energy'
     | '/home'
+    | '/insights'
     | '/integrations'
     | '/rooms'
     | '/scenes'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/energy'
     | '/home'
+    | '/insights'
     | '/integrations'
     | '/rooms'
     | '/scenes'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/energy'
     | '/_authenticated/home'
+    | '/_authenticated/insights'
     | '/_authenticated/integrations'
     | '/_authenticated/rooms'
     | '/_authenticated/scenes'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/insights': {
+      id: '/_authenticated/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/integrations': {
@@ -425,6 +444,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEnergyRoute: typeof AuthenticatedEnergyRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedRoomsRoute: typeof AuthenticatedRoomsRoute
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
@@ -445,6 +465,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEnergyRoute: AuthenticatedEnergyRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedRoomsRoute: AuthenticatedRoomsRoute,
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
@@ -471,13 +492,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
