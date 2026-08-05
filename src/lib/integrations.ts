@@ -125,18 +125,19 @@ export const integrations: IntegrationDef[] = [
   {
     id: "homeassistant",
     name: "Home Assistant",
-    description: "Brücke ins Heimnetz für lokale Geräte und Zigbee-Hubs.",
+    description: "Zentrale Plattform: Geräte, Räume, Sensoren und Live-Zustände aus Home Assistant.",
     icon: Server,
-    tone: "muted",
-    externalSource: null,
-    live: false,
+    tone: "primary",
+    externalSource: "homeassistant",
+    live: true,
     account: [
-      { label: "Server", value: "http://homeassistant.local:8123" },
-      { label: "Token", value: "Noch nicht hinterlegt" },
+      { label: "Server", value: "Adresse im Einrichtungsassistenten" },
+      { label: "Zugang", value: "Long Lived Access Token" },
+      { label: "Live-Updates", value: "WebSocket (state_changed)" },
     ],
     advanced: [
-      { label: "Nur ausgewählte Entitäten", hint: "Filter nach Bereich oder Label" },
-      { label: "Lokale Verbindung bevorzugen", hint: "Cloud nur als Rückfallebene" },
+      { label: "Bereiche übernehmen", hint: "Räume kommen aus den Home-Assistant-Areas" },
+      { label: "Unterstützte Domains", hint: "light, switch, sensor, climate, cover, camera u. a." },
     ],
   },
   {
