@@ -1,4 +1,11 @@
-import { Link, Outlet, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -17,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTuyaLiveSync } from "@/lib/smarthome";
+import { useHaConnection, useHomeAssistantLive } from "@/services/homeAssistant.hooks";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -44,6 +52,18 @@ function AuthenticatedLayout() {
 
   // Änderungen aus der Smart-Life-App laufend ins Panel übernehmen
   useTuyaLiveSync();
+
+  // Home Assistant: beim App-Start automatisch verbinden und live aktualisieren
+  useHomeAssistantLive();
+  const haConnection = useHaConnection();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  useEffect(() => {
+    if (haConnection.isLoading) return;
+    if (haConnection.data) return;
+    if (pathname.startsWith("/setup") || pathname.startsWith("/integration")) return;
+    navigate({ to: "/setup", replace: true });
+  }, [haConnection.isLoading, haConnection.data, pathname, navigate]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? "Gastzugang"));

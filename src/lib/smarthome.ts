@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { controlTapoDevice } from "@/lib/tapo.functions";
+import { homeAssistant } from "@/services/homeAssistant";
 import { controlTuyaDevice, refreshTuyaStates } from "@/lib/tuya.functions";
 import type { Tables } from "@/integrations/supabase/types";
 import {
@@ -182,6 +183,22 @@ export function useUpdateDevice() {
       log?: string;
     }) => {
       let note: string | null = null;
+
+      // Home Assistant ist die zentrale Plattform – Befehle laufen über Services.
+      if (
+        device.external_source === "homeassistant" &&
+        device.external_id &&
+        (patch.is_on !== undefined || patch.brightness !== undefined)
+      ) {
+        try {
+          await homeAssistant.control(device.external_id, {
+            ...(patch.is_on !== undefined ? { on: patch.is_on } : {}),
+            ...(patch.brightness !== undefined ? { brightness: patch.brightness } : {}),
+          });
+        } catch (error) {
+          note = error instanceof Error ? error.message : "Home Assistant nicht erreichbar";
+        }
+      }
 
       // Real hardware: try to switch the physical Tapo device first.
       if (device.external_source === "tapo" && device.external_id && patch.is_on !== undefined) {
@@ -568,6 +585,13 @@ export function useBulkToggleKind() {
   return useMutation({
     mutationFn: async ({ devices, on }: { devices: Device[]; on: boolean }) => {
       for (const device of devices) {
+        if (device.external_source === "homeassistant" && device.external_id) {
+          try {
+            await homeAssistant.control(device.external_id, { on });
+          } catch {
+            /* Gerät offline – lokaler Zustand wird trotzdem gesetzt */
+          }
+        }
         if (device.external_source === "tuya" && device.external_id) {
           try {
             await controlTuyaDevice({ data: { externalId: device.external_id, on } });
@@ -599,6 +623,7 @@ export function isCameraDevice(device: Device) {
 }
 
 export const deviceSourceLabel: Record<string, string> = {
+  homeassistant: "Home Assistant",
   tuya: "Smart Life (Tuya)",
   tapo: "Tapo (TP-Link)",
   dreame: "Dreame Cloud",

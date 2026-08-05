@@ -339,6 +339,45 @@ export type Database = {
           },
         ]
       }
+      ha_connections: {
+        Row: {
+          access_token: string
+          base_url: string
+          created_at: string
+          entity_count: number
+          ha_version: string | null
+          last_error: string | null
+          last_sync_at: string | null
+          location_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          base_url: string
+          created_at?: string
+          entity_count?: number
+          ha_version?: string | null
+          last_error?: string | null
+          last_sync_at?: string | null
+          location_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          base_url?: string
+          created_at?: string
+          entity_count?: number
+          ha_version?: string | null
+          last_error?: string | null
+          last_sync_at?: string | null
+          location_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       rooms: {
         Row: {
           created_at: string
