@@ -817,7 +817,23 @@ export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
     name,
     kind,
     room_id: roomId,
-    is_on: ["on", "open", "playing", "cleaning", "home", "heat", "cool", "auto"].includes(entity.state),
+    is_on: [
+      "on",
+      "open",
+      "opening",
+      "playing",
+      "cleaning",
+      "mowing",
+      "running",
+      "home",
+      "heat",
+      "cool",
+      "heat_cool",
+      "dry",
+      "fan_only",
+      "auto",
+    ].includes(entity.state),
+
     brightness:
       brightnessRaw !== undefined
         ? Math.round((brightnessRaw / 255) * 100)
