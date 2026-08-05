@@ -568,7 +568,42 @@ class HomeAssistantService {
     return patch.on ? this.turnOn(entityId) : this.turnOff(entityId);
   }
 
+  /* ---------------------------- Live-Übernahme --------------------------- */
+
+  /**
+   * Schreibt die per WebSocket gemeldeten Zustandsänderungen in die
+   * Gerätetabelle der App. Gibt die Anzahl aktualisierter Geräte zurück.
+   */
+  async flushLiveStates(): Promise<number> {
+    if (!this.dirty.size) return 0;
+    const entityIds = [...this.dirty];
+    this.dirty.clear();
+
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) return 0;
+
+    const { data: rows } = await supabase
+      .from("devices")
+      .select("id, external_id")
+      .eq("user_id", user.user.id)
+      .eq("external_source", "homeassistant")
+      .in("external_id", entityIds);
+
+    let changed = 0;
+    for (const row of rows ?? []) {
+      const entity = row.external_id ? this.states.get(row.external_id) : undefined;
+      if (!entity) continue;
+      const patch = entityToDeviceRow(entity, null);
+      if (!patch) continue;
+      const { room_id: _ignored, name: _name, ...rest } = patch;
+      const { error } = await supabase.from("devices").update(rest).eq("id", row.id);
+      if (!error) changed += 1;
+    }
+    return changed;
+  }
+
   /* ------------------------------ Abgleich ------------------------------- */
+
 
   /** Holt Entitäten und Bereiche und schreibt sie in Räume/Geräte der App. */
   async sync() {
