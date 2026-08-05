@@ -797,7 +797,146 @@ class HomeAssistantService {
     };
   }
 
+  /* --------------------- Erweiterte Steuerung (Services) ------------------ */
+
+  /** Beliebiger Service-Aufruf – deckt auch zukünftige Integrationen ab. */
+  async call(domain: string, service: string, data: Record<string, unknown> = {}) {
+    return this.callService(domain, service, data);
+  }
+
+  async setRgbColor(entityId: string, rgb: [number, number, number]) {
+    return this.callService("light", "turn_on", { entity_id: entityId, rgb_color: rgb });
+  }
+
+  async setColorTemp(entityId: string, kelvin: number) {
+    return this.callService("light", "turn_on", { entity_id: entityId, color_temp_kelvin: kelvin });
+  }
+
+  async setCoverPosition(entityId: string, position: number) {
+    return this.callService("cover", "set_cover_position", {
+      entity_id: entityId,
+      position: Math.max(0, Math.min(100, Math.round(position))),
+    });
+  }
+
+  async stopCover(entityId: string) {
+    return this.callService("cover", "stop_cover", { entity_id: entityId });
+  }
+
+  async setFanMode(entityId: string, fanMode: string) {
+    return this.callService("climate", "set_fan_mode", { entity_id: entityId, fan_mode: fanMode });
+  }
+
+  async setPresetMode(entityId: string, preset: string) {
+    return this.callService(domainOf(entityId), "set_preset_mode", {
+      entity_id: entityId,
+      preset_mode: preset,
+    });
+  }
+
+  async setSource(entityId: string, source: string) {
+    return this.callService("media_player", "select_source", { entity_id: entityId, source });
+  }
+
+  async mediaCommand(entityId: string, command: "play" | "pause" | "stop" | "next" | "previous") {
+    const service = {
+      play: "media_play",
+      pause: "media_pause",
+      stop: "media_stop",
+      next: "media_next_track",
+      previous: "media_previous_track",
+    }[command];
+    return this.callService("media_player", service, { entity_id: entityId });
+  }
+
+  async setVacuumFanSpeed(entityId: string, fanSpeed: string) {
+    return this.callService("vacuum", "set_fan_speed", { entity_id: entityId, fan_speed: fanSpeed });
+  }
+
+  /* ---------------------- Szenen, Skripte, Automationen ------------------- */
+
+  /** Alle Szenen-Entitäten aus Home Assistant. */
+  listScenes(): HaEntity[] {
+    return [...this.states.values()].filter((e) => domainOf(e.entity_id) === "scene");
+  }
+
+  /** Alle Automations-Entitäten aus Home Assistant. */
+  listAutomations(): HaEntity[] {
+    return [...this.states.values()].filter((e) => domainOf(e.entity_id) === "automation");
+  }
+
+  async activateScene(entityId: string) {
+    return this.callService("scene", "turn_on", { entity_id: entityId });
+  }
+
+  async triggerAutomation(entityId: string) {
+    return this.callService("automation", "trigger", { entity_id: entityId });
+  }
+
+  async setAutomationEnabled(entityId: string, enabled: boolean) {
+    return this.callService("automation", enabled ? "turn_on" : "turn_off", { entity_id: entityId });
+  }
+
+  async runScript(entityId: string) {
+    return this.callService("script", "turn_on", { entity_id: entityId });
+  }
+
+  /* ----------------------------- Zusatzdaten ------------------------------ */
+
+  /** Persistente Benachrichtigungen aus Home Assistant. */
+  async notifications() {
+    try {
+      const list = await this.send<
+        { notification_id: string; title?: string; message: string; created_at?: string }[]
+      >({ type: "persistent_notification/get" });
+      return list ?? [];
+    } catch {
+      return [];
+    }
+  }
+
+  async dismissNotification(notificationId: string) {
+    return this.callService("persistent_notification", "dismiss", {
+      notification_id: notificationId,
+    });
+  }
+
+  /** Verlaufsdaten einer Entität (Standard: letzte 24 Stunden). */
+  async history(entityId: string, hours = 24): Promise<HaEntity[]> {
+    const start = new Date(Date.now() - hours * 3600_000).toISOString();
+    const result = await this.rest<HaEntity[][]>(
+      `/history/period/${start}?filter_entity_id=${encodeURIComponent(entityId)}&minimal_response`,
+    );
+    return result?.[0] ?? [];
+  }
+
+  /** Direkter Bild-Endpunkt einer Kamera (Snapshot bzw. MJPEG-Stream). */
+  cameraStreamUrl(entity: HaEntity): string | null {
+    const path = entity.attributes?.["entity_picture"] as string | undefined;
+    if (!path || !this.connection) return null;
+    return `${this.connection.baseUrl}${path}`;
+  }
+
+  /** Globale Suche über alle Entitäten (Name, Entity-ID, Zustand). */
+  search(term: string, limit = 40): HaEntity[] {
+    const needle = term.trim().toLowerCase();
+    if (!needle) return [];
+    const hits: HaEntity[] = [];
+    for (const entity of this.states.values()) {
+      const name = String(entity.attributes?.["friendly_name"] ?? "");
+      if (
+        entity.entity_id.toLowerCase().includes(needle) ||
+        name.toLowerCase().includes(needle) ||
+        entity.state.toLowerCase().includes(needle)
+      ) {
+        hits.push(entity);
+        if (hits.length >= limit) break;
+      }
+    }
+    return hits;
+  }
 }
+
 
 /** Wandelt eine Entität in eine Zeile der bestehenden `devices`-Tabelle. */
 export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
