@@ -758,6 +758,23 @@ class HomeAssistantService {
       }
     }
 
+    /* In Home Assistant gelöschte Geräte auch hier entfernen */
+    let removed = 0;
+    const liveIds = new Set(relevant.map((entity) => entity.entity_id));
+    const { data: known } = await supabase
+      .from("devices")
+      .select("id, external_id")
+      .eq("user_id", userId)
+      .eq("external_source", "homeassistant");
+    const orphans = (known ?? [])
+      .filter((row) => !row.external_id || !liveIds.has(row.external_id))
+      .map((row) => row.id);
+    if (orphans.length) {
+      await supabase.from("scene_actions").delete().in("device_id", orphans);
+      const { error } = await supabase.from("devices").delete().in("id", orphans);
+      if (!error) removed = orphans.length;
+    }
+
     const lastSyncAt = new Date().toISOString();
     await supabase
       .from("ha_connections")
@@ -773,11 +790,13 @@ class HomeAssistantService {
       created,
       updated,
       skipped,
+      removed,
       rooms: areas.length,
       roomsImported,
       durationMs: Math.round(performance.now() - started),
     };
   }
+
 }
 
 /** Wandelt eine Entität in eine Zeile der bestehenden `devices`-Tabelle. */
