@@ -18,6 +18,10 @@ import {
   DoorOpen,
   LogOut,
   House,
+  Activity,
+  Zap,
+  Camera,
+  Bell,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { useHaConnection, useHomeAssistantLive } from "@/services/homeAssistant.hooks";
+import { GlobalSearch, GlobalSearchButton } from "@/components/os/GlobalSearch";
+import { NotificationCenter } from "@/components/os/NotificationCenter";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -45,10 +51,18 @@ const nav = [
   { to: "/settings", label: "Einstellungen", shortLabel: "Setup", icon: Settings2 },
 ] as const;
 
+const osNav = [
+  { to: "/status", label: "Hausstatus", icon: Activity },
+  { to: "/energy", label: "Energie", icon: Zap },
+  { to: "/cameras", label: "Kameras", icon: Camera },
+] as const;
+
 function AuthenticatedLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // Home Assistant ist die einzige Datenquelle: verbinden, live aktualisieren
   // und Registry-Änderungen automatisch abgleichen.
@@ -93,8 +107,21 @@ function AuthenticatedLayout() {
               </span>
             </Link>
 
+            <div className="col-start-2 row-start-1 flex items-center gap-1 md:col-auto md:row-auto">
+              <GlobalSearchButton onClick={() => setSearchOpen(true)} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11 shrink-0"
+                aria-label="Benachrichtigungen öffnen"
+                onClick={() => setNotificationsOpen(true)}
+              >
+                <Bell className="size-4" />
+              </Button>
+            </div>
+
             <nav className="hidden gap-1 md:flex md:flex-col">
-              {nav.map((item) => (
+              {[...nav, ...osNav].map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
@@ -153,6 +180,9 @@ function AuthenticatedLayout() {
         <main className="min-w-0 flex-1 pb-28 md:pb-10">
           <Outlet />
         </main>
+
+        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+        <NotificationCenter open={notificationsOpen} onOpenChange={setNotificationsOpen} />
       </div>
     </div>
   );

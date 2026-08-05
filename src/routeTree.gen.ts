@@ -13,13 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
+import { Route as AuthenticatedCamerasRouteImport } from './routes/_authenticated/cameras'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedEnergyRouteImport } from './routes/_authenticated/energy'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedRoomsRouteImport } from './routes/_authenticated/rooms'
 import { Route as AuthenticatedScenesRouteImport } from './routes/_authenticated/scenes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
+import { Route as AuthenticatedStatusRouteImport } from './routes/_authenticated/status'
 import { Route as AuthenticatedVacuumRouteImport } from './routes/_authenticated/vacuum'
 import { Route as AuthenticatedAlexaDeviceIdRouteImport } from './routes/_authenticated/alexa.$deviceId'
 import { Route as AuthenticatedAlexaCallbackRouteImport } from './routes/_authenticated/alexa.callback'
@@ -47,9 +50,19 @@ const AuthenticatedAutomationsRoute =
     path: '/automations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCamerasRoute = AuthenticatedCamerasRouteImport.update({
+  id: '/cameras',
+  path: '/cameras',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEnergyRoute = AuthenticatedEnergyRouteImport.update({
+  id: '/energy',
+  path: '/energy',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
@@ -81,6 +94,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
   id: '/setup',
   path: '/setup',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStatusRoute = AuthenticatedStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedVacuumRoute = AuthenticatedVacuumRouteImport.update({
@@ -122,13 +140,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/automations': typeof AuthenticatedAutomationsRoute
+  '/cameras': typeof AuthenticatedCamerasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/energy': typeof AuthenticatedEnergyRoute
   '/home': typeof AuthenticatedHomeRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
+  '/status': typeof AuthenticatedStatusRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
   '/alexa/$deviceId': typeof AuthenticatedAlexaDeviceIdRoute
   '/alexa/callback': typeof AuthenticatedAlexaCallbackRoute
@@ -140,13 +161,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/automations': typeof AuthenticatedAutomationsRoute
+  '/cameras': typeof AuthenticatedCamerasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/energy': typeof AuthenticatedEnergyRoute
   '/home': typeof AuthenticatedHomeRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/rooms': typeof AuthenticatedRoomsRoute
   '/scenes': typeof AuthenticatedScenesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
+  '/status': typeof AuthenticatedStatusRoute
   '/vacuum': typeof AuthenticatedVacuumRoute
   '/alexa/$deviceId': typeof AuthenticatedAlexaDeviceIdRoute
   '/alexa/callback': typeof AuthenticatedAlexaCallbackRoute
@@ -160,13 +184,16 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
+  '/_authenticated/cameras': typeof AuthenticatedCamerasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/energy': typeof AuthenticatedEnergyRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/rooms': typeof AuthenticatedRoomsRoute
   '/_authenticated/scenes': typeof AuthenticatedScenesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
+  '/_authenticated/status': typeof AuthenticatedStatusRoute
   '/_authenticated/vacuum': typeof AuthenticatedVacuumRoute
   '/_authenticated/alexa/$deviceId': typeof AuthenticatedAlexaDeviceIdRoute
   '/_authenticated/alexa/callback': typeof AuthenticatedAlexaCallbackRoute
@@ -180,13 +207,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/automations'
+    | '/cameras'
     | '/dashboard'
+    | '/energy'
     | '/home'
     | '/integrations'
     | '/rooms'
     | '/scenes'
     | '/settings'
     | '/setup'
+    | '/status'
     | '/vacuum'
     | '/alexa/$deviceId'
     | '/alexa/callback'
@@ -198,13 +228,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/automations'
+    | '/cameras'
     | '/dashboard'
+    | '/energy'
     | '/home'
     | '/integrations'
     | '/rooms'
     | '/scenes'
     | '/settings'
     | '/setup'
+    | '/status'
     | '/vacuum'
     | '/alexa/$deviceId'
     | '/alexa/callback'
@@ -217,13 +250,16 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/automations'
+    | '/_authenticated/cameras'
     | '/_authenticated/dashboard'
+    | '/_authenticated/energy'
     | '/_authenticated/home'
     | '/_authenticated/integrations'
     | '/_authenticated/rooms'
     | '/_authenticated/scenes'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
+    | '/_authenticated/status'
     | '/_authenticated/vacuum'
     | '/_authenticated/alexa/$deviceId'
     | '/_authenticated/alexa/callback'
@@ -268,11 +304,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAutomationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cameras': {
+      id: '/_authenticated/cameras'
+      path: '/cameras'
+      fullPath: '/cameras'
+      preLoaderRoute: typeof AuthenticatedCamerasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/energy': {
+      id: '/_authenticated/energy'
+      path: '/energy'
+      fullPath: '/energy'
+      preLoaderRoute: typeof AuthenticatedEnergyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/home': {
@@ -315,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof AuthenticatedSetupRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/status': {
+      id: '/_authenticated/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof AuthenticatedStatusRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/vacuum': {
@@ -364,13 +421,16 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
+  AuthenticatedCamerasRoute: typeof AuthenticatedCamerasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEnergyRoute: typeof AuthenticatedEnergyRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedRoomsRoute: typeof AuthenticatedRoomsRoute
   AuthenticatedScenesRoute: typeof AuthenticatedScenesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
+  AuthenticatedStatusRoute: typeof AuthenticatedStatusRoute
   AuthenticatedVacuumRoute: typeof AuthenticatedVacuumRoute
   AuthenticatedAlexaDeviceIdRoute: typeof AuthenticatedAlexaDeviceIdRoute
   AuthenticatedAlexaCallbackRoute: typeof AuthenticatedAlexaCallbackRoute
@@ -381,13 +441,16 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
+  AuthenticatedCamerasRoute: AuthenticatedCamerasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEnergyRoute: AuthenticatedEnergyRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedRoomsRoute: AuthenticatedRoomsRoute,
   AuthenticatedScenesRoute: AuthenticatedScenesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
+  AuthenticatedStatusRoute: AuthenticatedStatusRoute,
   AuthenticatedVacuumRoute: AuthenticatedVacuumRoute,
   AuthenticatedAlexaDeviceIdRoute: AuthenticatedAlexaDeviceIdRoute,
   AuthenticatedAlexaCallbackRoute: AuthenticatedAlexaCallbackRoute,

@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   Bell,
+  Camera,
   LayoutDashboard,
   Lightbulb,
   LogOut,
@@ -12,6 +14,7 @@ import {
   Sparkles,
   Star,
   WifiOff,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,6 +24,11 @@ import { HeroHeader } from "@/components/dashboard/HeroHeader";
 import { StatusCards } from "@/components/dashboard/StatusCards";
 import { WeatherPanel } from "@/components/dashboard/WeatherPanel";
 import { RoomCard } from "@/components/rooms/RoomCard";
+import { HouseStatusPanel } from "@/components/os/HouseStatusPanel";
+import { AssistantPanel } from "@/components/os/AssistantPanel";
+import { QuickActionsBar } from "@/components/os/QuickActionsBar";
+import { usePins } from "@/lib/os/prefs";
+import { useHaEntities, useHaStatus } from "@/services/homeAssistant.hooks";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,
@@ -74,6 +82,9 @@ function HomePage() {
   const bulkToggle = useBulkToggleKind();
   const runScene = useRunScene();
   const navigate = useNavigate();
+  const haEntities = useHaEntities();
+  const haStatus = useHaStatus();
+  const { pins } = usePins();
   const [away, setAway] = useState(false);
   const [armed, setArmed] = useState(false);
 
@@ -110,6 +121,21 @@ function HomePage() {
       />
 
       <WeatherPanel />
+
+      <Section
+        title="Hausstatus"
+        action={
+          <Link to="/status" className="text-xs text-muted-foreground hover:text-foreground">
+            Details
+          </Link>
+        }
+      >
+        <HouseStatusPanel entities={haEntities} status={haStatus} compact />
+      </Section>
+
+      <Section title="Assistent">
+        <AssistantPanel entities={haEntities} status={haStatus} limit={4} />
+      </Section>
 
       <Section title="Status">
         {loading ? (
@@ -177,7 +203,25 @@ function HomePage() {
             }}
           />
         </div>
+        <div className="mt-3">
+          <QuickActionsBar />
+        </div>
       </Section>
+
+      {pins.length ? (
+        <Section title="Angepinnt">
+          <div className="flex flex-wrap gap-2">
+            {pins.map((pin) => (
+              <span
+                key={`${pin.kind}-${pin.id}`}
+                className="panel-glass rounded-full px-3 py-1.5 text-xs"
+              >
+                {pin.label}
+              </span>
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section
         id="favoriten"
@@ -302,6 +346,24 @@ function HomePage() {
             <Link to="/scenes">
               <Star className="size-4 text-primary" />
               Szenen
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" className="h-14 justify-start gap-2 rounded-2xl">
+            <Link to="/status">
+              <Activity className="size-4 text-primary" />
+              Hausstatus
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" className="h-14 justify-start gap-2 rounded-2xl">
+            <Link to="/energy">
+              <Zap className="size-4 text-primary" />
+              Energie
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" className="h-14 justify-start gap-2 rounded-2xl">
+            <Link to="/cameras">
+              <Camera className="size-4 text-primary" />
+              Kameras
             </Link>
           </Button>
         </div>

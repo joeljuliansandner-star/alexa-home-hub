@@ -2,7 +2,7 @@
  * Szenen und Automationen direkt aus Home Assistant.
  * Es wird nichts hart codiert – alles kommt live aus dem WebSocket-Cache.
  */
-import { Play, Sparkles, Timer } from "lucide-react";
+import { Pin, Play, Sparkles, Timer } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,26 @@ import {
   useRunHaScene,
 } from "@/services/homeAssistant.hooks";
 import type { HaEntity } from "@/services/homeAssistant";
+import { usePins, type PinKind } from "@/lib/os/prefs";
+import { cn } from "@/lib/utils";
+
+function PinButton({ kind, entity }: { kind: PinKind; entity: HaEntity }) {
+  const { isPinned, toggle } = usePins();
+  const pinned = isPinned(kind, entity.entity_id);
+  return (
+    <button
+      type="button"
+      aria-label={pinned ? "Von der Startseite lösen" : "An Startseite anpinnen"}
+      onClick={() => toggle({ kind, id: entity.entity_id, label: entityName(entity) })}
+      className={cn(
+        "rounded-lg p-2 transition-colors",
+        pinned ? "text-primary" : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      <Pin className={cn("size-4", pinned && "fill-current")} />
+    </button>
+  );
+}
 
 function entityName(entity: HaEntity) {
   return (
@@ -70,6 +90,8 @@ export function HaScenesSection() {
                 <p className="truncate text-xs text-muted-foreground">{scene.entity_id}</p>
               </div>
             </div>
+            <div className="flex shrink-0 items-center gap-1">
+            <PinButton kind="scene" entity={scene} />
             <Button
               size="sm"
               variant="secondary"
@@ -84,6 +106,7 @@ export function HaScenesSection() {
             >
               <Play className="size-4" /> Start
             </Button>
+            </div>
           </div>
         ))}
       </div>
@@ -127,6 +150,7 @@ export function HaAutomationsSection() {
               </div>
 
               <div className="flex items-center gap-2">
+                <PinButton kind="automation" entity={automation} />
                 <Button
                   size="sm"
                   variant="secondary"
