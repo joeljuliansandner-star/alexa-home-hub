@@ -142,6 +142,7 @@ function IntegrationDetailPage() {
   });
 
   if (integrationId === "alexa") return <AlexaIntegrationPanel />;
+  if (integrationId === "homeassistant") return <HomeAssistantPanel />;
 
   if (!integration) {
     return (
