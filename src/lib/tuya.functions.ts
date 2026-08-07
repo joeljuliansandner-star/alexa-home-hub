@@ -67,9 +67,7 @@ export const syncTuyaDevices = createServerFn({ method: "POST" })
       if (device.online) online += 1;
 
       const sw = switchCode(device.status);
-      const isOn = sw
-        ? Boolean(device.status.find((s) => s.code === sw)?.value)
-        : false;
+      const isOn = sw ? Boolean(device.status.find((s) => s.code === sw)?.value) : false;
 
       const bright = brightnessCode(device.status);
       const brightness = bright
@@ -125,7 +123,6 @@ export const syncTuyaDevices = createServerFn({ method: "POST" })
         online: d.online,
       })),
     };
-
   });
 
 /** Schaltet bzw. dimmt ein Smart-Life-/Tuya-Gerät über die Cloud. */
@@ -194,9 +191,7 @@ export const controlTuyaDevice = createServerFn({ method: "POST" })
 export const refreshTuyaStates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { tuyaToken, tuyaDeviceList, switchCode, brightnessCode } = await import(
-      "./tuya.server"
-    );
+    const { tuyaToken, tuyaDeviceList, switchCode, brightnessCode } = await import("./tuya.server");
 
     const { data: known } = await context.supabase
       .from("devices")
@@ -241,11 +236,7 @@ export const refreshTuyaStates = createServerFn({ method: "POST" })
           )
         : row.brightness;
 
-      if (
-        isOn === row.is_on &&
-        brightness === row.brightness &&
-        device.online === row.is_online
-      ) {
+      if (isOn === row.is_on && brightness === row.brightness && device.online === row.is_online) {
         continue;
       }
 
@@ -328,9 +319,8 @@ export const controlVacuum = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { tuyaToken, tuyaDeviceStatus, tuyaSendCommands, vacuumCommands } = await import(
-      "./tuya.server"
-    );
+    const { tuyaToken, tuyaDeviceStatus, tuyaSendCommands, vacuumCommands } =
+      await import("./tuya.server");
 
     const { data: device } = await context.supabase
       .from("devices")

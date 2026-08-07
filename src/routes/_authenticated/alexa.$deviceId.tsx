@@ -165,9 +165,7 @@ function AlexaDevicePage() {
         {item.unsupportedProperties.length ? (
           <Panel className="mt-3 space-y-1">
             <p className="text-xs font-medium">Von Amazon nicht bereitgestellt</p>
-            <p className="text-xs text-muted-foreground">
-              {item.unsupportedProperties.join(", ")}
-            </p>
+            <p className="text-xs text-muted-foreground">{item.unsupportedProperties.join(", ")}</p>
           </Panel>
         ) : null}
       </Section>

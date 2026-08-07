@@ -85,11 +85,7 @@ function toModel(row: Tables<"alexa_devices">): AlexaDeviceModel {
 
 export async function listDevices(userId: string): Promise<AlexaDeviceModel[]> {
   const db = await admin();
-  const { data } = await db
-    .from("alexa_devices")
-    .select("*")
-    .eq("user_id", userId)
-    .order("name");
+  const { data } = await db.from("alexa_devices").select("*").eq("user_id", userId).order("name");
   return (data ?? []).map(toModel);
 }
 
@@ -123,10 +119,7 @@ export type AlexaDeviceUpsert = {
   raw_source: string;
 };
 
-export async function upsertDevices(
-  userId: string,
-  devices: AlexaDeviceUpsert[],
-): Promise<number> {
+export async function upsertDevices(userId: string, devices: AlexaDeviceUpsert[]): Promise<number> {
   if (!devices.length) return 0;
   const db = await admin();
   const stamp = new Date().toISOString();
@@ -164,11 +157,7 @@ const defaultSettings: AlexaSettingsModel = {
 
 export async function getSettings(userId: string): Promise<AlexaSettingsModel> {
   const db = await admin();
-  const { data } = await db
-    .from("alexa_settings")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const { data } = await db.from("alexa_settings").select("*").eq("user_id", userId).maybeSingle();
   if (!data) return defaultSettings;
   return {
     autoSync: data.auto_sync,

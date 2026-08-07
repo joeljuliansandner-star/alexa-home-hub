@@ -38,9 +38,7 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
       attempts: Array<{ method: string; found: number; ok: boolean; message: string }>;
     }> = [];
 
-
     type DevicePayload = Database["public"]["Tables"]["devices"]["Insert"];
-
 
     const save = async (payload: DevicePayload, externalId: string) => {
       const { data: existing } = await context.supabase
@@ -103,7 +101,6 @@ export const syncTapoDevices = createServerFn({ method: "POST" })
         children: children.length,
         attempts,
       });
-
 
       for (const child of children) {
         childCount += 1;

@@ -7,13 +7,7 @@ import { toast } from "sonner";
 import { useDevices } from "@/lib/smarthome";
 import { syncTuyaDevices } from "@/lib/tuya.functions";
 import { syncTapoDevices } from "@/lib/tapo.functions";
-import {
-  devicesFor,
-  formatSync,
-  getIntegration,
-  isConnected,
-  lastSync,
-} from "@/lib/integrations";
+import { devicesFor, formatSync, getIntegration, isConnected, lastSync } from "@/lib/integrations";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -72,7 +66,6 @@ type DebugLog = {
   raw?: { deviceList: string; childLists: Array<{ hub: string; payload: string }> };
 };
 
-
 function IntegrationDetailPage() {
   const { integrationId } = useParams({ from: "/_authenticated/integration/$integrationId" });
   const devices = useDevices();
@@ -120,7 +113,6 @@ function IntegrationDetailPage() {
             children: result.children,
             hubReports: result.hubReports,
             raw: result.raw,
-
           } satisfies DebugLog,
         };
       }
@@ -186,19 +178,13 @@ function IntegrationDetailPage() {
       <Panel className="flex flex-wrap items-center gap-3">
         <IconTile icon={integration.icon} tone={online ? integration.tone : "muted"} />
         <div className="min-w-0">
-          <p className="text-sm font-medium">
-            {online ? "Verbunden" : "Nicht verbunden"}
-          </p>
+          <p className="text-sm font-medium">{online ? "Verbunden" : "Nicht verbunden"}</p>
           <p className="text-xs text-muted-foreground">
             Letzter Abgleich: {formatSync(lastSync(integration, all))}
           </p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
-          <Button
-            className="gap-2"
-            disabled={sync.isPending}
-            onClick={() => sync.mutate()}
-          >
+          <Button className="gap-2" disabled={sync.isPending} onClick={() => sync.mutate()}>
             <RefreshCw className={sync.isPending ? "size-4 animate-spin" : "size-4"} />
             Abgleich starten
           </Button>
@@ -215,7 +201,11 @@ function IntegrationDetailPage() {
       </Panel>
 
       <div className={grids.stats}>
-        <StatTile label="Status" value={online ? "Aktiv" : "Inaktiv"} tone={online ? "primary" : "muted"} />
+        <StatTile
+          label="Status"
+          value={online ? "Aktiv" : "Inaktiv"}
+          tone={online ? "primary" : "muted"}
+        />
         <StatTile label="Geräte" value={String(own.length)} tone="accent" />
         <StatTile label="Online" value={String(onlineCount)} tone="primary" />
         <StatTile
@@ -260,9 +250,7 @@ function IntegrationDetailPage() {
             {debug.unsupported.length ? (
               <div className="rounded-lg border border-border bg-muted/30 p-3">
                 <p className="text-sm font-medium">Nicht unterstützte Geräte</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {debug.unsupported.join(", ")}
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{debug.unsupported.join(", ")}</p>
               </div>
             ) : null}
             {debug.errors.length ? (
@@ -275,7 +263,9 @@ function IntegrationDetailPage() {
                 </ul>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">Keine API-Fehler beim letzten Abgleich.</p>
+              <p className="text-xs text-muted-foreground">
+                Keine API-Fehler beim letzten Abgleich.
+              </p>
             )}
           </Panel>
         ) : (
@@ -303,7 +293,11 @@ function IntegrationDetailPage() {
               <div className={grids.stats}>
                 <StatTile label="Steuerzentralen" value={String(debug.hubs ?? 0)} tone="accent" />
                 <StatTile label="Untergeräte" value={String(debug.children ?? 0)} tone="primary" />
-                <StatTile label="API-Fehler" value={String(debug.errors.length)} tone={debug.errors.length ? "muted" : "primary"} />
+                <StatTile
+                  label="API-Fehler"
+                  value={String(debug.errors.length)}
+                  tone={debug.errors.length ? "muted" : "primary"}
+                />
               </div>
 
               {debug.hubReports?.length ? (
@@ -339,8 +333,6 @@ function IntegrationDetailPage() {
                 </div>
               ) : null}
 
-
-
               <div>
                 <p className="text-sm font-medium">Rohantwort Geräteabfrage</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
@@ -374,7 +366,9 @@ function IntegrationDetailPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-1 text-xs text-muted-foreground">Keine Fehler beim letzten Abgleich.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Keine Fehler beim letzten Abgleich.
+                  </p>
                 )}
               </div>
             </Panel>
@@ -384,14 +378,10 @@ function IntegrationDetailPage() {
         </Section>
       ) : null}
 
-
       <Section title="Erweiterte Einstellungen">
         <Panel className="divide-y divide-border py-0">
           {integration.advanced.map((option) => (
-            <div
-              key={option.label}
-              className="flex items-center justify-between gap-4 py-3"
-            >
+            <div key={option.label} className="flex items-center justify-between gap-4 py-3">
               <div className="min-w-0">
                 <p className="text-sm font-medium">{option.label}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{option.hint}</p>

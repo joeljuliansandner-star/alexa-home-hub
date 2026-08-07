@@ -13,7 +13,13 @@ import {
   stacks,
 } from "@/components/kit";
 import { cn } from "@/lib/utils";
-import { energySummary, friendlyName, numericState, selectSensors, unitOf } from "@/lib/os/insights";
+import {
+  energySummary,
+  friendlyName,
+  numericState,
+  selectSensors,
+  unitOf,
+} from "@/lib/os/insights";
 import { useHaEntities } from "@/services/homeAssistant.hooks";
 
 export const Route = createFileRoute("/_authenticated/energy")({

@@ -136,7 +136,6 @@ function RootComponent() {
       </div>
 
       <Toaster position="top-center" richColors />
-
     </QueryClientProvider>
   );
 }

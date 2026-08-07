@@ -120,7 +120,6 @@ export interface TuyaDevice {
   uid?: string | undefined;
 }
 
-
 /** Alle Geräte, die mit dem verknüpften Smart-Life-Konto verbunden sind. */
 export async function tuyaDeviceList(token: string): Promise<TuyaDevice[]> {
   const result = await request<{ devices: Array<Record<string, unknown>> }>(
@@ -152,11 +151,9 @@ export interface TuyaRoom {
  * darin liegenden Geräte-IDs.
  */
 export async function tuyaRooms(token: string, uid: string): Promise<TuyaRoom[]> {
-  const homes = await request<Array<{ home_id: number }>>(
-    "GET",
-    `/v1.0/users/${uid}/homes`,
-    { accessToken: token },
-  );
+  const homes = await request<Array<{ home_id: number }>>("GET", `/v1.0/users/${uid}/homes`, {
+    accessToken: token,
+  });
 
   const rooms: TuyaRoom[] = [];
 
@@ -204,7 +201,6 @@ export function iconForRoom(name: string): string {
   if (n.includes("keller") || n.includes("abstell")) return "package";
   return "sofa";
 }
-
 
 export async function tuyaDeviceStatus(
   token: string,
@@ -285,10 +281,7 @@ export interface VacuumState {
   isRunning: boolean;
 }
 
-function statusValue(
-  status: Array<{ code: string; value: unknown }>,
-  codes: string[],
-): unknown {
+function statusValue(status: Array<{ code: string; value: unknown }>, codes: string[]): unknown {
   for (const code of codes) {
     const hit = status.find((s) => s.code === code);
     if (hit !== undefined) return hit.value;
@@ -297,10 +290,12 @@ function statusValue(
 }
 
 /** Liest die typischen Datenpunkte eines Tuya-/Dreame-Saugroboters aus. */
-export function parseVacuumState(
-  status: Array<{ code: string; value: unknown }>,
-): VacuumState {
-  const battery = statusValue(status, ["battery_percentage", "electricity_left", "residual_electricity"]);
+export function parseVacuumState(status: Array<{ code: string; value: unknown }>): VacuumState {
+  const battery = statusValue(status, [
+    "battery_percentage",
+    "electricity_left",
+    "residual_electricity",
+  ]);
   const state = statusValue(status, ["status", "state", "work_state"]);
   const mode = statusValue(status, ["mode", "work_mode"]);
   const area = statusValue(status, ["clean_area", "clean_record"]);
@@ -356,4 +351,3 @@ export function vacuumCommands(
   if (has("find_robot")) return [{ code: "find_robot", value: true }];
   return [];
 }
-

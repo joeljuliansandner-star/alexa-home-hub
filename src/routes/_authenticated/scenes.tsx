@@ -28,7 +28,6 @@ import {
 import { LoadingState, PageHeader, stacks } from "@/components/kit";
 import { HaScenesSection } from "@/components/homeassistant/HaAutomationSections";
 
-
 export const Route = createFileRoute("/_authenticated/scenes")({
   head: () => ({
     meta: [
@@ -65,7 +64,6 @@ function ScenesPage() {
       />
 
       <HaScenesSection />
-
 
       {scenes.isLoading ? (
         <LoadingState size="section" />

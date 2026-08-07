@@ -41,7 +41,8 @@ export const Route = createFileRoute("/_authenticated/room/$roomId")({
       { title: "Raumdetails – Smarthome Control" },
       {
         name: "description",
-        content: "Alle Geräte eines Raumes nach Kategorien, mit Suche, Favoriten und Schnellaktionen.",
+        content:
+          "Alle Geräte eines Raumes nach Kategorien, mit Suche, Favoriten und Schnellaktionen.",
       },
       { property: "og:title", content: "Raumdetails – Smarthome Control" },
       {
@@ -149,7 +150,10 @@ function RoomDetail() {
           label="Temperatur"
           value={stats.temperature != null ? `${stats.temperature} °C` : "–"}
         />
-        <StatTile label="Luftfeuchte" value={stats.humidity != null ? `${stats.humidity} %` : "–"} />
+        <StatTile
+          label="Luftfeuchte"
+          value={stats.humidity != null ? `${stats.humidity} %` : "–"}
+        />
       </div>
 
       <Section title="Schnellaktionen">

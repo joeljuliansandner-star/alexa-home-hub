@@ -18,7 +18,15 @@ import {
 
 import { DeviceCard } from "@/components/DeviceCard";
 import { AlexaStatusCard } from "@/components/alexa/AlexaStatusCard";
-import { EmptyState, EntryList, EntryRow, IconTile, Panel, Section, StatTile } from "@/components/kit";
+import {
+  EmptyState,
+  EntryList,
+  EntryRow,
+  IconTile,
+  Panel,
+  Section,
+  StatTile,
+} from "@/components/kit";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatSync, integrations, isConnected } from "@/lib/integrations";
@@ -42,15 +50,13 @@ export function DashboardOverview() {
   const navigate = useNavigate();
   const [away, setAway] = useState(false);
 
-  const list = devices.data ?? [];
+  const list = useMemo(() => devices.data ?? [], [devices.data]);
   const online = list.filter((d) => d.is_online).length;
   const offline = list.length - online;
   const favorites = list.filter((d) => d.is_favorite).slice(0, 6);
 
-  const connected = useMemo(
-    () => integrations.filter((entry) => isConnected(entry, list)),
-    [list],
-  );
+  const connected = useMemo(() => integrations.filter((entry) => isConnected(entry, list)), [list]);
+  const needsAttention = offline > 0 || connected.length < integrations.length;
 
   const lastSyncDate = useMemo(() => {
     const newest = list.reduce((max, device) => {
@@ -100,7 +106,11 @@ export function DashboardOverview() {
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile label="Verbunden" value={`${list.length}`} tone="primary" />
             <StatTile label="Online" value={`${online}`} tone="accent" />
-            <StatTile label="Offline" value={`${offline}`} tone={offline ? "destructive" : "muted"} />
+            <StatTile
+              label="Offline"
+              value={`${offline}`}
+              tone={offline ? "destructive" : "muted"}
+            />
             <StatTile label="Letzter Abgleich" value={formatSync(lastSyncDate)} />
           </div>
         </Panel>
@@ -138,12 +148,42 @@ export function DashboardOverview() {
         </div>
       </Section>
 
+      {/* Schnellaktionen */}
+      <Section title="Schnellaktionen">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <button
+            type="button"
+            onClick={() => setAway((value) => !value)}
+            className={cn(
+              "flex h-12 items-center justify-between rounded-xl border px-4 text-left text-sm font-medium transition-all duration-200",
+              away
+                ? "border-primary/40 bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_var(--primary)]"
+                : "border-border bg-secondary text-foreground hover:border-primary/30",
+            )}
+          >
+            <span>{away ? "Abwesend" : "Zuhause"}</span>
+            <span className="text-xs opacity-80">Modus</span>
+          </button>
+          {[
+            { to: "/rooms", icon: LayoutGrid, label: "Räume" },
+            { to: "/dashboard", icon: Plug, label: "Geräte" },
+            { to: "/integrations", icon: Boxes, label: "Integrationen" },
+            { to: "/settings", icon: Settings, label: "Einstellungen" },
+          ].map((item) => (
+            <Button key={item.label} asChild variant="secondary" className="h-12 justify-start gap-2">
+              <Link to={item.to}>
+                <item.icon className="size-4 text-primary" />
+                {item.label}
+              </Link>
+            </Button>
+          ))}
+        </div>
+      </Section>
+
       {/* Favoriten */}
       <Section
         title="Favoriten"
-        action={
-          <span className="text-xs text-muted-foreground">max. 6 Geräte</span>
-        }
+        action={<span className="text-xs text-muted-foreground">max. 6 Geräte</span>}
       >
         {favorites.length ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -158,9 +198,13 @@ export function DashboardOverview() {
                     log: `${device.name} ${next ? "eingeschaltet" : "ausgeschaltet"}`,
                   })
                 }
-                onBrightness={(value) => updateDevice.mutate({ device, patch: { brightness: value } })}
+                onBrightness={(value) =>
+                  updateDevice.mutate({ device, patch: { brightness: value } })
+                }
                 onFavorite={(value) => toggleFavorite.mutate({ device, value })}
-                onOpen={() => navigate({ to: "/device/$deviceId", params: { deviceId: device.id } })}
+                onOpen={() =>
+                  navigate({ to: "/device/$deviceId", params: { deviceId: device.id } })
+                }
               />
             ))}
           </div>
@@ -173,7 +217,7 @@ export function DashboardOverview() {
       <Section title="Letzte Aktivitäten">
         {activity.data?.length ? (
           <EntryList>
-            {activity.data.slice(0, 6).map((entry) => (
+            {activity.data.slice(0, 4).map((entry) => (
               <EntryRow
                 key={entry.id}
                 meta={new Date(entry.created_at).toLocaleString("de-DE", {
@@ -197,64 +241,37 @@ export function DashboardOverview() {
 
       {/* Systemstatus */}
       <Section title="Systemstatus">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Panel className="flex items-center gap-3">
-            <IconTile icon={ShieldCheck} tone={connected.length ? "primary" : "muted"} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">
-                {connected.length} von {integrations.length}
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-3">
+            <Panel className="flex items-center gap-3">
+              <IconTile icon={ShieldCheck} tone={connected.length ? "primary" : "muted"} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium">
+                  {connected.length} von {integrations.length} verbunden
+                </p>
+                <p className="text-xs text-muted-foreground">Integrationen</p>
+              </div>
+            </Panel>
+            <Panel className="flex items-center gap-3">
+              <IconTile icon={offline ? WifiOff : Wifi} tone={offline ? "destructive" : "accent"} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium">
+                  {offline ? `${offline} Geräte offline` : "Alle Geräte erreichbar"}
+                </p>
+                <p className="text-xs text-muted-foreground">Geräteverbindung</p>
+              </div>
+            </Panel>
+            <div className="rounded-xl border border-border/70 bg-muted/20 p-3 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">{needsAttention ? "Achtung nötig" : "Alles im grünen Bereich"}</p>
+              <p className="mt-1">
+                {offline ? `${offline} Gerät(e) benötigen Aufmerksamkeit. ` : ""}
+                {connected.length < integrations.length
+                  ? `Noch ${integrations.length - connected.length} Integration(en) nicht verbunden.`
+                  : "Alle Integrationen sind verbunden."}
               </p>
-              <p className="text-xs text-muted-foreground">Integrationen verbunden</p>
             </div>
-          </Panel>
-          <Panel className="flex items-center gap-3">
-            <IconTile icon={RefreshCw} tone="accent" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{formatSync(lastSyncDate)}</p>
-              <p className="text-xs text-muted-foreground">Synchronisationsstatus</p>
-            </div>
-          </Panel>
-          <Panel className="flex items-center gap-3">
-            <IconTile icon={offline ? WifiOff : Wifi} tone={offline ? "destructive" : "accent"} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">{offline ? "Teilweise offline" : "Alles erreichbar"}</p>
-              <p className="text-xs text-muted-foreground">Geräteverbindung</p>
-            </div>
-          </Panel>
+          </div>
           <AlexaStatusCard />
-        </div>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Panel className="flex items-center gap-3">
-            <IconTile icon={Cloud} tone="muted" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Cloud aktiv · v{APP_VERSION}</p>
-              <p className="text-xs text-muted-foreground">Cloudstatus (Platzhalter)</p>
-            </div>
-          </Panel>
-        </div>
-      </Section>
-
-      {/* Schnellzugriffe */}
-      <Section title="Schnellzugriffe">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[
-            { to: "/dashboard", icon: Plug, label: "Geräte" },
-            { to: "/rooms", icon: LayoutGrid, label: "Räume" },
-            { to: "/integrations", icon: Boxes, label: "Integrationen" },
-            { to: "/settings", icon: Settings, label: "Einstellungen" },
-          ].map((item) => (
-            <Button
-              key={item.label}
-              asChild
-              variant="secondary"
-              className="h-12 justify-start gap-2"
-            >
-              <Link to={item.to}>
-                <item.icon className="size-4 text-primary" />
-                {item.label}
-              </Link>
-            </Button>
-          ))}
         </div>
       </Section>
     </div>

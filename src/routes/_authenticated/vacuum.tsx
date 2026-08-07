@@ -80,9 +80,7 @@ const WATER = [
   { value: 3, label: "Viel" },
 ];
 
-type DreameVacuum = NonNullable<
-  Awaited<ReturnType<typeof getDreameVacuums>>["vacuums"]
->[number];
+type DreameVacuum = NonNullable<Awaited<ReturnType<typeof getDreameVacuums>>["vacuums"]>[number];
 
 function VacuumPage() {
   const qc = useQueryClient();
@@ -206,9 +204,8 @@ function VacuumPage() {
         <div className="panel space-y-3 p-6">
           <p className="text-sm font-medium">Noch kein Saugroboter gefunden</p>
           <p className="text-sm text-muted-foreground">
-            Dein Dreame wird direkt über dein Dreamehome-Konto geladen. Falls hier nichts
-            auftaucht, prüfe, ob der Sauger in der Dreamehome-App mit demselben Konto verbunden
-            ist.
+            Dein Dreame wird direkt über dein Dreamehome-Konto geladen. Falls hier nichts auftaucht,
+            prüfe, ob der Sauger in der Dreamehome-App mit demselben Konto verbunden ist.
           </p>
         </div>
       ) : (
@@ -353,9 +350,7 @@ function DreameCard({
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
 
   const toggleRoom = (id: number) =>
-    setSelectedRooms((prev) =>
-      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id],
-    );
+    setSelectedRooms((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
 
   return (
     <div className="panel space-y-6 p-5">
@@ -409,7 +404,12 @@ function DreameCard({
         >
           <Trash2 className="size-4" /> Absaugen
         </Button>
-        <Button variant="ghost" className="gap-2" disabled={busy} onClick={() => onAction("locate")}>
+        <Button
+          variant="ghost"
+          className="gap-2"
+          disabled={busy}
+          onClick={() => onAction("locate")}
+        >
           <Volume2 className="size-4" /> Suchen
         </Button>
       </div>

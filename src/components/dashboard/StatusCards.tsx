@@ -24,7 +24,8 @@ type StatusItem = {
 };
 
 const matches = (device: Device, words: string[]) => {
-  const haystack = `${device.name} ${device.model ?? ""} ${device.manufacturer ?? ""}`.toLowerCase();
+  const haystack =
+    `${device.name} ${device.model ?? ""} ${device.manufacturer ?? ""}`.toLowerCase();
   return words.some((word) => haystack.includes(word));
 };
 

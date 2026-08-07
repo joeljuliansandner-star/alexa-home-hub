@@ -24,6 +24,34 @@ function baseHeaders(token?: string): Record<string, string> {
 
 export type DreameSession = { token: string; uid: string };
 
+type DreameApiRecord = {
+  did?: unknown;
+  model?: unknown;
+  customName?: unknown;
+  deviceInfo?: { displayName?: unknown };
+  online?: unknown;
+  bindDomain?: unknown;
+  [key: string]: unknown;
+};
+
+type DreamePropResponse = {
+  code?: number;
+  siid?: number;
+  piid?: number;
+  value?: unknown;
+};
+
+type DreameApiResponse = {
+  code?: number;
+  data?: {
+    result?: DreamePropResponse[];
+    page?: { records?: unknown };
+    records?: unknown;
+    [key: string]: unknown;
+  };
+  result?: DreamePropResponse[];
+};
+
 let cached: { session: DreameSession; expires: number } | null = null;
 
 export async function dreameLogin(): Promise<DreameSession> {
@@ -33,7 +61,9 @@ export async function dreameLogin(): Promise<DreameSession> {
   const password = process.env["DREAME_PASSWORD"];
   if (!email || !password) throw new Error("Dreame-Zugangsdaten fehlen.");
 
-  const hashed = createHash("md5").update(password + PASSWORD_SALT).digest("hex");
+  const hashed = createHash("md5")
+    .update(password + PASSWORD_SALT)
+    .digest("hex");
 
   const body = new URLSearchParams({
     grant_type: "password",
@@ -95,14 +125,25 @@ export async function dreameDeviceList(session: DreameSession): Promise<DreameDe
   const text = await res.text();
   if (!res.ok) throw new Error(`Dreame-Geräteliste fehlgeschlagen (${res.status})`);
 
-  let json: any;
+  let json: unknown;
   try {
     json = JSON.parse(text);
   } catch {
     throw new Error("Dreame-Geräteliste: unerwartete Antwort");
   }
 
-  const list: any[] = json?.data?.page?.records ?? json?.data?.records ?? json?.data ?? [];
+  const parsed = json as {
+    data?: {
+      page?: { records?: unknown };
+      records?: unknown;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  const list = (parsed?.data?.page?.records ??
+    parsed?.data?.records ??
+    parsed?.data ??
+    []) as unknown;
   if (!Array.isArray(list)) return [];
 
   return list
@@ -221,10 +262,7 @@ function emptyState(): DreameState {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function dreameGetState(
-  session: DreameSession,
-  did: string,
-): Promise<DreameState> {
+export async function dreameGetState(session: DreameSession, did: string): Promise<DreameState> {
   const entries = Object.entries(PROPS) as [DreamePropKey, readonly [number, number]][];
   const values = new Map<DreamePropKey, unknown>();
   let reachable = false;
@@ -233,11 +271,11 @@ export async function dreameGetState(
   // Versuchen (Cloud-Code 80001 = "Befehl abgelaufen") -> mit Wiederholungen wecken.
   for (let i = 0; i < entries.length; i += 6) {
     const chunk = entries.slice(i, i + 6);
-    let results: any[] = [];
+    let results: DreamePropResponse[] = [];
 
     const attempts = i === 0 ? 4 : 2;
     for (let attempt = 0; attempt < attempts; attempt++) {
-      let response: any = null;
+      let response: DreameApiResponse | null = null;
       try {
         response = await sendCommand(session, did, {
           did,
@@ -250,7 +288,7 @@ export async function dreameGetState(
         response = null;
       }
 
-      const list: any[] = response?.data?.result ?? response?.result ?? [];
+      const list = (response?.data?.result ?? response?.result ?? []) as DreamePropResponse[];
       if (Array.isArray(list) && list.length > 0) {
         results = list;
         break;
@@ -275,7 +313,6 @@ export async function dreameGetState(
   }
 
   if (!reachable) return emptyState();
-
 
   const num = (key: DreamePropKey) => {
     const value = values.get(key);
@@ -404,7 +441,10 @@ export async function dreameCleanRooms(
   return interpret(response);
 }
 
-function interpret(response: any): { ok: boolean; message: string } {
+function interpret(response: DreameApiResponse | null | undefined): {
+  ok: boolean;
+  message: string;
+} {
   const code = response?.code ?? response?.data?.code ?? 0;
   if (code === 0) return { ok: true, message: "Befehl gesendet" };
   if (code === 80001) {

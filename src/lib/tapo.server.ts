@@ -167,7 +167,8 @@ export function childLabel(model: string, category: string): string {
   if (m.startsWith("T31") || m.startsWith("T30") || c.includes("temp"))
     return "Temperatur-/Feuchtesensor";
   if (m.startsWith("S200") || c.includes("button")) return "Taster";
-  if (m.startsWith("KE100") || c.includes("kasa.switch.outlet.sub-fan")) return "Heizkörperthermostat";
+  if (m.startsWith("KE100") || c.includes("kasa.switch.outlet.sub-fan"))
+    return "Heizkörperthermostat";
   if (m.startsWith("S210") || m.startsWith("S220") || c.includes("switch")) return "Schalter";
   return "Sensor";
 }
@@ -222,7 +223,9 @@ function parseChild(entry: Record<string, unknown>, hubId: string): TapoChildDev
     category: String(entry["category"] ?? entry["type"] ?? entry["deviceType"] ?? ""),
     online: status === undefined ? true : String(status).toLowerCase() !== "offline",
     battery:
-      typeof entry["battery_percentage"] === "number" ? (entry["battery_percentage"] as number) : null,
+      typeof entry["battery_percentage"] === "number"
+        ? (entry["battery_percentage"] as number)
+        : null,
     sensorValue: hasTemp ? (temperature as number) : typeof humidity === "number" ? humidity : null,
     sensorUnit: hasTemp ? "°C" : typeof humidity === "number" ? "%" : null,
   };
@@ -241,7 +244,11 @@ async function hubPassthrough(
       { method: "passthrough", params: { deviceId: hubId, requestData: JSON.stringify(request) } },
     );
   } catch (err) {
-    return { ok: false, inner: null, message: err instanceof Error ? err.message : "Unbekannter Fehler" };
+    return {
+      ok: false,
+      inner: null,
+      message: err instanceof Error ? err.message : "Unbekannter Fehler",
+    };
   }
 
   if (payload.error_code !== 0) {
@@ -251,12 +258,15 @@ async function hubPassthrough(
       message:
         payload.error_code === -20571
           ? "Die TP-Link Cloud gibt diese Abfrage nicht an die Steuerzentrale weiter (nur im Heimnetz erreichbar)."
-          : payload.msg ?? `Cloud-Fehler ${payload.error_code}`,
+          : (payload.msg ?? `Cloud-Fehler ${payload.error_code}`),
     };
   }
 
   try {
-    const inner = JSON.parse(String(payload.result?.responseData ?? "{}")) as Record<string, unknown>;
+    const inner = JSON.parse(String(payload.result?.responseData ?? "{}")) as Record<
+      string,
+      unknown
+    >;
     return { ok: true, inner, message: "Antwort erhalten" };
   } catch {
     return { ok: false, inner: null, message: "Antwort der Steuerzentrale war unlesbar." };
@@ -358,7 +368,11 @@ export async function tapoChildDevices(token: string, hubId: string): Promise<Hu
       method: "passthrough → get_child_device_component_list",
       found: added,
       ok: res.ok,
-      message: added ? `${added} Untergeräte geliefert` : res.ok ? "Keine Untergeräte enthalten" : res.message,
+      message: added
+        ? `${added} Untergeräte geliefert`
+        : res.ok
+          ? "Keine Untergeräte enthalten"
+          : res.message,
     });
   }
 
@@ -372,7 +386,11 @@ export async function tapoChildDevices(token: string, hubId: string): Promise<Hu
       method: "passthrough → system.get_sysinfo",
       found: added,
       ok: res.ok,
-      message: added ? `${added} Untergeräte geliefert` : res.ok ? "Keine Untergeräte enthalten" : res.message,
+      message: added
+        ? `${added} Untergeräte geliefert`
+        : res.ok
+          ? "Keine Untergeräte enthalten"
+          : res.message,
     });
   }
 
@@ -388,7 +406,7 @@ export async function tapoChildDevices(token: string, hubId: string): Promise<Hu
       );
       raw.push(redact(payload));
       ok = payload.error_code === 0;
-      message = ok ? "Antwort erhalten" : payload.msg ?? `Cloud-Fehler ${payload.error_code}`;
+      message = ok ? "Antwort erhalten" : (payload.msg ?? `Cloud-Fehler ${payload.error_code}`);
       if (ok) added = push(collectChildEntries(payload.result));
     } catch (err) {
       message = err instanceof Error ? err.message : "Unbekannter Fehler";
@@ -408,4 +426,3 @@ export async function tapoChildDevices(token: string, hubId: string): Promise<Hu
 
   return { children, attempts, cloudSupported, error, raw };
 }
-

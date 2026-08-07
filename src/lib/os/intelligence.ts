@@ -30,12 +30,7 @@ import {
 import { dayKey, telemetry, type TelemetrySnapshot } from "./telemetry";
 
 export type InsightCategory =
-  | "sicherheit"
-  | "energie"
-  | "komfort"
-  | "wartung"
-  | "geraete"
-  | "automationen";
+  "sicherheit" | "energie" | "komfort" | "wartung" | "geraete" | "automationen";
 
 export type Insight = {
   id: string;
@@ -304,8 +299,10 @@ export function houseReport(
   const open = openings(entities).filter((e) => e.state === "on");
   const alarms = entities.filter((e) => domainOf(e.entity_id) === "alarm_control_panel");
   const triggered = alarms.some((e) => e.state === "triggered");
-  const away = entities.some((e) => domainOf(e.entity_id) === "person") && !personsHome(entities).length;
-  let securityScore = 100 - open.length * 12 - (triggered ? 60 : 0) - (away && open.length ? 20 : 0);
+  const away =
+    entities.some((e) => domainOf(e.entity_id) === "person") && !personsHome(entities).length;
+  let securityScore =
+    100 - open.length * 12 - (triggered ? 60 : 0) - (away && open.length ? 20 : 0);
   const securityImprovements: string[] = [];
   if (open.length) securityImprovements.push(`${open.length} Öffnungen schließen`);
   if (!alarms.length) securityImprovements.push("Alarmanlage in Home Assistant einbinden");
@@ -385,7 +382,8 @@ export function houseReport(
   if (status.latencyMs != null && status.latencyMs > 500) networkScore -= 20;
   else if (status.latencyMs != null && status.latencyMs > 200) networkScore -= 10;
   const networkImprovements: string[] = [];
-  if (status.websocket !== "open") networkImprovements.push("Live-Verbindung zu Home Assistant herstellen");
+  if (status.websocket !== "open")
+    networkImprovements.push("Live-Verbindung zu Home Assistant herstellen");
   if (status.latencyMs != null && status.latencyMs > 200)
     networkImprovements.push(`Antwortzeit von ${status.latencyMs} ms verbessern`);
   categories.push({
@@ -431,7 +429,8 @@ export function houseReport(
   const sensorScore = 100 - low.length * 10 - Math.min(30, deadSensors.length * 3);
   const sensorImprovements: string[] = [];
   if (low.length) sensorImprovements.push(`${low.length} Batterien wechseln`);
-  if (deadSensors.length) sensorImprovements.push(`${deadSensors.length} Sensoren liefern keine Werte`);
+  if (deadSensors.length)
+    sensorImprovements.push(`${deadSensors.length} Sensoren liefern keine Werte`);
   categories.push({
     id: "sensoren",
     label: "Sensoren",
@@ -448,7 +447,14 @@ export function houseReport(
 
   return {
     score,
-    grade: score >= 90 ? "Sehr gut" : score >= 75 ? "Gut" : score >= 55 ? "Befriedigend" : "Handlungsbedarf",
+    grade:
+      score >= 90
+        ? "Sehr gut"
+        : score >= 75
+          ? "Gut"
+          : score >= 55
+            ? "Befriedigend"
+            : "Handlungsbedarf",
     headline:
       score >= 90
         ? "Dein Zuhause läuft rund."
@@ -638,7 +644,9 @@ function describeDelta(label: string, current: number, previous: number, unit: s
   const percent = ((current - previous) / previous) * 100;
   const direction = percent > 3 ? "mehr" : percent < -3 ? "weniger" : "genauso viel";
   return `${label}: ${current.toFixed(1)} ${unit} – ${
-    direction === "genauso viel" ? "etwa gleich wie" : `${Math.abs(percent).toFixed(0)} % ${direction} als`
+    direction === "genauso viel"
+      ? "etwa gleich wie"
+      : `${Math.abs(percent).toFixed(0)} % ${direction} als`
   } ${previous.toFixed(1)} ${unit} zuvor.`;
 }
 
@@ -767,12 +775,17 @@ export function dailyBriefing({
   if (on) lines.push(`${on} ${on === 1 ? "Lampe ist" : "Lampen sind"} noch eingeschaltet.`);
 
   const open = openings(entities).filter((entity) => entity.state === "on");
-  if (open.length) lines.push(`${open.length} ${open.length === 1 ? "Öffnung ist" : "Öffnungen sind"} offen: ${open.map(friendlyName).slice(0, 3).join(", ")}.`);
+  if (open.length)
+    lines.push(
+      `${open.length} ${open.length === 1 ? "Öffnung ist" : "Öffnungen sind"} offen: ${open.map(friendlyName).slice(0, 3).join(", ")}.`,
+    );
 
   if (rainChance != null && rainChance >= 50) lines.push("Heute wird Regen erwartet.");
 
   const laundry = entities.find((entity) =>
-    /wasch|trockn|washer|dryer|spülmaschine|geschirrspüler/.test(friendlyName(entity).toLowerCase()),
+    /wasch|trockn|washer|dryer|spülmaschine|geschirrspüler/.test(
+      friendlyName(entity).toLowerCase(),
+    ),
   );
   if (laundry) {
     const state = laundry.state.toLowerCase();
@@ -791,7 +804,8 @@ export function dailyBriefing({
   }
 
   const low = batterySensors(entities).filter((entity) => (numericState(entity) ?? 100) <= 20);
-  if (low.length) lines.push(`${low.length} ${low.length === 1 ? "Batterie ist" : "Batterien sind"} fast leer.`);
+  if (low.length)
+    lines.push(`${low.length} ${low.length === 1 ? "Batterie ist" : "Batterien sind"} fast leer.`);
 
   const severity: Severity = critical.length ? "critical" : warnings.length ? "warn" : "ok";
 
@@ -830,7 +844,9 @@ export function deviceHealthPlus(
     .map((item) => {
       const record = snapshot.entities[item.entityId];
       const uptime =
-        record && record.samples > 3 ? Math.round((record.onlineSamples / record.samples) * 100) : null;
+        record && record.samples > 3
+          ? Math.round((record.onlineSamples / record.samples) * 100)
+          : null;
       const linkQuality =
         item.signal != null
           ? Math.max(0, Math.min(100, Math.round(((item.signal + 100) / 60) * 100)))

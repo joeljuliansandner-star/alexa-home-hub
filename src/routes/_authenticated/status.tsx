@@ -6,7 +6,15 @@ import { HouseStatusPanel } from "@/components/os/HouseStatusPanel";
 import { AssistantPanel } from "@/components/os/AssistantPanel";
 import { severityBg } from "@/components/os/severity";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
-import { EmptyState, PageHeader, Panel, Section, SkeletonGrid, grids, stacks } from "@/components/kit";
+import {
+  EmptyState,
+  PageHeader,
+  Panel,
+  Section,
+  SkeletonGrid,
+  grids,
+  stacks,
+} from "@/components/kit";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";

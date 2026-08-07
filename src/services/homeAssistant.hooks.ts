@@ -40,7 +40,8 @@ export function useHaStatus(): HaStatus {
 function useHaRevision() {
   return useSyncExternalStore(
     (listener) => homeAssistant.subscribe(listener),
-    () => `${homeAssistant.states.size}:${homeAssistant.registryVersion}:${homeAssistant.status.websocket}:${homeAssistant.status.lastSyncAt ?? ""}:${homeAssistant.dirty.size}`,
+    () =>
+      `${homeAssistant.states.size}:${homeAssistant.registryVersion}:${homeAssistant.status.websocket}:${homeAssistant.status.lastSyncAt ?? ""}:${homeAssistant.dirty.size}`,
     () => "",
   );
 }

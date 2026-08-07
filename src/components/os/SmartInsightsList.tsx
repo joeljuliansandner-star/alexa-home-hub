@@ -1,14 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  AlertTriangle,
-  Info,
-  Plug,
-  ShieldAlert,
-  Sparkles,
-  Timer,
-  Wrench,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, Info, Plug, ShieldAlert, Sparkles, Timer, Wrench, Zap } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { Panel } from "@/components/kit";
@@ -16,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { severityBg } from "./severity";
 import type { Insight, InsightCategory } from "@/lib/os/intelligence";
 
-export const insightIcon: Record<InsightCategory, LucideIcon> = {
+const insightIcon: Record<InsightCategory, LucideIcon> = {
   sicherheit: ShieldAlert,
   energie: Zap,
   komfort: Sparkles,
@@ -25,7 +16,7 @@ export const insightIcon: Record<InsightCategory, LucideIcon> = {
   automationen: Timer,
 };
 
-export const insightLabel: Record<InsightCategory, string> = {
+const insightLabel: Record<InsightCategory, string> = {
   sicherheit: "Sicherheit",
   energie: "Energie",
   komfort: "Komfort",
@@ -72,7 +63,8 @@ export function SmartInsightsList({
 }
 
 function InsightCard({ insight, index }: { insight: Insight; index: number }) {
-  const Icon = insight.severity === "critical" ? AlertTriangle : (insightIcon[insight.category] ?? Info);
+  const Icon =
+    insight.severity === "critical" ? AlertTriangle : (insightIcon[insight.category] ?? Info);
   return (
     <Panel
       className="rise-in flex items-start gap-3 p-4"

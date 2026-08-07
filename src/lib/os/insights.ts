@@ -312,7 +312,11 @@ export function assistantHints({
     const state = entity.state.toLowerCase();
     if (["finished", "complete", "done", "fertig", "off", "standby"].includes(state)) {
       const minutes = minutesSince(entity);
-      if (minutes != null && minutes <= 180 && ["finished", "complete", "done", "fertig"].includes(state)) {
+      if (
+        minutes != null &&
+        minutes <= 180 &&
+        ["finished", "complete", "done", "fertig"].includes(state)
+      ) {
         hints.push({
           id: `laundry-${entity.entity_id}`,
           title: `${friendlyName(entity)} ist fertig`,
@@ -364,7 +368,9 @@ export function assistantHints({
 
   // Nicht erreichbare Geräte
   const unavailable = entities.filter(
-    (e) => !isAvailable(e) && ["light", "switch", "climate", "cover", "camera"].includes(domainOf(e.entity_id)),
+    (e) =>
+      !isAvailable(e) &&
+      ["light", "switch", "climate", "cover", "camera"].includes(domainOf(e.entity_id)),
   );
   if (unavailable.length) {
     hints.push({
@@ -433,7 +439,8 @@ function relatedSensor(entities: HaEntity[], entityId: string, deviceClass: stri
     (e) =>
       domainOf(e.entity_id) === "sensor" &&
       deviceClassOf(e) === deviceClass &&
-      (e.entity_id.includes(base) || (base.length > 4 && base.includes(e.entity_id.split(".")[1]?.split("_")[0] ?? "@"))),
+      (e.entity_id.includes(base) ||
+        (base.length > 4 && base.includes(e.entity_id.split(".")[1]?.split("_")[0] ?? "@"))),
   );
 }
 

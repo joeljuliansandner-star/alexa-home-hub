@@ -2,15 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, PlugZap } from "lucide-react";
 
 import { useDevices } from "@/lib/smarthome";
-import {
-  formatSync,
-  integrations,
-  isConnected,
-  lastSync,
-  devicesFor,
-} from "@/lib/integrations";
+import { formatSync, integrations, isConnected, lastSync, devicesFor } from "@/lib/integrations";
 import { Button } from "@/components/ui/button";
-import { PageHeader, Panel, Section, IconTile, LoadingState, grids, stacks } from "@/components/kit";
+import {
+  PageHeader,
+  Panel,
+  Section,
+  IconTile,
+  LoadingState,
+  grids,
+  stacks,
+} from "@/components/kit";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({
@@ -83,16 +85,18 @@ function IntegrationsPage() {
                     />
                     {online ? "Verbunden" : "Nicht verbunden"}
                   </span>
-                  {online ? (
-                    <span className="text-muted-foreground">{count} Geräte</span>
-                  ) : null}
+                  {online ? <span className="text-muted-foreground">{count} Geräte</span> : null}
                 </div>
 
                 <p className="text-xs text-muted-foreground">
                   Letzter Abgleich: {formatSync(lastSync(entry, all))}
                 </p>
 
-                <Button asChild variant={online ? "secondary" : "default"} className="mt-auto w-full gap-2">
+                <Button
+                  asChild
+                  variant={online ? "secondary" : "default"}
+                  className="mt-auto w-full gap-2"
+                >
                   <Link to="/integration/$integrationId" params={{ integrationId: entry.id }}>
                     <PlugZap className="size-4" />
                     {online ? "Verwalten" : "Verbinden"}

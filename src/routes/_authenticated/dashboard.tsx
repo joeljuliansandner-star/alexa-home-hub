@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { syncTuyaDevices } from "@/lib/tuya.functions";
 
-
 import {
   useActivity,
   useCreateDevice,
@@ -47,7 +46,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 
 type ChipId = "all" | "light" | "plug" | "sensor" | "camera" | "favorite";
 type SortId = "name" | "room" | "status";
@@ -105,7 +103,7 @@ function Dashboard() {
   const [chip, setChip] = useState<ChipId>("all");
   const [sort, setSort] = useState<SortId>("name");
 
-  const list = devices.data ?? [];
+  const list = useMemo(() => devices.data ?? [], [devices.data]);
   const activeCount = list.filter((d) => d.is_on && d.kind !== "sensor").length;
   const sensors = list.filter((d) => d.kind === "sensor" || d.kind === "thermostat");
 
@@ -155,8 +153,6 @@ function Dashboard() {
     ].filter((group) => group.devices.length > 0);
   }, [rooms.data, filtered]);
 
-
-
   const loading = rooms.isLoading || devices.isLoading;
 
   if (loading) {
@@ -192,10 +188,16 @@ function Dashboard() {
           </Button>
           <Button
             variant="outline"
-            onClick={() => seed.mutate(undefined, { onSuccess: () => toast.success("Beispiel-Setup angelegt") })}
+            onClick={() =>
+              seed.mutate(undefined, { onSuccess: () => toast.success("Beispiel-Setup angelegt") })
+            }
             disabled={seed.isPending}
           >
-            {seed.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+            {seed.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" />
+            )}
             Beispiel-Setup laden
           </Button>
           <AddRoomDialog />
@@ -204,7 +206,6 @@ function Dashboard() {
       </div>
     );
   }
-
 
   return (
     <div className="space-y-8">
@@ -224,8 +225,6 @@ function Dashboard() {
 
       <DashboardOverview />
 
-
-
       {scenes.data?.length ? (
         <Section title="Schnellzugriff">
           <div className="flex flex-wrap gap-2">
@@ -237,7 +236,8 @@ function Dashboard() {
                 disabled={runScene.isPending}
                 onClick={() =>
                   runScene.mutate(scene, {
-                    onSuccess: (count) => toast.success(`„${scene.name}" – ${count} Geräte geschaltet`),
+                    onSuccess: (count) =>
+                      toast.success(`„${scene.name}" – ${count} Geräte geschaltet`),
                   })
                 }
               >
@@ -338,9 +338,6 @@ function Dashboard() {
         </div>
       </section>
 
-
-
-
       {sensors.length ? (
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {sensors.map((sensor) => (
@@ -400,8 +397,6 @@ function Dashboard() {
       {grouped.length === 0 ? (
         <EmptyState description="Keine Geräte gefunden. Passe Suche oder Filter an." />
       ) : null}
-
-
 
       {activity.data?.length ? (
         <Section title="Letzte Aktivität">

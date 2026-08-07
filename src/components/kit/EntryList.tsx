@@ -17,9 +17,7 @@ export function EntryRow({
   className?: string;
 }) {
   return (
-    <li
-      className={cn("flex items-center justify-between gap-4 px-3 py-2.5 text-sm", className)}
-    >
+    <li className={cn("flex items-center justify-between gap-4 px-3 py-2.5 text-sm", className)}>
       <span className="min-w-0 truncate">{children}</span>
       {meta ? <span className="shrink-0 text-xs text-muted-foreground">{meta}</span> : null}
     </li>

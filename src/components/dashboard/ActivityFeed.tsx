@@ -19,13 +19,7 @@ function iconFor(message: string): { icon: LucideIcon; tone: string } {
 }
 
 /** Ruhige Aktivitätsliste mit sanftem Zeitstrahl. */
-export function ActivityFeed({
-  entries,
-  limit = 6,
-}: {
-  entries: ActivityEntry[];
-  limit?: number;
-}) {
+export function ActivityFeed({ entries, limit = 6 }: { entries: ActivityEntry[]; limit?: number }) {
   return (
     <ol className="panel-glass divide-y divide-border/70 overflow-hidden">
       {entries.slice(0, limit).map((entry, index) => {

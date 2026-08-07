@@ -31,7 +31,8 @@ export const Route = createFileRoute("/_authenticated/insights")({
       { property: "og:title", content: "Smart Insights – Smarthome Control" },
       {
         property: "og:description",
-        content: "Automatische Analyse von Geräten, Sensoren und Verbrauch – vollständig lokal berechnet.",
+        content:
+          "Automatische Analyse von Geräten, Sensoren und Verbrauch – vollständig lokal berechnet.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -72,9 +73,12 @@ function InsightsPage() {
         <StatTile label="Score" value={`${report.score}`} />
         <StatTile label="Hinweise" value={`${insights.length}`} />
         <StatTile label="Trend" value={energy.trend} />
-        <StatTile label="Kritisch" value={`${criticalCount}`} tone={criticalCount ? "destructive" : "accent"} />
+        <StatTile
+          label="Kritisch"
+          value={`${criticalCount}`}
+          tone={criticalCount ? "destructive" : "accent"}
+        />
       </div>
-
 
       <Tabs defaultValue="bericht">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">

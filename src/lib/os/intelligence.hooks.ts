@@ -132,7 +132,9 @@ export function useDeviceHealthPlus(): HealthPlus[] {
   const status = useHaStatus();
   const revision = useTelemetryRevision();
   return useMemo(() => {
-    const targets = entities.filter((entity) => HEALTH_DOMAINS.includes(domainOf(entity.entity_id)));
+    const targets = entities.filter((entity) =>
+      HEALTH_DOMAINS.includes(domainOf(entity.entity_id)),
+    );
     return deviceHealthPlus(entities, targets, status, telemetry.snapshot);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entities, status, revision]);

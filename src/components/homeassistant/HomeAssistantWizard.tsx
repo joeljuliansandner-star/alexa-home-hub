@@ -28,12 +28,12 @@ export function HomeAssistantWizard({ onConnected }: { onConnected?: () => void 
 
   useEffect(() => {
     void handleScan();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleScan() {
     setScanning(true);
-    const extra = typeof window !== "undefined" ? [window.location.origin.replace(/:\d+$/, ":8123")] : [];
+    const extra =
+      typeof window !== "undefined" ? [window.location.origin.replace(/:\d+$/, ":8123")] : [];
     const discovery = await homeAssistant.discover(extra);
     setScanning(false);
     setScanned(true);
@@ -143,11 +143,20 @@ export function HomeAssistantWizard({ onConnected }: { onConnected?: () => void 
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" className="gap-2" disabled={busy} onClick={() => void handleTest()}>
+            <Button
+              variant="secondary"
+              className="gap-2"
+              disabled={busy}
+              onClick={() => void handleTest()}
+            >
               <ShieldCheck className="size-4" /> Verbindung testen
             </Button>
             <Button className="gap-2" disabled={busy} onClick={() => void handleConnect()}>
-              {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+              {busy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="size-4" />
+              )}
               Verbinden
             </Button>
           </div>
@@ -155,15 +164,20 @@ export function HomeAssistantWizard({ onConnected }: { onConnected?: () => void 
           {result ? (
             <div
               className={`rounded-xl border p-3 text-xs ${
-                result.ok ? "border-primary/40 text-foreground" : "border-destructive/40 text-muted-foreground"
+                result.ok
+                  ? "border-primary/40 text-foreground"
+                  : "border-destructive/40 text-muted-foreground"
               }`}
             >
-              <p className="font-medium">{result.ok ? "Test erfolgreich" : "Test fehlgeschlagen"}</p>
+              <p className="font-medium">
+                {result.ok ? "Test erfolgreich" : "Test fehlgeschlagen"}
+              </p>
               <p>{result.message}</p>
               {result.ok ? (
                 <p>
-                  REST API: in Ordnung · WebSocket: {result.websocket ? "in Ordnung" : "nicht erreichbar"} ·
-                  Version: {result.version ?? "unbekannt"}
+                  REST API: in Ordnung · WebSocket:{" "}
+                  {result.websocket ? "in Ordnung" : "nicht erreichbar"} · Version:{" "}
+                  {result.version ?? "unbekannt"}
                 </p>
               ) : null}
             </div>

@@ -14,12 +14,7 @@
 import type { HaEntity, HaStatus } from "@/services/homeAssistant";
 import type { TelemetrySnapshot } from "@/lib/os/telemetry";
 import type { Briefing, HouseReport, Insight, Recommendation } from "@/lib/os/intelligence";
-import {
-  dailyBriefing,
-  houseReport,
-  recommendations,
-  smartInsights,
-} from "@/lib/os/intelligence";
+import { dailyBriefing, houseReport, recommendations, smartInsights } from "@/lib/os/intelligence";
 
 /** Alle Daten, die einem Anbieter zur Verfügung stehen. */
 export type AiContext = {

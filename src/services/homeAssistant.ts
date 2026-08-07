@@ -79,7 +79,6 @@ export const IGNORED_DOMAINS = new Set([
 
 export type HaDomain = string;
 
-
 const STORAGE_KEY = "ha.connection";
 const DISCOVERY_CANDIDATES = [
   "http://homeassistant.local:8123",
@@ -108,7 +107,10 @@ class HomeAssistantService {
   private connection: HaConnection | null = null;
   private socket: WebSocket | null = null;
   private msgId = 1;
-  private pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+  private pending = new Map<
+    number,
+    { resolve: (v: unknown) => void; reject: (e: Error) => void }
+  >();
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectDelay = 2000;
   private listeners = new Set<Listener>();
@@ -163,7 +165,9 @@ class HomeAssistantService {
 
     const { data } = await supabase
       .from("ha_connections")
-      .select("base_url, access_token, ha_version, location_name, last_sync_at, last_error, entity_count")
+      .select(
+        "base_url, access_token, ha_version, location_name, last_sync_at, last_error, entity_count",
+      )
       .maybeSingle();
 
     if (data) {
@@ -374,8 +378,6 @@ class HomeAssistantService {
     };
   }
 
-
-
   /** Sucht Home Assistant automatisch im Heimnetz. */
   async discover(extraCandidates: string[] = []) {
     const candidates = [...extraCandidates, ...DISCOVERY_CANDIDATES];
@@ -523,7 +525,6 @@ class HomeAssistantService {
     await this.loadAreas().catch(() => null);
   }
 
-
   private scheduleReconnect() {
     if (this.reconnectTimer) return;
     this.reconnectTimer = setTimeout(() => {
@@ -592,7 +593,8 @@ class HomeAssistantService {
       });
       const deviceArea = new Map(devices.map((d) => [d.id, d.area_id]));
       for (const entity of entities) {
-        const areaId = entity.area_id ?? (entity.device_id ? deviceArea.get(entity.device_id) : null);
+        const areaId =
+          entity.area_id ?? (entity.device_id ? deviceArea.get(entity.device_id) : null);
         if (areaId) map.set(entity.entity_id, areaId);
       }
       this.patchStatus({ deviceCount: devices.length });
@@ -658,7 +660,8 @@ class HomeAssistantService {
     }
     if (patch.on === undefined) return null;
     if (domain === "cover") return this.setCover(entityId, patch.on);
-    if (domain === "vacuum") return this.vacuumCommand(entityId, patch.on ? "start" : "return_to_base");
+    if (domain === "vacuum")
+      return this.vacuumCommand(entityId, patch.on ? "start" : "return_to_base");
     return patch.on ? this.turnOn(entityId) : this.turnOff(entityId);
   }
 
@@ -697,7 +700,6 @@ class HomeAssistantService {
   }
 
   /* ------------------------------ Abgleich ------------------------------- */
-
 
   /** Holt Entitäten und Bereiche und schreibt sie in Räume/Geräte der App. */
   async sync() {
@@ -740,10 +742,7 @@ class HomeAssistantService {
     let created = 0;
     let updated = 0;
     let skipped = 0;
-    const relevant = states.filter(
-      (entity) => !IGNORED_DOMAINS.has(domainOf(entity.entity_id)),
-    );
-
+    const relevant = states.filter((entity) => !IGNORED_DOMAINS.has(domainOf(entity.entity_id)));
 
     for (const entity of relevant) {
       const domain = domainOf(entity.entity_id);
@@ -872,7 +871,10 @@ class HomeAssistantService {
   }
 
   async setVacuumFanSpeed(entityId: string, fanSpeed: string) {
-    return this.callService("vacuum", "set_fan_speed", { entity_id: entityId, fan_speed: fanSpeed });
+    return this.callService("vacuum", "set_fan_speed", {
+      entity_id: entityId,
+      fan_speed: fanSpeed,
+    });
   }
 
   /* ---------------------- Szenen, Skripte, Automationen ------------------- */
@@ -896,7 +898,9 @@ class HomeAssistantService {
   }
 
   async setAutomationEnabled(entityId: string, enabled: boolean) {
-    return this.callService("automation", enabled ? "turn_on" : "turn_off", { entity_id: entityId });
+    return this.callService("automation", enabled ? "turn_on" : "turn_off", {
+      entity_id: entityId,
+    });
   }
 
   async runScript(entityId: string) {
@@ -959,13 +963,14 @@ class HomeAssistantService {
   }
 }
 
-
 /** Wandelt eine Entität in eine Zeile der bestehenden `devices`-Tabelle. */
 export function entityToDeviceRow(entity: HaEntity, roomId: string | null) {
   const domain = domainOf(entity.entity_id);
   const attributes = entity.attributes ?? {};
   const name =
-    (attributes["friendly_name"] as string | undefined) ?? entity.entity_id.split(".")[1] ?? entity.entity_id;
+    (attributes["friendly_name"] as string | undefined) ??
+    entity.entity_id.split(".")[1] ??
+    entity.entity_id;
   const unavailable = entity.state === "unavailable" || entity.state === "unknown";
 
   const kind = kindForDomain(domain);
@@ -1040,11 +1045,10 @@ export function kindForDomain(domain: string) {
       return "speaker" as const;
     case "vacuum":
     case "lawn_mower":
-return "vacuum" as const;
+      return "vacuum" as const;
     default:
       return "sensor" as const;
   }
-
 }
 
 export const homeAssistant = new HomeAssistantService();

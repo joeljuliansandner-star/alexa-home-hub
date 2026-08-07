@@ -34,7 +34,6 @@ import {
 import { LoadingState, PageHeader, stacks } from "@/components/kit";
 import { HaAutomationsSection } from "@/components/homeassistant/HaAutomationSections";
 
-
 export const Route = createFileRoute("/_authenticated/automations")({
   head: () => ({
     meta: [
@@ -72,7 +71,6 @@ function AutomationsPage() {
       />
 
       <HaAutomationsSection />
-
 
       {automations.isLoading ? (
         <LoadingState size="section" />

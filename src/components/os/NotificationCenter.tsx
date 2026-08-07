@@ -202,7 +202,10 @@ function NotificationRow({
   return (
     <div className="panel-glass flex items-start gap-3 p-3">
       <span
-        className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", severityBg[item.tone])}
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-xl",
+          severityBg[item.tone],
+        )}
       >
         <Icon className="size-4" />
       </span>

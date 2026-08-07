@@ -71,7 +71,11 @@ export function useAlexaCallback() {
       complete({ data: { code, redirectUri: `${window.location.origin}/alexa/callback` } }),
     onSuccess: (result) => {
       void qc.invalidateQueries({ queryKey: ["alexa"] });
-      result.ok ? toast.success(result.message) : toast.error(result.message);
+      if (result.ok) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -112,7 +116,11 @@ export function useAlexaControl() {
       run({ data: input }),
     onSuccess: (result) => {
       void qc.invalidateQueries({ queryKey: alexaKeys.log });
-      result.ok ? toast.success(result.message) : toast.warning(result.message);
+      if (result.ok) {
+        toast.success(result.message);
+      } else {
+        toast.warning(result.message);
+      }
     },
     onError: (error: Error) => toast.error(error.message),
   });

@@ -228,9 +228,7 @@ function SettingsPage() {
             <IconTile icon={LayoutDashboard} tone="primary" />
             <div className="min-w-0">
               <p className="text-sm font-medium">Geräte</p>
-              <p className="text-xs text-muted-foreground">
-                {devices.data?.length ?? 0} verbunden
-              </p>
+              <p className="text-xs text-muted-foreground">{devices.data?.length ?? 0} verbunden</p>
             </div>
             <Button asChild variant="secondary" size="sm" className="ml-auto">
               <Link to="/dashboard">Öffnen</Link>
@@ -299,7 +297,11 @@ function SettingsPage() {
                 </p>
               </div>
             </div>
-            <Button className="gap-2" disabled={syncTuya.isPending} onClick={() => syncTuya.mutate()}>
+            <Button
+              className="gap-2"
+              disabled={syncTuya.isPending}
+              onClick={() => syncTuya.mutate()}
+            >
               <RefreshCw className={syncTuya.isPending ? "size-4 animate-spin" : "size-4"} />
               Smart Life abgleichen
             </Button>
@@ -385,7 +387,8 @@ function SettingsPage() {
               <h3 className="text-base font-semibold">Warum Schalten bei Tapo nicht klappt</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 TP-Link erlaubt für Tapo-Geräte keine Befehle über die Cloud – Status kommt an, der
-                Schaltbefehl wird abgelehnt. Eine Bridge im Heimnetz (z. B. Home Assistant) löst das.
+                Schaltbefehl wird abgelehnt. Eine Bridge im Heimnetz (z. B. Home Assistant) löst
+                das.
               </p>
             </div>
             <a
@@ -487,7 +490,9 @@ function SettingsPage() {
                     aria-label={tone.label}
                     onClick={() => setAccent(tone.id)}
                     className={`size-8 rounded-full transition-transform duration-300 ${tone.className} ${
-                      accent === tone.id ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-105" : ""
+                      accent === tone.id
+                        ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-105"
+                        : ""
                     }`}
                   />
                 ))}

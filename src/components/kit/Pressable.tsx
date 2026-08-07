@@ -91,7 +91,10 @@ export function Pressable({
       }}
     >
       {children}
-      <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
+      >
         {ripples.map((ripple) => (
           <span key={ripple.id} className="ripple" style={{ left: ripple.x, top: ripple.y }} />
         ))}

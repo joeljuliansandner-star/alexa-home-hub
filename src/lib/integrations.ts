@@ -21,15 +21,7 @@ import type { Device } from "@/lib/smarthome";
  * `sync` in der Detailseite zu verdrahten.
  */
 export type IntegrationId =
-  | "tuya"
-  | "tapo"
-  | "dreame"
-  | "alexa"
-  | "homeassistant"
-  | "mqtt"
-  | "hue"
-  | "shelly"
-  | "zigbee";
+  "tuya" | "tapo" | "dreame" | "alexa" | "homeassistant" | "mqtt" | "hue" | "shelly" | "zigbee";
 
 export type IntegrationDef = {
   id: IntegrationId;
@@ -125,7 +117,8 @@ export const integrations: IntegrationDef[] = [
   {
     id: "homeassistant",
     name: "Home Assistant",
-    description: "Zentrale Plattform: Geräte, Räume, Sensoren und Live-Zustände aus Home Assistant.",
+    description:
+      "Zentrale Plattform: Geräte, Räume, Sensoren und Live-Zustände aus Home Assistant.",
     icon: Server,
     tone: "primary",
     externalSource: "homeassistant",
@@ -137,7 +130,10 @@ export const integrations: IntegrationDef[] = [
     ],
     advanced: [
       { label: "Bereiche übernehmen", hint: "Räume kommen aus den Home-Assistant-Areas" },
-      { label: "Unterstützte Domains", hint: "light, switch, sensor, climate, cover, camera u. a." },
+      {
+        label: "Unterstützte Domains",
+        hint: "light, switch, sensor, climate, cover, camera u. a.",
+      },
     ],
   },
   {

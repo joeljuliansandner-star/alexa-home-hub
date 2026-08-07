@@ -91,21 +91,21 @@ export function HaScenesSection() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-            <PinButton kind="scene" entity={scene} />
-            <Button
-              size="sm"
-              variant="secondary"
-              className="gap-2"
-              disabled={run.isPending}
-              onClick={() =>
-                run.mutate(scene.entity_id, {
-                  onSuccess: () => toast.success(`${entityName(scene)} gestartet`),
-                  onError: (error) => toast.error((error as Error).message),
-                })
-              }
-            >
-              <Play className="size-4" /> Start
-            </Button>
+              <PinButton kind="scene" entity={scene} />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="gap-2"
+                disabled={run.isPending}
+                onClick={() =>
+                  run.mutate(scene.entity_id, {
+                    onSuccess: () => toast.success(`${entityName(scene)} gestartet`),
+                    onError: (error) => toast.error((error as Error).message),
+                  })
+                }
+              >
+                <Play className="size-4" /> Start
+              </Button>
             </div>
           </div>
         ))}

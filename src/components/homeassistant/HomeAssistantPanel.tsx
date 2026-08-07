@@ -42,7 +42,9 @@ export function HomeAssistantPanel() {
 
   if (connection.isLoading) return <LoadingState />;
 
-  const haDevices = (devices.data ?? []).filter((device) => device.external_source === "homeassistant");
+  const haDevices = (devices.data ?? []).filter(
+    (device) => device.external_source === "homeassistant",
+  );
   const online = haDevices.filter((device) => device.is_online).length;
 
   return (
@@ -140,7 +142,11 @@ export function HomeAssistantPanel() {
                 <EntryRow meta={String(status.entityCount)}>Entitäten</EntryRow>
                 <EntryRow meta={String(status.deviceCount)}>Geräte (Registry)</EntryRow>
                 <EntryRow
-                  meta={status.lastSyncAt ? new Date(status.lastSyncAt).toLocaleString("de-DE") : "Noch nie"}
+                  meta={
+                    status.lastSyncAt
+                      ? new Date(status.lastSyncAt).toLocaleString("de-DE")
+                      : "Noch nie"
+                  }
                 >
                   Letzte Synchronisierung
                 </EntryRow>

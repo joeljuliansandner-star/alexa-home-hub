@@ -114,9 +114,7 @@ export function DeviceCard({
             <span
               className={cn(
                 "flex h-7 w-12 items-center rounded-full border px-1 transition-colors duration-300",
-                device.is_on
-                  ? "border-primary/50 bg-primary/85"
-                  : "border-border bg-secondary",
+                device.is_on ? "border-primary/50 bg-primary/85" : "border-border bg-secondary",
               )}
             >
               <span

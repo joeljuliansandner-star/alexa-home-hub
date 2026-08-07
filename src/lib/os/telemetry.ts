@@ -89,7 +89,9 @@ class TelemetryStore {
     if (typeof window === "undefined") return empty;
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      this.data = raw ? (JSON.parse(raw) as TelemetrySnapshot) : { ...empty, startedAt: Date.now() };
+      this.data = raw
+        ? (JSON.parse(raw) as TelemetrySnapshot)
+        : { ...empty, startedAt: Date.now() };
     } catch {
       this.data = { ...empty, startedAt: Date.now() };
     }
@@ -173,7 +175,8 @@ class TelemetryStore {
         record.changes += 1;
         today.changes += 1;
         record.events.push({ t: now, s: state });
-        if (record.events.length > MAX_EVENTS) record.events.splice(0, record.events.length - MAX_EVENTS);
+        if (record.events.length > MAX_EVENTS)
+          record.events.splice(0, record.events.length - MAX_EVENTS);
         const wasAvailable = !["unavailable", "unknown", ""].includes(previous.toLowerCase());
         if (wasAvailable && !available) {
           record.outages += 1;

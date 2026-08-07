@@ -64,7 +64,7 @@ function DeviceDetail() {
       setName(device.name);
       setRoomId(device.room_id ?? "none");
     }
-  }, [device?.id, device?.name, device?.room_id]);
+  }, [device]);
 
   if (devices.isLoading) {
     return <LoadingState />;

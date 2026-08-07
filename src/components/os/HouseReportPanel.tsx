@@ -50,7 +50,12 @@ export function HouseReportPanel({
             />
           </svg>
           <span className="absolute flex flex-col items-center">
-            <span className={cn("font-display text-2xl font-semibold tabular-nums", scoreTone(report.score))}>
+            <span
+              className={cn(
+                "font-display text-2xl font-semibold tabular-nums",
+                scoreTone(report.score),
+              )}
+            >
               {report.score}
             </span>
             <span className="text-[10px] text-muted-foreground">von 100</span>
@@ -86,7 +91,10 @@ export function HouseReportPanel({
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
               <div
-                className={cn("h-full rounded-full transition-all duration-700", scoreBar(category.score))}
+                className={cn(
+                  "h-full rounded-full transition-all duration-700",
+                  scoreBar(category.score),
+                )}
                 style={{ width: `${category.score}%` }}
               />
             </div>

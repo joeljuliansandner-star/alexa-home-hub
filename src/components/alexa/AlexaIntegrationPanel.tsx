@@ -65,8 +65,7 @@ export function AlexaIntegrationPanel() {
             {connected ? `Verbunden – ${alexaValue(info?.accountName)}` : "Nicht verbunden"}
           </p>
           <p className="text-xs text-muted-foreground">
-            Letzter Abgleich:{" "}
-            {formatSync(info?.lastSyncAt ? new Date(info.lastSyncAt) : null)}
+            Letzter Abgleich: {formatSync(info?.lastSyncAt ? new Date(info.lastSyncAt) : null)}
           </p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
@@ -106,9 +105,9 @@ export function AlexaIntegrationPanel() {
         <Panel className="space-y-2 border-destructive/40">
           <p className="text-sm font-medium text-destructive">Amazon-Zugangsdaten fehlen</p>
           <p className="text-xs text-muted-foreground">
-            Für die Anmeldung werden eine Amazon-Client-ID und ein Client-Geheimnis benötigt
-            (Login with Amazon). Hinterlege sie im Backend, danach ist die Anmeldung sofort
-            möglich. Als erlaubte Rückkehr-Adresse trage bei Amazon ein:{" "}
+            Für die Anmeldung werden eine Amazon-Client-ID und ein Client-Geheimnis benötigt (Login
+            with Amazon). Hinterlege sie im Backend, danach ist die Anmeldung sofort möglich. Als
+            erlaubte Rückkehr-Adresse trage bei Amazon ein:{" "}
             <code className="break-all">
               {typeof window === "undefined" ? "" : `${window.location.origin}/alexa/callback`}
             </code>
@@ -130,13 +129,12 @@ export function AlexaIntegrationPanel() {
         <p className="text-xs text-muted-foreground">
           Die früher genutzten Adressen unter <code>api.amazonalexa.com</code> gehören zu den
           Skill-gebundenen Schnittstellen (Alexa Smart Home / Skill Messaging) und antworten für
-          Login-with-Amazon-Tokens mit <strong>HTTP 404</strong>. Sie wurden entfernt. Die
-          Anmeldung bleibt bestehen und liefert ausschließlich die Kontodaten (Name, E-Mail).
-          Für echte Gerätesteuerung wäre ein eigener, bei Amazon zertifizierter Alexa-Skill mit
+          Login-with-Amazon-Tokens mit <strong>HTTP 404</strong>. Sie wurden entfernt. Die Anmeldung
+          bleibt bestehen und liefert ausschließlich die Kontodaten (Name, E-Mail). Für echte
+          Gerätesteuerung wäre ein eigener, bei Amazon zertifizierter Alexa-Skill mit
           Account-Linking nötig.
         </p>
       </Panel>
-
 
       <div className={grids.stats}>
         <StatTile
@@ -146,11 +144,7 @@ export function AlexaIntegrationPanel() {
         />
         <StatTile label="Echo-Geräte" value={String(list.length)} tone="accent" />
         <StatTile label="Online" value={String(online)} tone="primary" />
-        <StatTile
-          label="Konto"
-          value={info?.accountEmail ? info.accountEmail : "—"}
-          tone="muted"
-        />
+        <StatTile label="Konto" value={info?.accountEmail ? info.accountEmail : "—"} tone="muted" />
       </div>
 
       <Section title={`Echo-Geräte (${list.length})`}>
@@ -164,7 +158,10 @@ export function AlexaIntegrationPanel() {
                 className="block"
               >
                 <Panel hover className="flex h-full items-center gap-3">
-                  <IconTile icon={device.isOnline ? Wifi : WifiOff} tone={device.isOnline ? "accent" : "muted"} />
+                  <IconTile
+                    icon={device.isOnline ? Wifi : WifiOff}
+                    tone={device.isOnline ? "accent" : "muted"}
+                  />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{device.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
@@ -176,23 +173,14 @@ export function AlexaIntegrationPanel() {
             ))}
           </div>
         ) : (
-          <EmptyState
-            description={
-              info?.lastError ?? ALEXA_NO_DEVICE_API
-            }
-          />
+          <EmptyState description={info?.lastError ?? ALEXA_NO_DEVICE_API} />
         )}
       </Section>
 
       <Section
         title="Entwicklerbereich (Debug)"
         action={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-            onClick={() => clearLog.mutate()}
-          >
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => clearLog.mutate()}>
             <Trash2 className="size-4" /> Protokoll leeren
           </Button>
         }

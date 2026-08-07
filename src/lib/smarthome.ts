@@ -4,12 +4,7 @@ import { controlTapoDevice } from "@/lib/tapo.functions";
 import { homeAssistant } from "@/services/homeAssistant";
 import { controlTuyaDevice, refreshTuyaStates } from "@/lib/tuya.functions";
 import type { Tables } from "@/integrations/supabase/types";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 export type Room = Tables<"rooms">;
 export type Device = Tables<"devices">;
@@ -30,7 +25,6 @@ export const deviceKindLabel: Record<string, string> = {
 };
 
 export const controllableKinds: DeviceKind[] = ["light", "plug", "blind", "speaker"];
-
 
 async function currentUserId() {
   const { data } = await supabase.auth.getUser();
@@ -231,7 +225,6 @@ export function useUpdateDevice() {
           note = error instanceof Error ? error.message : "Smart Life nicht erreichbar";
         }
       }
-
 
       const { error } = await supabase.from("devices").update(patch).eq("id", device.id);
       if (error) throw error;
@@ -530,7 +523,14 @@ export function useSeedDemo() {
       push("Filmabend", "Deckenlicht", true, 15);
       push("Filmabend", "Stehlampe", true, 30);
       push("Filmabend", "TV-Steckdose", true);
-      for (const d of ["Deckenlicht", "Stehlampe", "TV-Steckdose", "Küchenlicht", "Kaffeemaschine", "Nachttischlampe"]) {
+      for (const d of [
+        "Deckenlicht",
+        "Stehlampe",
+        "TV-Steckdose",
+        "Küchenlicht",
+        "Kaffeemaschine",
+        "Nachttischlampe",
+      ]) {
         push("Alles aus", d, false);
       }
       if (actions.length) {
@@ -618,7 +618,8 @@ export function useBulkToggleKind() {
 
 /** Kameras haben keinen eigenen Enum-Wert – wir erkennen sie am Modell/Namen. */
 export function isCameraDevice(device: Device) {
-  const haystack = `${device.model ?? ""} ${device.name} ${device.manufacturer ?? ""}`.toLowerCase();
+  const haystack =
+    `${device.model ?? ""} ${device.name} ${device.manufacturer ?? ""}`.toLowerCase();
   return /cam|kamera|tc\d{2}|c\d{3}\b/.test(haystack);
 }
 

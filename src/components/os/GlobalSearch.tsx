@@ -1,15 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Camera,
-  DoorOpen,
-  Gauge,
-  Lightbulb,
-  PlayCircle,
-  Search,
-  Timer,
-  User,
-} from "lucide-react";
+import { Camera, DoorOpen, Gauge, Lightbulb, PlayCircle, Search, Timer, User } from "lucide-react";
 
 import {
   CommandDialog,

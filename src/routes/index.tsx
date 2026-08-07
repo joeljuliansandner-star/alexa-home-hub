@@ -17,7 +17,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Smarthome Control – Dein privates Adminpanel" },
       {
         property: "og:description",
-        content: "Räume, Geräte, Szenen und Automationen zentral steuern – privat und passwortgeschützt.",
+        content:
+          "Räume, Geräte, Szenen und Automationen zentral steuern – privat und passwortgeschützt.",
       },
     ],
   }),

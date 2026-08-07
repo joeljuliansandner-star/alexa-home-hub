@@ -5,12 +5,7 @@
  */
 import { useCallback, useSyncExternalStore } from "react";
 
-export type QuickActionKind =
-  | "domain-off"
-  | "domain-on"
-  | "scene"
-  | "script"
-  | "automation";
+export type QuickActionKind = "domain-off" | "domain-on" | "scene" | "script" | "automation";
 
 export type QuickAction = {
   id: string;
@@ -65,8 +60,20 @@ function createStore<T>(key: string, fallback: T): Store<T> {
 }
 
 export const defaultQuickActions: QuickAction[] = [
-  { id: "lights-off", label: "Alle Lichter aus", kind: "domain-off", target: "light", icon: "lightbulb" },
-  { id: "covers-close", label: "Rollläden schließen", kind: "domain-off", target: "cover", icon: "blinds" },
+  {
+    id: "lights-off",
+    label: "Alle Lichter aus",
+    kind: "domain-off",
+    target: "light",
+    icon: "lightbulb",
+  },
+  {
+    id: "covers-close",
+    label: "Rollläden schließen",
+    kind: "domain-off",
+    target: "cover",
+    icon: "blinds",
+  },
   { id: "plugs-off", label: "Steckdosen aus", kind: "domain-off", target: "switch", icon: "plug" },
 ];
 

@@ -43,9 +43,7 @@ function AlexaCallbackPage() {
       <div className={stacks.page}>
         <PageHeader title="Amazon-Anmeldung" description="Die Anmeldung wurde abgebrochen." />
         <Panel className="space-y-3">
-          <p className="text-sm text-destructive">
-            {search.error_description ?? search.error}
-          </p>
+          <p className="text-sm text-destructive">{search.error_description ?? search.error}</p>
           <Button
             onClick={() =>
               navigate({ to: "/integration/$integrationId", params: { integrationId: "alexa" } })

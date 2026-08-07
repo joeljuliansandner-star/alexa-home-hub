@@ -41,8 +41,8 @@ function RoomsPage() {
   const devices = useDevices();
   const [search, setSearch] = useState("");
 
-  const list = devices.data ?? [];
-  const roomList = rooms.data ?? [];
+  const list = useMemo(() => devices.data ?? [], [devices.data]);
+  const roomList = useMemo(() => rooms.data ?? [], [rooms.data]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
