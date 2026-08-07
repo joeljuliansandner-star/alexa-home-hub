@@ -109,7 +109,7 @@ function AuthenticatedLayout() {
                 <House className="size-5" />
               </span>
               <span className="truncate font-display text-lg font-semibold tracking-tight">
-                Smarthome
+                SmartHUB - Sandner
               </span>
             </Link>
 

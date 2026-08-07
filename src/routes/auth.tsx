@@ -13,12 +13,12 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Anmelden – Smarthome Control" },
+      { title: "Anmelden – SmartHub" },
       {
         name: "description",
-        content: "Melde dich an, um dein Smarthome-Adminpanel zu öffnen.",
+        content: "Melde dich an, um dein SmartHub-Adminpanel zu öffnen.",
       },
-      { property: "og:title", content: "Anmelden – Smarthome Control" },
+      { property: "og:title", content: "Anmelden – SmartHub" },
       {
         property: "og:description",
         content: "Zugang zum privaten Adminpanel für Licht, Steckdosen und Szenen.",
@@ -90,7 +90,7 @@ function AuthPage() {
           <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <House className="size-5" />
           </span>
-          <span className="font-display text-lg font-semibold">Smarthome Control</span>
+          <span className="font-display text-lg font-semibold">SmartHub</span>
         </div>
 
         <h1 className="mt-6 text-2xl font-semibold">
