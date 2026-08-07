@@ -3,13 +3,11 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Activity,
   Boxes,
-  Cloud,
   DoorOpen,
   Heart,
   Home,
   LayoutGrid,
   Plug,
-  RefreshCw,
   Settings,
   ShieldCheck,
   Wifi,
@@ -114,38 +112,6 @@ export function DashboardOverview() {
             <StatTile label="Letzter Abgleich" value={formatSync(lastSyncDate)} />
           </div>
         </Panel>
-      </Section>
-
-      {/* Smart-Home-Übersicht */}
-      <Section title="Smart-Home-Übersicht">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[
-            { to: "/rooms", icon: LayoutGrid, label: "Räume", value: (rooms.data ?? []).length },
-            { to: "/dashboard", icon: Plug, label: "Geräte", value: list.length },
-            {
-              to: "/dashboard",
-              icon: Heart,
-              label: "Favoriten",
-              value: list.filter((d) => d.is_favorite).length,
-            },
-            {
-              to: "/integrations",
-              icon: Boxes,
-              label: "Integrationen",
-              value: connected.length,
-            },
-          ].map((item) => (
-            <Link key={item.label} to={item.to} className="block">
-              <Panel hover className="flex h-full items-center gap-3">
-                <IconTile icon={item.icon} tone="accent" />
-                <div className="min-w-0">
-                  <p className="stat-value text-xl">{item.value}</p>
-                  <p className="truncate text-xs text-muted-foreground">{item.label}</p>
-                </div>
-              </Panel>
-            </Link>
-          ))}
-        </div>
       </Section>
 
       {/* Schnellaktionen */}
