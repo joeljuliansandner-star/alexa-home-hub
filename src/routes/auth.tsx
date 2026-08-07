@@ -97,7 +97,7 @@ function AuthPage() {
           {mode === "signin" ? "Willkommen zurück" : "Konto anlegen"}
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Dein Panel ist privat – nur du siehst deine Geräte.
+          Dein Panel ist privat – nur du siehst deine Geräte!
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
